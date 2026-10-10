@@ -141,5 +141,11 @@ are provided separately where safe to publish.
 
 ## License
 
-No open-source license has been granted. Repository access does not itself grant
-permission to redistribute the software or third-party material.
+Copyright (c) 2026 **suvsha1029-debug**. This project is public, but is **not open source**.
+See [LICENSE](LICENSE) and [copyright notice](NOTICE.md).
+
+Request written permission for reuse, modification, redistribution, commercial
+licensing or independent deployment at [suvsha1029@gmail.com](mailto:suvsha1029@gmail.com).
+Normal use of the author's hosted application is permitted. GitHub's permitted
+viewing and forking rights, applicable legal exceptions, third-party licenses and
+previously granted permissions remain unaffected.
