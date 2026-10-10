@@ -1,0 +1,827 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exam Platform Admin</title>
+    <link rel="stylesheet" href="/assets/admin/admin-portal.css?v=challenge-review-20260909-1">
+    <link rel="stylesheet" href="/assets/admin/portal-support-settings.css">
+    <link rel="stylesheet" href="/assets/admin/operations-workspace.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Exam Platform Admin</h1>
+    </div>
+    <div class="header-tools">
+      <button class="secondary" type="button" onclick="window.location.href='/console/c7e42a9d51f8603b7a24/master'">Master Admin</button>
+      <button id="themeToggle" class="secondary" type="button">Black Theme</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="card project-create-card" id="projectCreateCard">
+      <h2>Create Exam</h2>
+      <form id="examForm">
+        <label for="examName">Exam Name</label>
+        <input id="examName" name="examName" placeholder="e.g. GATE 2027 Mock 01" required>
+
+        <label for="examMode">Mode</label>
+        <select id="examMode" name="examMode" required>
+          <option value="ONLINE_REMOTE">Online Remote Assessment</option>
+          <option value="PHYSICAL_CENTER">Physical Exam Center</option>
+        </select>
+
+        <label for="durationMinutes">Duration Minutes</label>
+        <input id="durationMinutes" name="durationMinutes" type="number" min="1" value="180" required>
+
+        <label for="projectExamStartAt">Exam Start Time</label>
+        <input id="projectExamStartAt" name="projectExamStartAt" type="datetime-local">
+
+        <button type="submit">Create Exam</button>
+      </form>
+      <div id="examResult" class="result"></div>
+      <div id="projectGateNote" class="section-note project-gate-note">No active exam project.</div>
+      <div id="projectHub" class="project-hub hidden">
+        <div class="project-hub-head">
+          <div class="project-badge">Active project: <span id="activeProjectLabel">None</span></div>
+          <div class="project-links">
+            <button class="secondary" type="button" id="openProjectSettings">Open Exam Settings</button>
+            <button class="secondary" type="button" id="openDatabaseView">Open Database View</button>
+            <button class="secondary" type="button" id="openResponseCenter">Open Response Center</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="workspaceShell" class="workspace-shell hidden">
+    <div class="workspace-topbar">
+      <div class="project-badge">Active project: <span id="workspaceProjectLabel">None</span></div>
+      <div class="workspace-actions">
+        <button class="secondary" type="button" id="openWorkspaceHome">Dashboard Home</button>
+        <button class="secondary" type="button" id="showProjectCreator">New / Switch Project</button>
+      </div>
+    </div>
+
+    <section class="card wide workspace-screen active" id="workspaceDashboard">
+      <div class="workspace-dashboard-card">
+        <div>
+          <h2>Exam Project Dashboard</h2>
+        </div>
+        <div class="workspace-shortcuts">
+          <div class="workspace-shortcut">
+            <h3>Exam Settings</h3>
+            <button class="secondary" type="button" id="openProjectSettingsDashboard">Open Exam Settings</button>
+          </div>
+          <div class="workspace-shortcut">
+            <h3>Database View</h3>
+            <button class="secondary" type="button" id="openDatabaseViewDashboard">Open Database View</button>
+          </div>
+          <div class="workspace-shortcut">
+            <h3>Response Center</h3>
+            <button class="secondary" type="button" id="openResponseCenterDashboard">Open Response Center</button>
+          </div>
+          <div class="workspace-shortcut">
+            <h3>Report Card Designer</h3>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="secondary" type="button" id="openReportDesignerDashboard">Open Designer</button>
+            </div>
+          </div>
+        </div>
+        <div class="workspace-status-grid">
+          <div class="workspace-status-chip">Project Code: <span id="workspaceProjectCode">-</span></div>
+          <div class="workspace-status-chip">Mode: <span id="workspaceProjectMode">-</span></div>
+          <div class="workspace-status-chip">Duration: <span id="workspaceProjectDuration">-</span></div>
+        </div>
+        <div class="workspace-insights">
+          <div class="workspace-insight">
+            <strong>Registration Window</strong>
+            <div class="value" id="workspaceRegistrationWindow">-</div>
+            <div class="meta" id="workspaceRegistrationMeta">Open or close registration from Exam Settings.</div>
+          </div>
+          <div class="workspace-insight">
+            <strong>Candidate Count</strong>
+            <div class="value" id="workspaceCandidateCount">0</div>
+            <div class="meta" id="workspaceCandidateMeta">Candidates linked to the selected project.</div>
+          </div>
+          <div class="workspace-insight">
+            <strong>Question Paper</strong>
+            <div class="value" id="workspacePaperState">-</div>
+            <div class="meta" id="workspacePaperMeta">Upload a JSON question paper to activate exam ordering controls.</div>
+          </div>
+          <div class="workspace-insight">
+            <strong>Queued Notifications</strong>
+            <div class="value" id="workspaceNotificationCount">0</div>
+            <div class="meta" id="workspaceNotificationMeta">Email/SMS outbox rows for this project.</div>
+          </div>
+        </div>
+        <div class="workspace-feed">
+          <h3>Recent Candidate Activity</h3>
+          <div id="workspaceRecentCandidates" class="workspace-feed-list">
+            <div class="workspace-feed-item">
+              <strong>No candidate data yet.</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card wide workspace-screen" id="registrationConfigCard">
+      <h2>Registration Configuration</h2>
+      <form id="examConfigForm">
+        <label for="configExamCode">Exam</label>
+        <select id="configExamCode" name="configExamCode" required></select>
+
+        <div class="check-grid">
+          <label><input id="registrationOpen" name="registrationOpen" type="checkbox"> Registration open</label>
+          <label><input id="correctionsOpen" name="correctionsOpen" type="checkbox"> Corrections open</label>
+          <label><input id="streamSelectionRequired" name="streamSelectionRequired" type="checkbox"> Use sub-streams for this exam</label>
+        </div>
+
+        <label>Sub-streams</label>
+        <div id="streams"></div>
+        <button class="secondary" type="button" id="addStream">+ Add Stream</button>
+
+        <label>Enabled Candidate Fields</label>
+        <div id="fieldWorkflowNote" class="field-workflow-note">Candidate fields</div>
+        <div id="candidateFields" class="check-grid"></div>
+
+        <label>Extra Candidate Boxes</label>
+        <div id="customCandidateFields"></div>
+        <button class="secondary" type="button" id="addCustomCandidateField">+ Add Extra Box</button>
+
+        <label>Allowed Candidate Countries</label>
+        <input id="countryRestrictionSearch" type="search" placeholder="Search country name or ISO code">
+        <div id="allowedCountryIso2s" class="country-check-grid"></div>
+        <div id="countryRestrictionSummary" class="hint">No restriction selected. Candidates can choose from all countries.</div>
+
+        <div class="admin-tabs" role="tablist" aria-label="Admin configuration tabs">
+          <button class="admin-tab active" type="button" data-admin-tab="examOpsTab">Exam Operations</button>
+          <button class="admin-tab" type="button" data-admin-tab="portalDisplayTab">Portal Display</button>
+        </div>
+
+        <section id="examOpsTab" class="admin-tab-panel active">
+        <div class="section-note">Manual launch controls</div>
+        <div id="examOpsStatus" class="ops-status"></div>
+        <label>Online Exam Beta Controls</label>
+        <div class="check-grid">
+          <label><input id="examLobbyEnabled" name="examLobbyEnabled" type="checkbox"> Enable exam lobby</label>
+          <label><input id="examLaunchEnabled" name="examLaunchEnabled" type="checkbox"> Enable manual exam launch</label>
+          <label><input id="candidateSubmitEnabled" name="candidateSubmitEnabled" type="checkbox"> Candidate submit button enabled</label>
+          <label><input id="responsesReleased" name="responsesReleased" type="checkbox"> Release saved responses to candidates</label>
+          <label><input id="resultReleased" name="resultReleased" type="checkbox"> Release result card to candidates</label>
+          <label><input id="scoreCardPdfReleased" name="scoreCardPdfReleased" type="checkbox"> Release score card PDF download</label>
+          <label><input id="originalQuestionPaperReleased" name="originalQuestionPaperReleased" type="checkbox"> Release original question paper PDF</label>
+          <label><input id="originalAnswerKeyReleased" name="originalAnswerKeyReleased" type="checkbox"> Release original answer key PDF</label>
+          <label><input id="answerKeyChallengeEnabled" name="answerKeyChallengeEnabled" type="checkbox"> Enable answer-key challenge window</label>
+          <label><input id="optionRandomizationEnabled" name="optionRandomizationEnabled" type="checkbox"> Randomize options in qbank assembly</label>
+          <label><input id="desktopEntryTimerEnabled" name="desktopEntryTimerEnabled" type="checkbox"> Desktop entry timer enabled</label>
+          <label><input id="desktopCaptureProtectionEnabled" name="desktopCaptureProtectionEnabled" type="checkbox"> Block screenshots / screen sharing in desktop client</label>
+          <label><input id="examReadinessTimerEnabled" name="examReadinessTimerEnabled" type="checkbox"> Exam readiness timer enabled</label>
+        </div>
+        <div class="color-grid">
+          <div>
+            <label for="answerKeyChallengeOpensAt">Challenge Opens (IST)</label>
+            <input id="answerKeyChallengeOpensAt" name="answerKeyChallengeOpensAt" type="datetime-local">
+          </div>
+          <div>
+            <label for="answerKeyChallengeClosesAt">Challenge Closes (IST)</label>
+            <input id="answerKeyChallengeClosesAt" name="answerKeyChallengeClosesAt" type="datetime-local">
+          </div>
+        </div>
+        <div class="banner-tools" style="margin-top:10px;align-items:flex-end">
+          <div style="flex:1;min-width:260px">
+            <label for="reportCardTemplateSelect">Studio Default Design</label>
+            <select id="reportCardTemplateSelect">
+              <option value="">No saved template</option>
+            </select>
+          </div>
+          <button class="secondary" type="button" id="previewReportTemplateBtn">Preview Template</button>
+          <button class="secondary" type="button" id="activateReportTemplateBtn">Set Studio Default</button>
+        </div>
+        <div class="hint" id="reportCardTemplateAdminStatus">Candidate PDF downloads use the official layout. Saved designs remain available in the studio.</div>
+        <div class="section-note">Score card authority branding</div>
+        <div class="color-grid">
+          <div><label for="scoreInstituteName">Exam Conducting Institute</label><input id="scoreInstituteName" maxlength="180"></div>
+          <div><label for="scoreBackgroundColor">Page Colour</label><input id="scoreBackgroundColor" type="color" value="#ffffff"></div>
+          <div><label for="scoreAccentColor">Accent Colour</label><input id="scoreAccentColor" type="color" value="#153e50"></div>
+          <div><label for="scoreStripColor">Strip Colour</label><input id="scoreStripColor" type="color" value="#967344"></div>
+          <div><label><input id="scoreStripsEnabled" type="checkbox" checked> Colour strips</label></div>
+          <div><label for="scoreWatermarkOpacity">Application Watermark Opacity</label><input id="scoreWatermarkOpacity" type="range" min="2" max="15" value="6"><output id="scoreWatermarkValue">6%</output></div>
+        </div>
+        <div class="color-grid">
+          <div>
+            <label for="reportCardAuthorityName">Conducting Authority Name</label>
+            <input id="reportCardAuthorityName" name="reportCardAuthorityName" placeholder="e.g. Controller of Examination">
+          </div>
+          <div>
+            <label for="reportCardAuthorityDesignation">Authority Designation</label>
+            <input id="reportCardAuthorityDesignation" name="reportCardAuthorityDesignation" placeholder="e.g. Conducting Authority">
+          </div>
+          <div>
+            <label for="reportCardValidityText">Score Card Validity</label>
+            <input id="reportCardValidityText" name="reportCardValidityText" placeholder="e.g. Valid until 31 Dec 2027">
+          </div>
+        </div>
+        <div class="banner-tools" style="margin-top:10px;align-items:flex-end">
+          <div style="flex:1;min-width:220px">
+            <label for="reportCardInstituteLogoFile">Top-left Institute Logo</label>
+            <input id="reportCardInstituteLogoFile" name="reportCardInstituteLogoFile" type="file" accept="image/png,image/jpeg,image/svg+xml">
+            <input id="reportCardInstituteLogoDataUrl" name="reportCardInstituteLogoDataUrl" type="hidden">
+          </div>
+          <div style="flex:1;min-width:220px">
+            <label for="reportCardWatermarkLogoFile">Background Watermark Logo</label>
+            <input id="reportCardWatermarkLogoFile" name="reportCardWatermarkLogoFile" type="file" accept="image/png,image/jpeg,image/svg+xml">
+            <input id="reportCardWatermarkLogoDataUrl" name="reportCardWatermarkLogoDataUrl" type="hidden">
+          </div>
+          <div style="flex:1;min-width:220px">
+            <label for="reportCardAuthoritySignatureFile">Authority Signature</label>
+            <input id="reportCardAuthoritySignatureFile" name="reportCardAuthoritySignatureFile" type="file" accept="image/png,image/jpeg,image/svg+xml">
+            <input id="reportCardAuthoritySignatureDataUrl" name="reportCardAuthoritySignatureDataUrl" type="hidden">
+          </div>
+        </div>
+        <div class="hint">These score-card assets are stored separately from candidate portal branding. Choose files, then click Save Registration Config.</div>
+        <div class="banner-tools">
+          <button type="button" class="secondary" data-clear-score-image="reportCardInstituteLogo">Remove Institute Logo</button>
+          <button type="button" class="secondary" data-clear-score-image="reportCardWatermarkLogo">Remove Watermark Logo</button>
+          <button type="button" class="secondary" data-clear-score-image="reportCardAuthoritySignature">Remove Authority Signature</button>
+        </div>
+        <div class="section-note">Score card closing information</div>
+        <div class="color-grid">
+          <div><label for="scoreNotesTitle">Section Title</label><input id="scoreNotesTitle" maxlength="100" value="Score information"></div>
+          <div><label for="scoreNotesImageFile">Additional Image</label><input id="scoreNotesImageFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><input id="scoreNotesImageDataUrl" type="hidden"><button type="button" class="secondary" data-clear-score-image="scoreNotesImage">Remove Image</button></div>
+        </div>
+        <label for="scoreNotesText">Additional Information</label>
+        <textarea id="scoreNotesText" rows="5" maxlength="6000"></textarea>
+        <div class="banner-tools" style="align-items:flex-end">
+          <div><label for="scorePreviewApplication">Preview Application Number</label><input id="scorePreviewApplication" autocomplete="off"></div>
+          <button type="button" class="secondary" id="scorePreviewButton">Preview Saved Score Card</button>
+          <span id="scorePreviewStatus" role="status"></span>
+        </div>
+        <dialog id="scorePreviewDialog" style="width:min(900px,95vw);max-height:90vh;border:1px solid #89959a;border-radius:0;padding:16px">
+          <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:12px"><a id="scorePreviewDownload">Download PDF</a><button type="button" class="secondary" id="scorePreviewClose">Close</button></div>
+          <div id="scorePreviewPages"></div>
+        </dialog>
+        <div class="color-grid">
+          <div>
+            <label for="examStartAt">Scheduled Time Reference</label>
+            <input id="examStartAt" name="examStartAt" type="datetime-local">
+          </div>
+          <div>
+            <label for="loginOpensMinutesBeforeStart">Future Auto: Opens Minutes Before</label>
+            <input id="loginOpensMinutesBeforeStart" name="loginOpensMinutesBeforeStart" type="number" min="0" value="30">
+          </div>
+          <div>
+            <label for="loginClosesMinutesBeforeStart">Future Auto: Closes Minutes Before</label>
+            <input id="loginClosesMinutesBeforeStart" name="loginClosesMinutesBeforeStart" type="number" min="0" value="15">
+          </div>
+          <div>
+            <label for="desktopEntryDelaySeconds">Desktop Entry Timer (seconds)</label>
+            <input id="desktopEntryDelaySeconds" name="desktopEntryDelaySeconds" type="number" min="0" max="3600" value="120">
+          </div>
+          <div>
+            <label for="examReadinessDurationSeconds">Exam Readiness Timer (seconds)</label>
+            <input id="examReadinessDurationSeconds" name="examReadinessDurationSeconds" type="number" min="0" max="3600" value="120">
+          </div>
+        </div>
+        <div class="section-note">Exam UI header is separate from Portal Display. Leave these empty for the plain dark gray exam header.</div>
+        <label for="examUiHeaderTitle">Exam UI Header Title</label>
+        <input id="examUiHeaderTitle" name="examUiHeaderTitle" maxlength="220" placeholder="Optional, e.g. GATE 2027">
+
+        <label for="examUiHeaderSubtitle">Exam UI Institute / Subtitle</label>
+        <input id="examUiHeaderSubtitle" name="examUiHeaderSubtitle" maxlength="500" placeholder="Optional, e.g. Organizing institute name">
+
+        <label for="examUiBannerImageFile">Exam UI Header Banner Upload</label>
+        <div class="hint">Recommended full-width exam banner: 1920 x 90 px, transparent or solid background. Square logo is also supported at 512 x 512 px and stays compact on the dark header.</div>
+        <div class="banner-tools">
+          <input id="examUiBannerImageFile" name="examUiBannerImageFile" type="file" accept="image/png,image/jpeg,image/webp">
+          <button class="secondary" type="button" data-clear-image="examUiBanner">Clear Pick</button>
+        </div>
+        <input id="examUiBannerImageUrl" name="examUiBannerImageUrl" type="hidden">
+        <div id="examUiBannerPreview" class="banner-preview"></div>
+        <label for="questionPaperFile">Question Paper JSON Upload</label>
+        <div class="banner-tools">
+          <input id="questionPaperFile" name="questionPaperFile" type="file" accept="application/json,.json">
+          <button class="secondary" type="button" id="uploadQuestionPaper">Upload Paper</button>
+          <button class="secondary danger-outline" type="button" id="clearQuestionPaper">Clear Server Paper</button>
+        </div>
+        <div class="hint" id="questionPaperStatus">No question paper selected yet.</div>
+        <div class="section-note">Active Paper + Key Pipeline</div>
+        <div class="db-actions">
+          <button class="secondary" type="button" id="validateActivePaperKey">Validate Active Pair</button>
+          <button class="secondary" type="button" id="downloadActiveQuestionPaper">Download Active Paper JSON</button>
+          <button class="secondary" type="button" id="downloadActiveAnswerKey">Download Active Key JSON</button>
+        </div>
+        <div class="result" id="activePaperKeyStatus">Validate the current server paper/key pair before evaluation.</div>
+        <div class="qbank-builder" id="qbankBuilder">
+          <div class="qbank-head">
+            <div>
+              <h3>Question Bank Assembly</h3>
+            </div>
+            <span class="qbank-safe-badge">Draft</span>
+          </div>
+          <div class="qbank-upload-grid">
+            <div>
+              <label for="qbankFile">Full QBank JSON</label>
+              <div class="banner-tools">
+                <input id="qbankFile" name="qbankFile" type="file" accept="application/json,.json">
+                <button class="secondary" type="button" id="analyzeQBank">Analyze Bank</button>
+              </div>
+            </div>
+            <div>
+              <label for="qbankAnswerKeyFile">Protected Full-Bank Answer Key</label>
+              <div class="banner-tools">
+                <input id="qbankAnswerKeyFile" name="qbankAnswerKeyFile" type="file" accept="application/json,.json">
+                <button class="secondary" type="button" id="uploadQBankAnswerKey">Store In Server Vault</button>
+              </div>
+            </div>
+          </div>
+          <div class="hint" id="qbankStatus">No qbank analyzed yet.</div>
+          <div id="qbankInventory" class="qbank-inventory">Upload a qbank JSON to see subject, topic, marks, and difficulty availability.</div>
+          <div class="qbank-actions">
+            <button class="secondary" type="button" id="assembleQBankPaper" disabled>Assemble Selected Paper</button>
+            <button class="secondary" type="button" id="downloadQBankPaper" disabled>Download Selected Paper JSON</button>
+            <button class="secondary" type="button" id="downloadQBankKey" disabled>Download Selected Key JSON</button>
+            <button class="secondary" type="button" id="downloadQBankPaperPdf" disabled>Download Branded Paper PDF</button>
+            <button class="secondary" type="button" id="downloadQBankKeyPdf" disabled>Download Branded Key PDF</button>
+            <button type="button" id="publishQBankAssembly" disabled>Publish Selected Paper</button>
+            <button class="secondary" type="button" id="aggregatePublishedQBankKey">Reconstruct Evaluation Key</button>
+          </div>
+          <div id="qbankAssemblyStatus" class="hint">No published assembly.</div>
+          <div class="qbank-postexam">
+            <div class="qbank-postexam-head">
+              <div>
+                <strong>Post-Exam Used Paper Ledger</strong>
+              </div>
+              <button class="secondary" type="button" id="refreshQBankAssemblies">Refresh Used Questions</button>
+            </div>
+          <div id="qbankAssemblyHistory" class="qbank-history">Select an exam to view published papers.</div>
+          </div>
+        </div>
+        <label for="originalQuestionPaperPdfFile">Original Question Paper PDF</label>
+        <div class="banner-tools">
+          <input id="originalQuestionPaperPdfFile" name="originalQuestionPaperPdfFile" type="file" accept="application/pdf,.pdf">
+          <button class="secondary" type="button" id="uploadOriginalQuestionPaperPdf">Upload Original PDF</button>
+        </div>
+        <div class="hint" id="originalQuestionPaperPdfStatus">No original question paper PDF uploaded yet.</div>
+        <label>Question Order From Uploaded JSON</label>
+        <input id="questionSectionOrderJson" name="questionSectionOrderJson" type="hidden">
+        <input id="questionMarkPriorityBySectionJson" name="questionMarkPriorityBySectionJson" type="hidden">
+        <div id="questionOrderControls" class="order-box">
+          Upload a question paper JSON to detect sections and marks sorting choices.
+        </div>
+        </section>
+
+        <section id="portalDisplayTab" class="admin-tab-panel">
+        <div class="section-note">Portal display controls the public registration-service page: top notification strip, blue welcome banner, welcome-card image, and site background image.</div>
+        <div class="notice-editor-heading"><h3>Notice register</h3><span id="portalNoticeCount"></span><button class="secondary" type="button" id="addPortalNotice"><i data-lucide="plus"></i>Add notice</button></div>
+        <div id="portalNoticeEditor"></div>
+        <p id="portalNoticeEditorStatus" role="status"></p>
+        <button class="secondary" type="button" id="clearPortalNotifications">Clear Portal Notifications</button>
+        <textarea id="portalNotifications" name="portalNotifications" hidden></textarea>
+        <input id="portalNotification" name="portalNotification" type="hidden">
+        <select id="portalNotificationBadgeStyle" name="portalNotificationBadgeStyle" hidden aria-label="Legacy notification badge">
+          <option value="NEW">New - blue flashing square</option>
+          <option value="OLD">Old - black flashing circle</option>
+        </select>
+
+        <label><input id="portalNoticeTabEnabled" name="portalNoticeTabEnabled" type="checkbox"> Show Notice PDF tab on candidate pages</label>
+        <label for="portalNoticeDocumentLabel">Notice PDF / Brochure Label</label>
+        <input id="portalNoticeDocumentLabel" name="portalNoticeDocumentLabel" maxlength="160" placeholder="e.g. Admission brochure">
+        <label for="portalNoticePdfFile">Notice PDF / Brochure Upload</label>
+        <div class="banner-tools">
+          <input id="portalNoticePdfFile" name="portalNoticePdfFile" type="file" accept="application/pdf,.pdf">
+          <button class="secondary" type="button" id="uploadPortalNoticePdf">Upload Notice PDF</button>
+        </div>
+        <div class="hint" id="portalNoticePdfStatus">No notice PDF uploaded yet.</div>
+
+        <div class="color-grid">
+          <div>
+            <label for="portalNotificationTextColor">Notification Text Color</label>
+            <input id="portalNotificationTextColor" name="portalNotificationTextColor" type="color" value="#3d5549">
+          </div>
+          <div>
+            <label for="portalNotificationBackgroundColor">Notification Bar Color</label>
+            <input id="portalNotificationBackgroundColor" name="portalNotificationBackgroundColor" type="color" value="#f0f5f2">
+          </div>
+          <div>
+            <label for="portalNotificationFontSize">Notification Text Size</label>
+            <input id="portalNotificationFontSize" name="portalNotificationFontSize" placeholder="e.g. 15px" value="15px">
+          </div>
+        </div>
+
+        <div id="portalSupportSettings">
+        <h3>Portal FAQ &amp; Help</h3>
+        <div id="portalFaqEditor" class="portal-faq-editor"></div>
+        <div class="portal-faq-toolbar">
+          <button type="button" id="addPortalFaq" class="secondary"><i data-lucide="plus" aria-hidden="true"></i> Add FAQ</button>
+          <span id="portalFaqCount">0 / 25</span>
+        </div>
+        <div class="color-grid">
+          <div><label for="portalHelpEmail">Helpdesk Email</label><input id="portalHelpEmail" name="portalHelpEmail" type="email" maxlength="180"></div>
+          <div><label for="portalHelpPhone">Helpdesk Telephone</label><input id="portalHelpPhone" name="portalHelpPhone" type="tel" maxlength="80" pattern="[+0-9\(\) .\-]*"></div>
+        </div>
+        <label for="portalHelpHours">Support Hours</label>
+        <input id="portalHelpHours" name="portalHelpHours" maxlength="240" placeholder="Monday to Friday, 09:00-17:00 IST">
+        <label for="portalHelpUrl">Helpdesk Website</label>
+        <input id="portalHelpUrl" name="portalHelpUrl" type="url" maxlength="1200">
+        </div>
+
+        <label for="portalWelcomeText">Registration Page Welcome Text</label>
+        <textarea id="portalWelcomeText" name="portalWelcomeText" maxlength="900" placeholder="e.g. Welcome to GATE 2027 registration. Please read all instructions carefully before applying."></textarea>
+
+        <label for="portalHeaderTitle">Portal Header Title</label>
+        <input id="portalHeaderTitle" name="portalHeaderTitle" maxlength="220" placeholder="e.g. Welcome to GATE 2027 Registration Services">
+
+        <label for="portalHeaderSubtitle">Portal Header Subtitle</label>
+        <input id="portalHeaderSubtitle" name="portalHeaderSubtitle" maxlength="500" placeholder="e.g. Use this portal for fresh registration, login, corrections, and printout.">
+
+        <div class="color-grid">
+          <div>
+            <label for="portalHeaderTextColor">Header Text Color</label>
+            <input id="portalHeaderTextColor" name="portalHeaderTextColor" type="color" value="#202124">
+          </div>
+          <div>
+            <label for="portalHeaderBackgroundColor">Header Background Color</label>
+            <input id="portalHeaderBackgroundColor" name="portalHeaderBackgroundColor" type="color" value="#ffffff">
+          </div>
+          <div>
+            <label for="portalWelcomeTextColor">Welcome Text Color</label>
+            <input id="portalWelcomeTextColor" name="portalWelcomeTextColor" type="color" value="#60676d">
+          </div>
+        </div>
+
+        <label for="portalTopBannerImageFile">Top Strip Banner Upload</label>
+        <div class="banner-tools">
+          <input id="portalTopBannerImageFile" name="portalTopBannerImageFile" type="file" accept="image/png,image/jpeg,image/webp">
+          <button class="secondary" type="button" data-clear-image="topBanner">Clear Pick</button>
+        </div>
+        <input id="portalTopBannerImageUrl" name="portalTopBannerImageUrl" type="hidden">
+        <div id="portalTopBannerPreview" class="banner-preview"></div>
+
+        <label for="portalHeroImageFile">Welcome Card Image Upload</label>
+        <div class="banner-tools">
+          <input id="portalHeroImageFile" name="portalHeroImageFile" type="file" accept="image/png,image/jpeg,image/webp">
+          <button class="secondary" type="button" data-clear-image="hero">Clear Pick</button>
+        </div>
+        <input id="portalHeroImageUrl" name="portalHeroImageUrl" type="hidden">
+        <div id="portalHeroPreview" class="banner-preview"></div>
+
+        <label for="portalPageBackgroundImageFile">Page Background Institute Image Upload</label>
+        <div class="banner-tools">
+          <input id="portalPageBackgroundImageFile" name="portalPageBackgroundImageFile" type="file" accept="image/png,image/jpeg,image/webp">
+          <button class="secondary" type="button" data-clear-image="pageBackground">Clear Pick</button>
+        </div>
+        <input id="portalPageBackgroundImageUrl" name="portalPageBackgroundImageUrl" type="hidden">
+        <div id="portalPageBackgroundPreview" class="banner-preview"></div>
+
+        <label for="notificationSenderEmail">SMTP Sender Gmail</label>
+        <input id="notificationSenderEmail" name="notificationSenderEmail" type="email" placeholder="e.g. exam-office@gmail.com">
+        <label for="notificationSenderAppPassword">Google App Password</label>
+        <input id="notificationSenderAppPassword" name="notificationSenderAppPassword" type="password" autocomplete="new-password" placeholder="Leave blank to keep saved password">
+        <div class="hint" id="notificationSenderPasswordStatus">No sender app password saved.</div>
+
+        <label for="registrationEmailBody">Registration Email/SMS Body</label>
+        <input id="registrationEmailBody" name="registrationEmailBody" placeholder="Use {{registrationId}}, {{name}}, {{examName}}, {{examCode}}, {{streamCode}}">
+        </section>
+
+        <button type="submit">Save Registration Config</button>
+      </form>
+      <div id="configResult" class="result"></div>
+    </section>
+
+    <section class="card wide workspace-screen" id="databaseCard">
+      <h2>Database View</h2>
+      <div class="db-actions">
+        <button class="secondary" type="button" id="refreshDb">Refresh DB View</button>
+        <button class="secondary" type="button" id="checkMailHealth">Check Mail Setup</button>
+        <button class="secondary" type="button" id="sendQueuedEmails">Send Queued Emails</button>
+        <button class="secondary" type="button" id="clearNotificationOutbox">Clear Notification Outbox</button>
+        <button class="danger" type="button" id="resetStudents">Delete All Candidates</button>
+        <button class="danger" type="button" id="resetExams">Delete All Exams</button>
+      </div>
+      <div id="dbStatus" class="result">No data loaded.</div>
+
+      <h3>Exams</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Mode</th>
+              <th>Reg</th>
+              <th>Correction</th>
+              <th>Streams</th>
+              <th>Fields</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="examDbRows"></tbody>
+        </table>
+      </div>
+      <div id="examDbPager" class="admin-pager"></div>
+
+      <h3>Students</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Registration ID</th>
+              <th>Name</th>
+              <th>DOB</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Guardian</th>
+              <th>Files</th>
+              <th>Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="studentDbRows"></tbody>
+        </table>
+      </div>
+      <div id="studentDbPager" class="admin-pager"></div>
+
+      <h3>Notification Outbox</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Channel</th>
+              <th>Recipient</th>
+              <th>Sender</th>
+              <th>Subject</th>
+              <th>Body</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Sent</th>
+              <th>Error</th>
+            </tr>
+          </thead>
+          <tbody id="notificationDbRows"></tbody>
+        </table>
+      </div>
+      <div id="notificationDbPager" class="admin-pager"></div>
+    </section>
+
+    <section class="card wide workspace-screen" id="responseCenterCard">
+      <div class="operations-heading"><div><p class="operations-eyebrow">EXAM OPERATIONS</p><h2>Post-exam workspace</h2></div><span class="operations-tag">Administration</span></div>
+      <div class="admin-tabs" role="tablist" aria-label="Response center tabs">
+        <button class="admin-tab active" type="button" data-response-tab="responsesTab">Responses</button>
+        <button class="admin-tab" type="button" data-response-tab="evaluationTab">Evaluation</button>
+        <button class="admin-tab" type="button" data-response-tab="postDocumentsTab">Documents</button>
+        <button class="admin-tab" type="button" data-response-tab="postChallengesTab">Challenges</button>
+        <button class="admin-tab" type="button" data-response-tab="postPublicationTab">Publication</button>
+        <button class="admin-tab" type="button" data-response-tab="manualEvaluationTab">Manual Evaluator</button>
+        <button class="admin-tab" type="button" data-response-tab="examIncidentsTab">Exam Incidents</button>
+        <button class="admin-tab hidden" id="approvedExamActionsTabButton" type="button" data-response-tab="approvedExamActionsTab">Approved Actions</button>
+      </div>
+      <section id="responsesTab" class="response-tab-panel active">
+      <div class="db-actions">
+        <button class="secondary" type="button" id="refreshResponses">Refresh Responses</button>
+        <button class="secondary" type="button" id="openEvaluationTab">Open Evaluation / Answer Key</button>
+        <a href="#responseCenterCard" id="responseCenterHref">Response Center Link</a>
+      </div>
+      <div id="responseStatus" class="result">Click refresh to load saved candidate response sheets.</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Exam</th>
+              <th>Candidate</th>
+              <th>DOB</th>
+              <th>Questions</th>
+              <th>Submitted</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="responseRows"><tr><td colspan="7">No response rows loaded yet.</td></tr></tbody>
+        </table>
+      </div>
+      <div id="responsePager" class="admin-pager"></div>
+      <div id="responseDetail" class="result">No response selected.</div>
+      </section>
+      <section id="postDocumentsTab" class="response-tab-panel"><h3>Candidate documents</h3><div id="postQuestionPaper" class="operations-section"><h4>Question paper</h4></div><div id="postAnswerKey" class="operations-section"><h4>Answer key</h4></div></section>
+      <section id="postChallengesTab" class="response-tab-panel"><h3>Answer-key challenges</h3></section>
+      <section id="postPublicationTab" class="response-tab-panel">
+        <div class="operations-heading"><h3>Publication controls</h3><span id="postPublicationBadge" class="operations-tag">Not published</span></div>
+        <div id="postReleaseFields" class="operations-release-list"></div>
+        <div id="postChallengeWindow" class="operations-section"><h4>Challenge window</h4></div>
+        <div class="db-actions"><button id="savePostPublication" type="button"><i data-lucide="save"></i>Save publication</button><a class="operations-link" href="/console/c7e42a9d51f8603b7a24/master#results">Candidate result holds</a></div>
+        <div id="postPublicationStatus" class="result" role="status" aria-live="polite"></div>
+      </section>
+      <section id="evaluationTab" class="response-tab-panel">
+        <h3>Evaluation</h3>
+        <div class="db-actions">
+          <input id="answerKeyFile" type="file" accept="application/json,.json">
+          <button class="secondary" type="button" id="uploadAnswerKey">Upload Answer Key</button>
+          <button class="secondary danger-outline" type="button" id="clearAnswerKey">Clear Server Key</button>
+          <button class="secondary" type="button" id="refreshEvaluation">Evaluate Responses</button>
+        </div>
+        <label for="originalAnswerKeyPdfFile">Original Answer Key PDF</label>
+        <div class="db-actions">
+          <input id="originalAnswerKeyPdfFile" type="file" accept="application/pdf,.pdf">
+          <button class="secondary" type="button" id="uploadOriginalAnswerKeyPdf">Upload Original Answer Key PDF</button>
+        </div>
+        <div id="evaluationStatus" class="result">Upload an answer key JSON, then run evaluation.</div>
+        <div id="originalAnswerKeyPdfStatus" class="result">No original answer key PDF uploaded yet.</div>
+        <h4>Challenge Decisions And Scoring Ledger</h4>
+        <p class="note">Scoring changes are created from the visual challenge-review card. This prevents question IDs and actions from being entered blindly.</p>
+        <div class="db-actions">
+          <button class="secondary" type="button" id="refreshEvaluationOverrides">Refresh Scoring Ledger</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Question ID</th><th>Display</th><th>Type</th><th>Status</th><th>Reason</th><th>Action</th></tr>
+            </thead>
+            <tbody id="evaluationOverrideRows"><tr><td colspan="6">No overrides yet.</td></tr></tbody>
+          </table>
+        </div>
+        <h4>Answer-Key Adjudication Queue</h4>
+        <div class="db-actions">
+          <button class="secondary" type="button" id="refreshChallengeRequests">Refresh Challenges</button>
+          <select id="challengeStatusFilter" aria-label="Filter challenge status">
+            <option value="ALL">All challenges</option>
+            <option value="PENDING">Pending review</option>
+            <option value="ACCEPTED">Resolution applied</option>
+            <option value="REJECTED">Current key retained</option>
+          </select>
+        </div>
+        <div id="challengeQueueStats" class="challenge-queue-stats">Load challenges to see the ranked question summary.</div>
+        <div class="table-wrap challenge-ranking-wrap">
+          <table>
+            <thead>
+              <tr><th>Rank</th><th>Question</th><th>Challenges</th><th>Candidates</th><th>Pending</th><th>Resolved</th><th>Latest</th><th>Review</th></tr>
+            </thead>
+            <tbody id="challengeSummaryRows"><tr><td colspan="8">No challenge summary loaded yet.</td></tr></tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Candidate</th><th>Question</th><th>Status</th><th>Resolution</th><th>Filed</th><th>Proof</th><th>Action</th></tr>
+            </thead>
+            <tbody id="challengeRequestRows"><tr><td colspan="7">No candidate challenges yet.</td></tr></tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Application</th>
+                <th>Candidate</th>
+                <th>Score</th>
+                <th>Max</th>
+                <th>%</th>
+                <th>Correct</th>
+                <th>Wrong</th>
+                <th>Blank</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="evaluationRows"><tr><td colspan="9">No evaluation rows yet.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <section id="manualEvaluationTab" class="response-tab-panel">
+        <h3>Manual Evaluator</h3>
+        <p class="note"><strong>Controlled post-exam recovery:</strong> no answer key needs to be stored with the assembled paper. After master approval, upload the original QS Studio master-key JSON. Its source licence lineage, canonical question IDs, option IDs, question types, NAT values/ranges, and complete coverage of the served paper remain mandatory. Extra master-bank questions are ignored.</p>
+        <label for="manualEvaluationReason">Reason For Manual Evaluation</label>
+        <div class="db-actions">
+          <input id="manualEvaluationReason" type="text" maxlength="1000" placeholder="Describe the evaluation failure and why manual recovery is required">
+          <button class="secondary" type="button" id="requestManualEvaluation">Request Master Approval</button>
+          <button class="secondary" type="button" id="refreshManualEvaluations">Refresh Requests</button>
+        </div>
+        <div id="manualEvaluationStatus" class="result">Select an exam project to view its manual-evaluation ledger.</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Request</th><th>Reason</th><th>Status</th><th>Approval Window</th><th>Audit</th><th>One-Time Action</th></tr></thead>
+            <tbody id="manualEvaluationRows"><tr><td colspan="6">No manual-evaluation requests loaded yet.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <section id="examIncidentsTab" class="response-tab-panel">
+        <h3>Interrupted Exam Incidents</h3>
+        <div class="db-actions">
+          <button class="secondary" type="button" id="refreshExamIncidents">Refresh Incidents</button>
+        </div>
+        <div id="examIncidentStatus" class="result">Refresh to load interrupted candidate sessions.</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Exam</th><th>Candidate</th><th>Interrupted</th><th>Remaining</th><th>Reason</th><th>Action</th></tr></thead>
+            <tbody id="examIncidentRows"><tr><td colspan="6">No incidents loaded yet.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <section id="approvedExamActionsTab" class="response-tab-panel">
+        <h3>Master-Approved Exam Actions</h3>
+        <div class="db-actions">
+          <button class="secondary" type="button" id="refreshExamAccessRequests">Refresh Requests</button>
+        </div>
+        <div id="examAccessRequestStatus" class="result">Refresh to load the approval ledger.</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Exam</th><th>Candidate</th><th>Request</th><th>Status</th><th>Remaining</th><th>Requested By</th><th>Action</th></tr></thead>
+            <tbody id="examAccessRequestRows"><tr><td colspan="7">No requests loaded yet.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <section class="card wide workspace-screen" id="reportDesignerCard">
+      <h2>Report Card Designer</h2>
+      <div class="report-studio-shell">
+        <div class="report-studio-head">
+          <div>
+            <h3>Unified Score Card Studio</h3>
+          </div>
+          <div class="report-studio-actions"></div>
+        </div>
+        <div id="reportDesignerStatus" class="report-studio-status">Select an exam project to load the unified report-card studio.</div>
+        <div class="report-studio-frame-shell">
+          <iframe id="reportDesignerStudioFrame" class="report-studio-frame" title="Unified report card studio" loading="lazy"></iframe>
+        </div>
+      </div>
+    </section>
+    </div>
+  </main>
+
+  <div id="responseModal" class="response-modal" aria-hidden="true">
+    <div class="response-modal-card" role="dialog" aria-modal="true" aria-labelledby="responseModalTitle">
+      <div class="response-modal-head">
+        <div class="response-modal-title">
+          <h3 id="responseModalTitle">Response Sheet</h3>
+          <p id="responseModalMeta">Select a response row to view details.</p>
+        </div>
+        <div class="response-modal-actions">
+          <button class="danger" type="button" id="deleteResponseModal">Request Re-exam</button>
+          <button class="secondary" type="button" id="closeResponseModal">Close</button>
+        </div>
+      </div>
+      <div id="responseModalBody"></div>
+    </div>
+  </div>
+
+  <div id="challengeReviewModal" class="response-modal" aria-hidden="true">
+    <div class="response-modal-card" role="dialog" aria-modal="true" aria-labelledby="challengeReviewTitle">
+      <div class="response-modal-head">
+        <div class="response-modal-title">
+          <h3 id="challengeReviewTitle">Challenge Review</h3>
+          <p id="challengeReviewMeta">Open a challenge row to review proof and finalize the decision.</p>
+        </div>
+        <div class="response-modal-actions">
+          <button class="secondary" type="button" id="closeChallengeReviewModal">Close</button>
+        </div>
+      </div>
+      <div id="challengeReviewBody"></div>
+    </div>
+  </div>
+
+  <div id="projectCreateModal" class="create-modal" aria-hidden="true">
+    <div class="create-modal-card" role="dialog" aria-modal="true" aria-labelledby="projectCreateModalTitle">
+      <h3 id="projectCreateModalTitle">Saving Exam Project</h3>
+      <p id="projectCreateModalText">Saving exam project...</p>
+      <div class="create-modal-visual">
+        <img id="projectCreateSpinner" class="spinner" src="/assets/loading_image_big.gif" alt="Saving project">
+        <img id="projectCreateProgress" class="bar" src="/assets/progress_bar.gif" alt="Progress bar">
+      </div>
+      <div class="create-modal-actions">
+        <button id="projectCreateOk" type="button" class="hidden">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="templatePreviewModal" class="template-preview-modal" aria-hidden="true">
+    <div class="template-preview-card" role="dialog" aria-modal="true" aria-labelledby="templatePreviewTitle">
+      <div class="template-preview-head">
+        <div>
+          <h3 id="templatePreviewTitle">Score Card Template Preview</h3>
+          <p id="templatePreviewMeta">Preview a saved studio design.</p>
+        </div>
+        <div class="response-modal-actions">
+          <button class="secondary" type="button" id="templatePreviewReleaseBtn">Set Studio Default</button>
+          <button class="secondary" type="button" id="closeTemplatePreview">Close</button>
+        </div>
+      </div>
+      <iframe id="templatePreviewFrame" class="template-preview-frame" title="Score card template preview" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <script src="/assets/ui-guard.js"></script>
+  <script src="/assets/geo/country-registry.js"></script>
+  <script src="/assets/admin/admin-security.js"></script>
+  <script src="/assets/vendor/lucide-0.468.0.min.js"></script>
+  <script src="/assets/admin/portal-support-settings.js"></script>
+  <script src="/assets/portal-notices.js"></script>
+  <script src="/assets/admin/portal-notice-editor.js"></script>
+  <script src="/assets/admin/score-card-settings.js"></script>
+  <script src="/assets/admin/admin-registration.js"></script>
+  <script src="/assets/admin/post-exam-workspace.js"></script>
+  <script src="/assets/admin/admin-portal.js?v=challenge-review-20260909-1"></script>
+</body>
+</html>
+

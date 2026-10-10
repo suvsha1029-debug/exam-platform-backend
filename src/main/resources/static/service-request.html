@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Institute Service Request</title>
+  <style>
+    * { box-sizing:border-box; border-radius:0!important; box-shadow:none!important; text-shadow:none!important; }
+    :root { --dark:#20242b; --navy:#071f3d; --red:#9f1f32; --green:#90dbc6; --line:#657080; --paper:#f4f6f8; --ink:#111923; }
+    body { margin:0; min-height:100vh; color:var(--ink); background:#dfe5ea; font-family:Tahoma,Verdana,Arial,sans-serif; }
+    header { border-top:5px solid var(--red); border-bottom:2px solid #111923; background:linear-gradient(90deg,var(--dark),var(--navy)); color:#fff; }
+    .head-inner { width:min(1120px,calc(100% - 28px)); margin:auto; padding:28px 0 30px; }
+    h1 { margin:0; font-size:34px; letter-spacing:.03em; }
+    .subtitle { margin:8px 0 0; max-width:760px; color:#d7e5f2; line-height:1.45; font-size:14px; }
+    .strip { background:#111923; color:var(--green); border-bottom:1px solid #000; padding:8px 0; font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+    .strip div { width:min(1120px,calc(100% - 28px)); margin:auto; }
+    main { width:min(1120px,calc(100% - 28px)); margin:22px auto 38px; display:grid; grid-template-columns:1.05fr .95fr; gap:18px; align-items:start; }
+    .panel { border:2px solid var(--line); background:var(--paper); }
+    .panel h2 { margin:0; padding:13px 16px; background:#fff; border-bottom:2px solid var(--line); color:var(--navy); font-size:22px; }
+    form { padding:16px; display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+    label { display:block; margin:0 0 5px; color:#24384e; font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
+    input, textarea, select { width:100%; border:1px solid #5f6e80; background:#fff; color:#111923; padding:9px; font:14px Tahoma,Verdana,Arial,sans-serif; }
+    textarea { min-height:86px; resize:vertical; }
+    .full { grid-column:1 / -1; }
+    .actions { grid-column:1 / -1; display:flex; gap:10px; align-items:center; border-top:1px solid #c0c8d0; padding-top:12px; }
+    button { border:1px solid #071f3d; background:#071f3d; color:#fff; padding:9px 16px; font-weight:800; cursor:pointer; }
+    button.secondary { background:#fff; color:#071f3d; }
+    .status { min-height:32px; padding:8px 10px; border:1px solid #b6bec8; background:#fff; font-size:13px; }
+    .status.ok { border-color:#2f806a; background:#ecfff8; color:#10533f; }
+    .status.bad { border-color:#9f1f32; background:#fff2f4; color:#7a1726; }
+    .info { padding:16px; line-height:1.58; }
+    .info h3 { margin:0 0 10px; color:#9f1f32; font-size:18px; }
+    .step { border-left:5px solid var(--green); background:#fff; margin:10px 0; padding:10px 12px; }
+    .fine { margin-top:14px; color:#516172; font-size:12px; }
+    @media (max-width:840px) { main, form { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="head-inner">
+      <h1>Institute Examination Service Request</h1>
+      <p class="subtitle">Submit a formal request for question generation, secure exam administration, evaluation, reporting, or full institute assessment workflow services.</p>
+    </div>
+  </header>
+  <div class="strip"><div>Request intake is reviewed by the platform control team before access is issued.</div></div>
+  <main>
+    <section class="panel">
+      <h2>Service Request Form</h2>
+      <form id="requestForm">
+        <div>
+          <label for="instituteName">Institute Name</label>
+          <input id="instituteName" name="instituteName" maxlength="180" required>
+        </div>
+        <div>
+          <label for="contactName">Primary Contact</label>
+          <input id="contactName" name="contactName" maxlength="180" required>
+        </div>
+        <div>
+          <label for="officialEmail">Official Email</label>
+          <input id="officialEmail" name="officialEmail" type="email" maxlength="190" required>
+        </div>
+        <div>
+          <label for="phoneNumber">Phone Number</label>
+          <input id="phoneNumber" name="phoneNumber" maxlength="32" required>
+        </div>
+        <div>
+          <label for="designation">Designation</label>
+          <input id="designation" name="designation" maxlength="120" placeholder="Director / Exam Coordinator / Registrar">
+        </div>
+        <div>
+          <label for="requestedServices">Requested Services</label>
+          <select id="requestedServices" name="requestedServices" required>
+            <option value="">Select service</option>
+            <option>Question Generator</option>
+            <option>Exam Admin Portal</option>
+            <option>Question Generator + Exam Admin</option>
+            <option>Full Secure Assessment Workflow</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="instituteAddress">Institute Address</label>
+          <textarea id="instituteAddress" name="instituteAddress" maxlength="500"></textarea>
+        </div>
+        <div class="full">
+          <label for="notes">Request Notes</label>
+          <textarea id="notes" name="notes" maxlength="1000" placeholder="Expected exam type, estimated candidates, departments, timeline, special requirements."></textarea>
+        </div>
+        <div class="actions">
+          <button type="submit">Submit Request</button>
+          <button class="secondary" type="reset">Clear</button>
+          <div id="status" class="status" aria-live="polite">Ready for institute request.</div>
+        </div>
+      </form>
+    </section>
+    <aside class="panel">
+      <h2>Process</h2>
+      <div class="info">
+        <h3>Controlled Onboarding</h3>
+        <div class="step"><strong>1. Request</strong><br>Institute submits official details and requested service scope.</div>
+        <div class="step"><strong>2. Platform Review</strong><br>Platform team verifies institute identity and service suitability.</div>
+        <div class="step"><strong>3. People Mapping</strong><br>After approval, institute nominates responsible people with designation and contact details.</div>
+        <div class="step"><strong>4. Secure Access</strong><br>Approved people receive password setup links. Passwords are never emailed or viewed by operators.</div>
+        <p class="fine">All requests are logged. Platform approval is required before any admin, master-admin, or question-generation access is enabled.</p>
+      </div>
+    </aside>
+  </main>
+  <script>
+    const form = document.getElementById('requestForm');
+    const statusBox = document.getElementById('status');
+    function setStatus(text, kind) {
+      statusBox.textContent = text;
+      statusBox.className = 'status ' + (kind || '');
+    }
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      setStatus('Submitting request...', '');
+      const payload = Object.fromEntries(new FormData(form).entries());
+      try {
+        const response = await fetch('/api/public/institute-service-requests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
+        if (!response.ok) throw new Error(data.detail || 'Request could not be submitted.');
+        form.reset();
+        setStatus('Request #' + data.id + ' submitted for review.', 'ok');
+      } catch (error) {
+        setStatus(error.message || 'Request failed.', 'bad');
+      }
+    });
+  </script>
+</body>
+</html>

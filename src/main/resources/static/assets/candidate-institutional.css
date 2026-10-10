@@ -1,0 +1,374 @@
+:root {
+  --candidate-purple: #3b174f;
+  --candidate-purple-deep: #21102d;
+  --candidate-red: #a51f32;
+  --candidate-red-deep: #741321;
+  --candidate-black: #17151a;
+  --candidate-ink: #241d28;
+  --candidate-line: #c9bdcb;
+  --candidate-soft: #f6f2f6;
+}
+
+body.candidate-institutional {
+  color: var(--candidate-ink);
+  background: #f4f1f4 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.candidate-institutional *,
+body.candidate-institutional *::before,
+body.candidate-institutional *::after {
+  animation: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  letter-spacing: 0 !important;
+}
+
+.candidate-site-shell {
+  position: relative;
+  z-index: 100;
+  color: #fff;
+  border-bottom: 3px solid var(--candidate-red);
+  background: var(--candidate-black);
+  font-family: inherit;
+}
+
+.candidate-site-minibar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 8px max(18px, calc((100vw - 1180px) / 2));
+}
+
+.candidate-site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.candidate-site-home,
+.candidate-site-nav a {
+  display: inline-block;
+  padding: 7px 11px;
+  border: 1px solid transparent;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.candidate-site-nav a[hidden] {
+  display: none;
+}
+
+.candidate-site-home:hover,
+.candidate-site-home:focus-visible,
+.candidate-site-nav a:hover,
+.candidate-site-nav a:focus-visible {
+  border-color: #fff;
+  color: #fff;
+  background: var(--candidate-red-deep);
+  outline: none;
+}
+
+body.candidate-institutional > header:not(.candidate-site-shell),
+body.candidate-institutional #portalHeader {
+  padding: 18px max(22px, calc((100vw - 1180px) / 2)) !important;
+  border-bottom: 0 !important;
+  color: #fff !important;
+  text-align: center !important;
+  background: var(--candidate-purple-deep) !important;
+}
+
+body.candidate-institutional > header:not(.candidate-site-shell) h1,
+body.candidate-institutional #portalHeader h1 {
+  color: #fff !important;
+  font-family: inherit;
+}
+
+body.candidate-institutional > header:not(.candidate-site-shell) p,
+body.candidate-institutional #portalHeader p {
+  color: #eadfeb !important;
+}
+
+body.candidate-institutional .ticker {
+  padding: 7px 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid #4b0c16 !important;
+  color: #fff !important;
+  background: var(--candidate-red-deep) !important;
+  font-size: 12px;
+}
+
+body.candidate-institutional .ticker span {
+  min-width: 100% !important;
+  padding-left: 16px !important;
+  animation: candidate-ticker 14s linear infinite !important;
+  will-change: transform;
+}
+
+@keyframes candidate-ticker {
+  from { transform: translateX(100vw); }
+  to { transform: translateX(-100%); }
+}
+
+body.candidate-institutional .public-portal-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 0 max(22px, calc((100vw - 1180px) / 2));
+  border-top: 1px solid #5b3b63;
+  border-bottom: 3px solid var(--candidate-red);
+  background: var(--candidate-purple);
+}
+
+body.candidate-institutional .public-portal-tabs a {
+  display: inline-block;
+  padding: 10px 15px;
+  border-right: 1px solid #72537a;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+body.candidate-institutional .public-portal-tabs a:hover,
+body.candidate-institutional .public-portal-tabs a:focus-visible,
+body.candidate-institutional .public-portal-tabs a.active {
+  color: #fff;
+  background: var(--candidate-red-deep);
+  outline: none;
+}
+
+body.candidate-institutional .public-portal-tabs a[hidden] {
+  display: none;
+}
+
+body.candidate-institutional .molecule-field,
+body.candidate-institutional #moleculeField {
+  display: none !important;
+}
+
+body.candidate-institutional main {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, calc(100% - 44px)) !important;
+  margin-top: 28px !important;
+  gap: 20px !important;
+}
+
+body.candidate-institutional .card,
+body.candidate-institutional .panel,
+body.candidate-institutional .application-shell,
+body.candidate-institutional .action-shell,
+body.candidate-institutional .status-row,
+body.candidate-institutional .result,
+body.candidate-institutional .notice,
+body.candidate-institutional .closed,
+body.candidate-institutional dialog,
+body.candidate-institutional input,
+body.candidate-institutional select,
+body.candidate-institutional textarea,
+body.candidate-institutional button,
+body.candidate-institutional .link-button,
+body.candidate-institutional .pill,
+body.candidate-institutional .candidate-chip {
+  border-radius: 0 !important;
+}
+
+body.candidate-institutional .card,
+body.candidate-institutional .panel,
+body.candidate-institutional .application-shell,
+body.candidate-institutional .action-shell {
+  border-color: var(--candidate-line) !important;
+  background: #fff !important;
+}
+
+body.candidate-institutional .card,
+body.candidate-institutional .panel {
+  border-width: 1px !important;
+}
+
+body.candidate-institutional .hero-card {
+  min-height: 250px !important;
+}
+
+body.candidate-institutional .hero-content {
+  padding: 4px !important;
+}
+
+body.candidate-institutional .hero-content h2,
+body.candidate-institutional main > .card > h2 {
+  font-family: inherit;
+  font-size: 27px;
+}
+
+body.candidate-institutional h2,
+body.candidate-institutional h3,
+body.candidate-institutional label,
+body.candidate-institutional .item b,
+body.candidate-institutional .summary-row strong {
+  color: var(--candidate-purple-deep) !important;
+}
+
+body.candidate-institutional input,
+body.candidate-institutional select,
+body.candidate-institutional textarea {
+  font-family: inherit;
+  border-color: #aa9bad !important;
+  background: #fff !important;
+}
+
+body.candidate-institutional input:focus,
+body.candidate-institutional select:focus,
+body.candidate-institutional textarea:focus {
+  border-color: var(--candidate-purple) !important;
+  outline: 2px solid #dfd0e1 !important;
+}
+
+body.candidate-institutional button,
+body.candidate-institutional .link-button,
+body.candidate-institutional .flash {
+  border: 1px solid var(--candidate-purple-deep) !important;
+  color: #fff !important;
+  background: var(--candidate-purple) !important;
+}
+
+body.candidate-institutional .danger,
+body.candidate-institutional .danger-button,
+body.candidate-institutional .closed {
+  border-color: var(--candidate-red-deep) !important;
+  color: #fff !important;
+  background: var(--candidate-red) !important;
+}
+
+body.candidate-institutional .muted,
+body.candidate-institutional .muted-button,
+body.candidate-institutional .secondary {
+  border: 1px solid var(--candidate-purple) !important;
+  color: var(--candidate-purple-deep) !important;
+  background: #fff !important;
+}
+
+body.candidate-institutional .panel-title,
+body.candidate-institutional .topbar {
+  color: #fff !important;
+  background: var(--candidate-purple) !important;
+}
+
+body.candidate-institutional .hero-card::after {
+  background: rgba(255, 255, 255, .86) !important;
+}
+
+body.candidate-institutional .result:empty {
+  display: none !important;
+}
+
+body.candidate-institutional .notification-list {
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+body.candidate-institutional .notification-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid var(--candidate-line);
+}
+
+body.candidate-institutional .board-badge {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 39px;
+  height: 30px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  animation: board-badge-flash .95s steps(2, end) infinite !important;
+}
+
+body.candidate-institutional .board-badge.new {
+  border: 1px solid #003d8f;
+  border-radius: 0 !important;
+  background: #0047ab;
+}
+
+body.candidate-institutional .board-badge.old {
+  width: 35px;
+  height: 35px;
+  border: 1px solid #000;
+  border-radius: 50% !important;
+  background: #111;
+}
+
+@keyframes board-badge-flash {
+  0%, 48% { opacity: 1; }
+  49%, 100% { opacity: .35; }
+}
+
+/* Application forms share the submitted-record typography and neutral palette. */
+body.candidate-institutional.candidate-forms {
+  --blue:#343b3e;
+  --blue2:#242a2d;
+  --ink:#242a2d;
+  --muted:#636b6e;
+  --line:#cbd1d3;
+  --candidate-purple:#343b3e;
+  --candidate-purple-deep:#242a2d;
+  --candidate-line:#cbd1d3;
+  color:#242a2d;
+  background:#f4f5f5 !important;
+}
+body.candidate-forms *, body.candidate-forms *::before, body.candidate-forms *::after { border-radius:0 !important; }
+body.candidate-forms :is(button,input,select,textarea,.result) { font-family:inherit !important; }
+body.candidate-forms :is(button,label,.link-button,.workflow-copy strong,.summary-stage-copy strong) { font-weight:600; }
+body.candidate-forms :is(h2,h3,h4) { font-weight:650; }
+body.candidate-forms :is(strong,b,.top-links a,.step-progress-meta) { font-weight:600; }
+body.candidate-forms .step-panel-title { font-size:16px; font-weight:650; }
+body.candidate-forms :is(.workflow-check,.summary-stage-mark) { border-color:#cbd1d3 !important; }
+body.candidate-forms .workflow-step.pending .workflow-check { color:#636b6e; background:#f5f6f6; }
+body.candidate-forms .step-progress-wrap img { filter:grayscale(1); border-color:#cbd1d3; }
+body.candidate-forms .strength span { background:#d4d9da; }
+body.candidate-institutional.candidate-forms > header {
+  text-align:left !important;
+  background:#262b2d !important;
+  border-bottom:3px solid #9b2939 !important;
+}
+body.candidate-institutional.candidate-forms > header h1 { font-size:24px; font-weight:650; color:#fff !important; }
+body.candidate-institutional.candidate-forms > header p { color:#e1e4e5 !important; }
+body.candidate-forms :is(.card,.registration-sidebar,.application-summary,.preview-panel,.fee-panel,.preview-box,.preview-block,.step-health-card,.submit-dialog,.item) {
+  background:#fff !important;
+  border-color:#cbd1d3 !important;
+  color:#242a2d;
+}
+body.candidate-forms :is(.workflow-step,.summary-stage-chip,.step-panel-title,.step-tools,.step-view-header,.file-note,.result,.preview,.step-progress-wrap) {
+  background:#f3f5f5 !important;
+  border-color:#d4d9da !important;
+  color:#505b60;
+}
+body.candidate-forms :is(.workflow-step.active,.summary-stage-chip.active) { border-color:#9b2939 !important; border-left:3px solid #9b2939 !important; background:#faf5f6 !important; }
+body.candidate-forms :is(.workflow-step.complete,.summary-stage-chip.complete) { border-color:#b5cfc1 !important; background:#f2f7f4 !important; }
+body.candidate-forms :is(.workflow-icon,.summary-stage-mark) { background:#e5e9e9 !important; color:#343b3e !important; }
+body.candidate-forms :is(.workflow-copy strong,.summary-stage-copy strong,.step-health-card strong) { color:#242a2d; }
+body.candidate-forms :is(.workflow-copy span,.summary-stage-copy span,.step-health-card span,.file-note) { color:#636b6e; }
+body.candidate-institutional.candidate-forms :is(input,select,textarea) { border:1px solid #aeb7b9 !important; }
+body.candidate-institutional.candidate-forms :is(input,select,textarea):focus { border-color:#27694e !important; outline:2px solid #d2e5dc !important; }
+body.candidate-institutional.candidate-forms :is(button,.link-button) { background:#9b2939 !important; border-color:#9b2939 !important; }
+body.candidate-institutional.candidate-forms :is(.muted-button,.secondary,.password-toggle) { background:#fff !important; border-color:#aeb7b9 !important; color:#242a2d !important; }
+
+@media (max-width: 760px) {
+  .candidate-site-nav a {
+    padding: 8px 9px;
+  }
+
+  body.candidate-institutional main {
+    width: min(100%, calc(100% - 20px)) !important;
+  }
+}

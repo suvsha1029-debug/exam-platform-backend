@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Candidate Result Card</title>
+  <link rel="stylesheet" href="/assets/candidate-institutional.css">
+  <script src="/assets/candidate-institutional.js" defer></script>
+  <style>
+    :root { --blue:#0d5ca6; --blue2:#073a70; --line:#9dbce4; --ink:#10243f; --muted:#607089; --good:#116c2e; --bad:#b00020; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:Arial, Helvetica, sans-serif; color:var(--ink); background:#eef5ff; }
+    header { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 24px; color:#fff; background:linear-gradient(180deg,var(--blue) 0%,var(--blue2) 100%); border-bottom:4px solid #f0c84b; }
+    header h1 { margin:0; font-size:24px; }
+    header p { margin:4px 0 0; color:#d8ecff; }
+    main { width:min(960px, calc(100% - 32px)); margin:24px auto; }
+    .panel { border:2px solid var(--line); border-radius:14px; background:#fff; box-shadow:0 18px 40px rgba(16,36,63,.14); overflow:hidden; }
+    .panel-title { padding:12px 16px; color:#fff; background:#155fa8; font-weight:900; text-transform:uppercase; letter-spacing:.04em; }
+    .sheet { padding:20px; }
+    .hero { display:grid; grid-template-columns:110px 1fr 180px; gap:18px; align-items:center; border:1px solid #223; padding:14px; }
+    .photo { width:96px; height:116px; border:1px solid #555; background:#f3f3f3; object-fit:cover; display:block; }
+    .photo-placeholder { width:96px; height:116px; border:1px dashed #777; display:grid; place-items:center; color:#777; }
+    .hero h2 { margin:0; text-align:center; font-size:24px; text-transform:uppercase; }
+    .hero p { margin:6px 0 0; text-align:center; color:#334; font-weight:700; }
+    .score-box { border:1px solid #223; border-radius:12px; padding:14px; text-align:center; background:linear-gradient(180deg,#fffaf0,#f6edd5); }
+    .score-box strong { display:block; font-size:40px; color:#0d5ca6; line-height:1; }
+    .score-box span { display:block; margin-top:6px; color:#6b5730; font-weight:800; }
+    .grid { display:grid; grid-template-columns:210px 1fr 210px 1fr; border:1px solid #223; border-top:0; }
+    .label,.value { padding:10px 12px; border-right:1px solid #223; border-bottom:1px solid #223; min-height:40px; }
+    .label { background:#f7f7f7; font-weight:900; text-transform:uppercase; font-size:12px; letter-spacing:.04em; }
+    .value { white-space:pre-wrap; overflow-wrap:anywhere; }
+    .label:nth-child(4n), .value:nth-child(4n) { border-right:0; }
+    .signature-row { display:grid; grid-template-columns:1fr 1fr; gap:80px; padding:26px 0 8px; }
+    .signature-line { border-top:1px solid #222; padding-top:8px; text-align:center; font-weight:800; }
+    .signature-image { max-height:54px; max-width:180px; display:block; margin:0 auto 8px; object-fit:contain; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; padding:16px 20px 20px; }
+    .syllabus-panel { margin:18px 20px 20px; border:1px solid #c4d7ef; border-radius:12px; background:#f8fbff; overflow:hidden; }
+    .syllabus-head { display:flex; justify-content:space-between; gap:14px; align-items:center; padding:14px 16px; background:#eaf4ff; border-bottom:1px solid #c4d7ef; }
+    .syllabus-head h3 { margin:0; font-size:17px; }
+    .syllabus-head p { margin:4px 0 0; color:var(--muted); font-size:13px; }
+    .syllabus-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:14px 16px; }
+    .syllabus-controls input { max-width:360px; }
+    .syllabus-body { padding:0 16px 16px; }
+    .syllabus-summary { display:flex; gap:10px; flex-wrap:wrap; margin:0 0 12px; }
+    .syllabus-chip { border:1px solid #b8d0ee; background:#fff; border-radius:999px; padding:7px 10px; font-weight:800; color:#163d68; }
+    .syllabus-table { width:100%; border-collapse:collapse; background:#fff; font-size:13px; }
+    .syllabus-table th,.syllabus-table td { border:1px solid #d8e5f3; padding:8px; text-align:left; vertical-align:top; }
+    .syllabus-table th { background:#eff6ff; color:#173a59; }
+    .syllabus-table td.num,.syllabus-table th.num { text-align:right; font-variant-numeric:tabular-nums; }
+    .syllabus-questions { margin-top:14px; max-height:260px; overflow:auto; border:1px solid #d8e5f3; background:#fff; }
+    button { border:0; border-radius:8px; padding:11px 16px; font-weight:900; color:#fff; background:linear-gradient(180deg,#287bd4 0%,#0d5ca6 100%); cursor:pointer; }
+    .muted { color:var(--blue2); background:#eef6ff; border:2px solid var(--line); }
+    .result { padding:12px 16px; font-family:"Courier New", monospace; white-space:pre-wrap; color:#183557; }
+    .ok { color:var(--good); font-weight:900; }
+    .error { color:var(--bad); font-weight:900; }
+    @media print {
+      @page { size:A4 portrait; margin:12mm; }
+      header,.actions,.result { display:none !important; }
+      html,body { width:auto; margin:0; padding:0; overflow:visible; background:#fff; }
+      main { width:100%; margin:0; }
+      .panel { width:100%; box-shadow:none; border:1px solid #333; border-radius:0; overflow:hidden; }
+      .panel-title { display:none; }
+      .sheet { width:100%; padding:6mm; overflow:hidden; }
+      .hero { grid-template-columns:26mm minmax(0,1fr) 42mm; gap:4mm; padding:4mm; break-inside:avoid; }
+      .hero > *, .grid > *, .signature-row > * { min-width:0; max-width:100%; }
+      .photo,.photo-placeholder { width:24mm; height:30mm; max-width:100%; }
+      .hero h2 { font-size:18px; overflow-wrap:anywhere; word-break:break-word; }
+      .score-box { padding:3mm; }
+      .score-box strong { font-size:28px; }
+      .grid { grid-template-columns:34mm minmax(0,1fr) 34mm minmax(0,1fr); table-layout:fixed; }
+      .label,.value { padding:2.5mm 3mm; min-height:9mm; overflow-wrap:anywhere; word-break:break-word; white-space:pre-wrap; }
+      .signature-row { gap:18mm; padding:14mm 4mm 3mm; break-inside:avoid; }
+      .signature-image { max-width:42mm; }
+      .syllabus-panel { display:none !important; }
+    }
+    @media (max-width:760px) {
+      .hero { grid-template-columns:1fr; }
+      .grid { grid-template-columns:1fr; }
+      .label,.value { border-right:0; }
+      .signature-row { grid-template-columns:1fr; gap:32px; }
+    }
+    @media (max-width:640px) {
+      header {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        text-align: center;
+      }
+      main {
+        width: min(100%, calc(100% - 16px));
+        margin: 16px auto 20px;
+      }
+      .panel {
+        border-radius: 16px;
+      }
+      .sheet,
+      .actions,
+      .panel-title {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+      .syllabus-head,
+      .syllabus-controls {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+      .actions button {
+        width: 100%;
+      }
+      .syllabus-controls button,
+      .syllabus-controls input {
+        width: 100%;
+      }
+      #backButton {
+        width: 100%;
+      }
+      .label,
+      .value {
+        padding: 10px 12px;
+      }
+    }
+    body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; background:#edf0f1; letter-spacing:0; }
+    header { background:#243e49; border-bottom:2px solid #967344; }
+    main { width:min(900px,calc(100% - 24px)); }
+    .panel { border:1px solid #cad0d3; border-radius:0; box-shadow:none; }
+    .panel-title { background:#fff; color:#203844; letter-spacing:0; border-bottom:1px solid #cad0d3; }
+    .sheet { padding:14px; background:#dce1e3; overflow:auto; }
+    .sheet img.score-preview-page { display:block; width:calc(100% * var(--score-zoom,1)); max-width:none; height:auto; aspect-ratio:595.276/841.89; margin:0 0 14px; background:#fff; }
+    .score-preview-page:last-child { margin-bottom:0; }
+    button,.syllabus-panel { border-radius:0; }
+    body.score-card-view.candidate-institutional { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important; background:#edf0f1 !important; }
+    body.score-card-view.candidate-institutional main { width:min(900px,calc(100% - 24px)) !important; }
+    body.score-card-view.candidate-institutional > header:not(.candidate-site-shell) { background:#243e49 !important; }
+    body.score-card-view.candidate-institutional > header h1 { font-family:inherit; }
+    body.score-card-view.candidate-institutional .panel-title { background:#fff !important; color:#203844 !important; }
+    @media print {
+      @page { size:A4; margin:0; }
+      .candidate-site-shell { display:none !important; }
+      body.score-card-view.candidate-institutional main { width:100% !important; margin:0 !important; }
+      body.score-card-view.candidate-institutional .panel { border:0 !important; }
+      main,.panel,.sheet { width:100%; margin:0; padding:0; border:0; background:#fff; }
+      .sheet img.score-preview-page { width:210mm; height:297mm; margin:0; break-after:page; break-inside:avoid; }
+      .score-preview-page:last-child { break-after:auto; }
+    }
+  </style>
+</head>
+<body class="score-card-view">
+  <header>
+    <div>
+      <h1>Candidate Result Card</h1>
+    </div>
+    <button type="button" class="muted" id="backButton">Back</button>
+  </header>
+  <main>
+    <section class="panel">
+      <div class="panel-title">Result Card</div>
+      <div id="sheet" class="sheet"></div>
+      <div class="actions">
+        <button type="button" id="printScoreCard" onclick="window.print()" disabled>Print Score Card</button>
+        <button type="button" class="muted" id="downloadScoreCardPdf" hidden disabled>Download Score Card PDF</button>
+        <label for="scorePreviewZoom">Zoom <output id="scorePreviewZoomValue">100%</output><input id="scorePreviewZoom" type="range" min="100" max="200" step="10" value="100"></label>
+      </div>
+      <section class="syllabus-panel" id="syllabusPanel" hidden>
+        <div class="syllabus-head">
+          <div>
+            <h3>Syllabus Performance Map</h3>
+            <p>Upload the official syllabus PDF to map evaluated questions into topics.</p>
+          </div>
+        </div>
+        <div class="syllabus-controls">
+          <input id="syllabusFile" type="file" accept="application/pdf,.pdf">
+          <button type="button" class="muted" id="analyzeSyllabus">Analyze Syllabus</button>
+        </div>
+        <div id="syllabusStatus" class="result">No syllabus analyzed yet.</div>
+        <div id="syllabusBody" class="syllabus-body"></div>
+      </section>
+      <div id="result" class="result">Loading released result card...</div>
+    </section>
+  </main>
+  <script src="/assets/ui-guard.js"></script>
+  <script src="/assets/candidate-error.js"></script>
+  <script>
+    const candidate = JSON.parse(sessionStorage.getItem('candidateDashboardData') || 'null');
+    function escapeHtml(value) { return String(value ?? '-').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+    function row(label, value) { return '<div class="label">' + escapeHtml(label) + '</div><div class="value">' + escapeHtml(value || '-') + '</div>'; }
+    function numberCell(value) {
+      const number = Number(value || 0);
+      return Number.isFinite(number) ? String(Math.round(number * 1000) / 1000) : escapeHtml(value || 0);
+    }
+    function triggerDataUrlDownload(fileName, dataUrl) {
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = fileName || 'score-card.pdf';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+    function secureSiblingPage(fileName) {
+      const path = window.location.pathname || '';
+      if (path.endsWith('/candidate-result.html')) {
+        return path.replace(/candidate-result\.html$/, fileName);
+      }
+      return '/candidate-entry/' + fileName.replace('.html', '');
+    }
+    async function candidateSecurityToken() {
+      if (window.__candidateSecurityTokenCache) return window.__candidateSecurityTokenCache;
+      const response = await fetch('/api/public/candidate-security-token', { cache: 'no-store' });
+      const data = await response.json();
+      window.__candidateSecurityTokenCache = data.token || '';
+      return window.__candidateSecurityTokenCache;
+    }
+    let scoreCardDocument = null;
+    async function loadResultCard() {
+      if (!candidate) { openCandidateError('auth-required'); return; }
+      const result = document.getElementById('result');
+      try {
+        const response = await fetch('/api/candidate/score-card-document', {
+          method: 'POST',
+          cache: 'no-store',
+          headers: { 'Content-Type': 'application/json', 'X-Candidate-CSRF': await candidateSecurityToken() },
+          body: JSON.stringify({ registrationId: candidate.registrationId })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || data.message || response.statusText);
+        scoreCardDocument = data;
+        document.getElementById('sheet').replaceChildren(...data.pages.map((source, index) => {
+          const image = new Image();
+          image.className = 'score-preview-page';
+          image.src = source;
+          image.alt = 'Score card for ' + data.candidateName + ', application ' + data.applicationNumber + ', page ' + (index + 1);
+          image.width = 1191;
+          image.height = 1684;
+          return image;
+        }));
+        await Promise.all([...document.querySelectorAll('.score-preview-page')].map((image) => image.decode()));
+        const downloadButton = document.getElementById('downloadScoreCardPdf');
+        downloadButton.hidden = !data.pdfDataUrl;
+        downloadButton.disabled = !data.pdfDataUrl;
+        document.getElementById('printScoreCard').disabled = false;
+        document.getElementById('syllabusPanel').hidden = false;
+        result.textContent = '';
+      } catch (error) {
+        result.textContent = 'Could not load score card: ' + error.message;
+      }
+    }
+    function renderSyllabusAnalysis(data) {
+      const topics = Array.isArray(data.topics) ? data.topics : [];
+      const questions = Array.isArray(data.questions) ? data.questions : [];
+      const topicRows = topics.map((topic) =>
+        '<tr>'
+        + '<td>' + escapeHtml(topic.topic) + '</td>'
+        + '<td class="num">' + escapeHtml(topic.questionCount) + '</td>'
+        + '<td class="num">' + escapeHtml(topic.attemptedCount) + '</td>'
+        + '<td class="num">' + escapeHtml(topic.correctCount) + '</td>'
+        + '<td class="num">' + escapeHtml(topic.wrongCount) + '</td>'
+        + '<td class="num">' + escapeHtml(topic.blankCount) + '</td>'
+        + '<td class="num">' + numberCell(topic.awardedMarks) + ' / ' + numberCell(topic.maxMarks) + '</td>'
+        + '<td class="num">' + numberCell(topic.accuracyPercent) + '%</td>'
+        + '<td class="num">' + numberCell(topic.confidence) + '</td>'
+        + '</tr>'
+      ).join('');
+      const questionRows = questions.map((question) =>
+        '<tr>'
+        + '<td>' + escapeHtml(question.displayQuestionId || question.questionId || '-') + '</td>'
+        + '<td>' + escapeHtml(question.topic || '-') + '</td>'
+        + '<td>' + escapeHtml(question.type || '-') + '</td>'
+        + '<td>' + escapeHtml(question.attempted ? (question.correct ? 'Correct' : 'Wrong') : 'Blank') + '</td>'
+        + '<td class="num">' + numberCell(question.awardedMarks) + ' / ' + numberCell(question.maxMarks) + '</td>'
+        + '<td class="num">' + numberCell(question.confidence) + '</td>'
+        + '<td>' + escapeHtml(question.evidence || '-') + '</td>'
+        + '</tr>'
+      ).join('');
+      document.getElementById('syllabusBody').innerHTML =
+        '<div class="syllabus-summary">'
+        + '<span class="syllabus-chip">Score ' + numberCell(data.score) + ' / ' + numberCell(data.maxMarks) + '</span>'
+        + '<span class="syllabus-chip">Mapped ' + escapeHtml(data.mappedQuestionCount) + '</span>'
+        + '<span class="syllabus-chip">Unmapped ' + escapeHtml(data.unmappedQuestionCount) + '</span>'
+        + '<span class="syllabus-chip">Topics ' + escapeHtml(data.topicCount) + '</span>'
+        + '</div>'
+        + '<table class="syllabus-table"><thead><tr><th>Topic</th><th class="num">Q</th><th class="num">Attempted</th><th class="num">Correct</th><th class="num">Wrong</th><th class="num">Blank</th><th class="num">Marks</th><th class="num">Accuracy</th><th class="num">Confidence</th></tr></thead><tbody>'
+        + (topicRows || '<tr><td colspan="9">No topic rows available.</td></tr>')
+        + '</tbody></table>'
+        + '<div class="syllabus-questions"><table class="syllabus-table"><thead><tr><th>Q</th><th>Mapped Topic</th><th>Type</th><th>Result</th><th class="num">Marks</th><th class="num">Confidence</th><th>Evidence</th></tr></thead><tbody>'
+        + (questionRows || '<tr><td colspan="7">No question mapping available.</td></tr>')
+        + '</tbody></table></div>';
+    }
+    async function analyzeSyllabus() {
+      const fileInput = document.getElementById('syllabusFile');
+      const status = document.getElementById('syllabusStatus');
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) {
+        status.innerHTML = '<span class="error">Choose a syllabus PDF first.</span>';
+        return;
+      }
+      status.textContent = 'Analyzing syllabus and mapping evaluated questions...';
+      try {
+        const form = new FormData();
+        form.append('registrationId', candidate.registrationId);
+        form.append('file', file);
+        const response = await fetch('/api/candidate/syllabus-analysis', {
+          method: 'POST',
+          headers: { 'X-Candidate-CSRF': await candidateSecurityToken() },
+          body: form
+        });
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
+        if (!response.ok) throw new Error(data.detail || data.message || text || response.statusText);
+        renderSyllabusAnalysis(data);
+        status.innerHTML = '<span class="ok">Syllabus map ready</span>\\n' + escapeHtml(data.syllabusName || file.name);
+      } catch (error) {
+        status.innerHTML = '<span class="error">Could not analyze syllabus</span>\\n' + error.message;
+      }
+    }
+    document.getElementById('backButton').addEventListener('click', () => { window.location.href = secureSiblingPage('candidate-details.html'); });
+    document.getElementById('scorePreviewZoom').addEventListener('input', (event) => {
+      document.getElementById('sheet').style.setProperty('--score-zoom', Number(event.target.value) / 100);
+      document.getElementById('scorePreviewZoomValue').value = event.target.value + '%';
+    });
+    document.getElementById('analyzeSyllabus').addEventListener('click', analyzeSyllabus);
+    document.getElementById('downloadScoreCardPdf').addEventListener('click', () => {
+      if (scoreCardDocument?.pdfDataUrl) {
+        triggerDataUrlDownload(scoreCardDocument.fileName, scoreCardDocument.pdfDataUrl);
+      }
+    });
+    loadResultCard();
+  </script>
+</body>
+</html>

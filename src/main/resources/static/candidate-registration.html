@@ -1,0 +1,2411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Candidate Registration</title>
+  <link rel="stylesheet" href="/assets/candidate-institutional.css">
+  <script src="/assets/candidate-institutional.js" defer></script>
+  <style>
+    :root {
+      --blue: #0d5ca6;
+      --blue2: #073a70;
+      --panel: #ffffff;
+      --line: #9dbce4;
+      --ink: #10243f;
+      --muted: #607089;
+      --good: #116c2e;
+      --bad: #b00020;
+    }
+    * { box-sizing: border-box; }
+    body {
+      position: relative;
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255,255,255,.65), transparent 22rem),
+        linear-gradient(180deg, #cfe7ff 0%, #dbeafe 100%);
+      overflow-x: hidden;
+    }
+    #moleculeField {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: .5;
+      pointer-events: none;
+    }
+    header {
+      position: relative;
+      z-index: 1;
+      padding: 12px 24px;
+      color: #fff;
+      background: linear-gradient(180deg, var(--blue) 0%, var(--blue2) 100%);
+      box-shadow: 0 3px 18px rgba(0,0,0,.22);
+    }
+    header h1 { margin: 0; font-size: 18px; letter-spacing: .02em; }
+    header p { margin: 3px 0 0; color: #cfe4ff; font-size: 12px; }
+    main {
+      position: relative;
+      z-index: 1;
+      width: min(1240px, calc(100% - 32px));
+      margin: 28px auto;
+    }
+    .card {
+      background: rgba(255,255,255,.96);
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 18px 44px rgba(16,36,63,.18);
+      padding: 22px;
+    }
+    h2 { margin: 0 0 6px; color: var(--blue2); }
+    p { margin: 0 0 18px; color: var(--muted); line-height: 1.45; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    label {
+      display: block;
+      margin: 0 0 5px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #264d82;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    input, select, textarea {
+      width: 100%;
+      border: 2px solid var(--line);
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 15px;
+      outline: none;
+      background: #fff;
+    }
+    textarea { min-height: 86px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(13,92,166,.14);
+    }
+    .field { display: none; }
+    .field.visible { display: block; }
+    .field.visible.step-hidden { display: none; }
+    .full { grid-column: 1 / -1; }
+    button {
+      margin-top: 18px;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-weight: 800;
+      color: #fff;
+      background: linear-gradient(180deg, #287bd4 0%, #0d5ca6 100%);
+      cursor: pointer;
+      box-shadow: 0 4px 0 rgba(6,52,103,.28);
+    }
+    .result {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px dashed var(--line);
+      background: #f3f8ff;
+      min-height: 70px;
+      white-space: pre-wrap;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+    }
+    .ok { color: var(--good); font-weight: 800; }
+    .error { color: var(--bad); font-weight: 800; }
+    .closed {
+      padding: 14px;
+      border-radius: 12px;
+      background: #fff7d6;
+      border: 1px solid #e5c85f;
+      color: #6f5600;
+    }
+    .preview {
+      display: block;
+      width: 120px;
+      max-height: 120px;
+      margin-top: 8px;
+      object-fit: contain;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .file-note {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 400;
+    }
+    .top-links {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 14px;
+    }
+    .top-links a {
+      color: var(--blue2);
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .application-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 34px;
+      margin: 16px 0;
+      padding: 18px 22px;
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 10px 26px rgba(16,36,63,.12);
+    }
+    .summary-row {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 12px;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .summary-row strong { color: var(--blue2); }
+    .summary-stage-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 14px 0 18px;
+    }
+    .summary-stage-chip {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      padding: 11px 12px;
+      border: 1px solid #cfe0f4;
+      border-radius: 14px;
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 8px 20px rgba(16,36,63,.08);
+      text-decoration: none;
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .summary-stage-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(16,36,63,.12);
+    }
+    .summary-stage-chip.complete {
+      border-color: #9fd3ae;
+      background: linear-gradient(180deg, #f4fff7 0%, #eefaf2 100%);
+    }
+    .summary-stage-chip.active {
+      border-color: #0d5ca6;
+      background: linear-gradient(180deg, #eef6ff 0%, #e4f1ff 100%);
+    }
+    .summary-stage-chip.pending {
+      border-color: #ecd2d2;
+    }
+    .summary-stage-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid #cfe0f4;
+      color: #7588a1;
+      font-size: 14px;
+      font-weight: 900;
+      background: #fff;
+    }
+    .summary-stage-chip.complete .summary-stage-mark {
+      background: #116c2e;
+      border-color: #116c2e;
+      color: #fff;
+    }
+    .summary-stage-chip.active .summary-stage-mark {
+      background: #0d5ca6;
+      border-color: #0d5ca6;
+      color: #fff;
+    }
+    .summary-stage-copy {
+      min-width: 0;
+      display: grid;
+      gap: 2px;
+    }
+    .summary-stage-copy strong {
+      color: var(--blue2);
+      font-size: 13px;
+      line-height: 1.2;
+    }
+    .summary-stage-copy span {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+    }
+    .registration-layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+      margin-top: 18px;
+    }
+    .registration-sidebar {
+      position: sticky;
+      top: 18px;
+      padding: 14px;
+      border: 1px solid #cfe0f4;
+      border-radius: 16px;
+      background: #f7fbff;
+      box-shadow: 0 10px 26px rgba(16,36,63,.08);
+    }
+    .registration-sidebar h3 {
+      margin: 0 0 10px;
+      color: var(--blue2);
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .registration-sidebar .file-note {
+      margin-top: 0;
+    }
+    .registration-content {
+      min-width: 0;
+    }
+    .workflow-rail {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .workflow-step {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) 34px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border: 1px solid #cfe0f4;
+      border-radius: 14px;
+      background: #fff;
+      text-decoration: none;
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+    }
+    .workflow-step:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(16,36,63,.08);
+      border-color: #9dbce4;
+    }
+    .workflow-step.active {
+      border-color: #0d5ca6;
+      background: linear-gradient(180deg, #eef6ff 0%, #e4f1ff 100%);
+      box-shadow: 0 12px 24px rgba(13,92,166,.12);
+    }
+    .workflow-step.complete {
+      border-color: #9fd3ae;
+      background: linear-gradient(180deg, #f4fff7 0%, #eefaf2 100%);
+    }
+    .workflow-step.pending {
+      border-color: #f0d1d1;
+      background: #fff;
+    }
+    .workflow-icon,
+    .workflow-check {
+      display: inline-grid;
+      place-items: center;
+      border-radius: 50%;
+      font-weight: 900;
+    }
+    .workflow-icon {
+      width: 42px;
+      height: 42px;
+      background: #0d2f58;
+      color: #fff;
+      font-size: 16px;
+    }
+    .workflow-step.active .workflow-icon {
+      background: #0d5ca6;
+    }
+    .workflow-step.complete .workflow-icon {
+      background: #116c2e;
+    }
+    .workflow-check {
+      width: 30px;
+      height: 30px;
+      font-size: 16px;
+      border: 1px solid #cfe0f4;
+      color: #8193a9;
+      background: #f7fbff;
+    }
+    .workflow-step.complete .workflow-check {
+      color: #116c2e;
+      background: #e7f6e9;
+      border-color: #a9d7af;
+    }
+    .workflow-step.active .workflow-check {
+      color: #7a5100;
+      background: #fff6d8;
+      border-color: #e5c85f;
+    }
+    .workflow-copy strong {
+      display: block;
+      color: var(--blue2);
+      font-size: 15px;
+      line-height: 1.2;
+    }
+    .workflow-copy span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .step-panel-title {
+      margin: 16px 0 14px;
+      padding: 12px 14px;
+      color: #fff;
+      background: linear-gradient(180deg, #1b6cb6 0%, #0d5ca6 100%);
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: .03em;
+    }
+    .step-tools {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid #d8e6f7;
+    }
+    .step-tools button.secondary {
+      color: var(--blue2);
+      background: #eef6ff;
+      border: 2px solid var(--line);
+      box-shadow: none;
+    }
+    .fee-panel,
+    .preview-panel {
+      display: none;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #f8fbff;
+    }
+    .fee-panel.active,
+    .preview-panel.active {
+      display: block;
+    }
+    .preview-box {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .preview-block {
+      padding: 12px;
+      border: 1px solid #d8e6f7;
+      border-radius: 12px;
+      background: #fff;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .preview-block h3 {
+      margin: 0 0 8px;
+      color: var(--blue2);
+      font-size: 15px;
+    }
+    .preview-block.full {
+      grid-column: 1 / -1;
+    }
+    .submit-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .intro-loading {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 40px;
+    }
+    .step-progress-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 10px 0 14px;
+      padding: 10px 12px;
+      border: 1px solid #d7e5f4;
+      border-radius: 12px;
+      background: #f7fbff;
+    }
+    .step-progress-meta {
+      color: var(--blue2);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+    .step-progress-wrap img {
+      width: 180px;
+      height: 16px;
+      object-fit: contain;
+      border-radius: 6px;
+      border: 1px solid #c7dbf3;
+      background: #eef7ff;
+      opacity: 0;
+      transform: translateY(-2px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .step-progress-wrap.active img {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .step-health {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .step-health-card {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid #cddff4;
+      background: #f7fbff;
+      box-shadow: 0 8px 22px rgba(16,36,63,.08);
+    }
+    .step-health-card strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--blue2);
+      font-size: 12px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .step-health-card span {
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .submit-loader {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      place-items: center;
+      padding: 22px;
+      background: rgba(8, 31, 58, .42);
+      backdrop-filter: blur(7px);
+    }
+    .submit-loader.active {
+      display: grid;
+    }
+    .submit-loader.hidden {
+      display: none;
+    }
+    .submit-dialog {
+      width: min(520px, calc(100vw - 32px));
+      padding: 28px;
+      border: 1px solid rgba(188, 216, 248, .95);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, .86);
+      box-shadow: 0 32px 90px rgba(4, 25, 52, .34);
+      text-align: center;
+      transform: translateY(8px) scale(.98);
+      animation: dialogIn .24s ease forwards;
+    }
+    @keyframes dialogIn {
+      to { transform: translateY(0) scale(1); }
+    }
+    .submit-dialog-icon {
+      width: 112px;
+      height: 112px;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 32px;
+      border: 1px solid #b9d1ee;
+      background:
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,.85), transparent 36px),
+        linear-gradient(145deg, #e6f4ff 0%, #c9e3ff 100%);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.62), 0 16px 34px rgba(13,92,166,.18);
+    }
+    .submit-dialog-icon img {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      opacity: .72;
+    }
+    .submit-check {
+      display: none;
+      width: 112px;
+      height: 112px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #18a84f 0%, #0f7b39 100%);
+      box-shadow: 0 18px 44px rgba(17, 108, 46, .32);
+      color: #fff;
+      font-size: 76px;
+      font-weight: 900;
+      line-height: 112px;
+      text-align: center;
+      animation: tickPop .34s cubic-bezier(.2, 1.4, .4, 1) forwards;
+    }
+    @keyframes tickPop {
+      from { transform: scale(.72); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .submit-dialog h3 {
+      margin: 0 0 8px;
+      color: var(--blue2);
+      font-size: 25px;
+      letter-spacing: .01em;
+    }
+    .submit-dialog p {
+      margin: 0;
+      color: #4f6683;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .submit-dialog.success .submit-dialog-icon {
+      display: none;
+    }
+    .submit-dialog.success .submit-check {
+      display: block;
+    }
+    .step-view-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #cfe0f4;
+      background: #f7fbff;
+    }
+    .step-workspace.hidden,
+    .step-view-header.hidden,
+    .home-prompt.hidden {
+      display: none;
+    }
+    .home-prompt {
+      margin-top: 14px;
+    }
+    .strength {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .strength span {
+      height: 7px;
+      border-radius: 99px;
+      background: #d7e4f6;
+    }
+    .strength[data-score="1"] span:nth-child(-n+1),
+    .strength[data-score="2"] span:nth-child(-n+2) { background: #d78a00; }
+    .strength[data-score="3"] span:nth-child(-n+3) { background: #d6b000; }
+    .strength[data-score="4"] span:nth-child(-n+4),
+    .strength[data-score="5"] span:nth-child(-n+5) { background: var(--good); }
+    .strength-note {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .password-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+    .phone-row {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 8px;
+    }
+    .field-hint {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .password-toggle {
+      margin-top: 0;
+      padding: 11px 14px;
+      box-shadow: none;
+      white-space: nowrap;
+    }
+    .go-page-link {
+      display: inline-grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: #0d5ca6;
+      background: #fff;
+      border: 2px solid #9dbce4;
+      box-shadow: none;
+      font-size: 17px;
+      font-weight: 900;
+      text-decoration: none;
+    }
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+      .application-summary,
+      .preview-box { grid-template-columns: 1fr; }
+      .summary-row { grid-template-columns: 1fr; }
+      .summary-stage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .registration-layout {
+        grid-template-columns: 1fr;
+      }
+      .registration-sidebar {
+        position: static;
+      }
+    }
+    @media (max-width: 640px) {
+      header {
+        padding: 10px 16px;
+      }
+      main {
+        width: min(100%, calc(100% - 18px));
+        margin: 18px auto;
+      }
+      .card {
+        padding: 18px 14px;
+        border-radius: 16px;
+      }
+      .top-links {
+        justify-content: stretch;
+      }
+      .top-links a {
+        width: 100%;
+        text-align: center;
+      }
+      input,
+      select,
+      textarea {
+        font-size: 16px;
+      }
+      .application-summary {
+        padding: 14px;
+        gap: 10px;
+      }
+      .summary-stage-grid {
+        grid-template-columns: 1fr;
+      }
+      .summary-row {
+        gap: 4px;
+      }
+      .step-tools {
+        flex-direction: column;
+      }
+      .step-tools button,
+      button {
+        width: 100%;
+      }
+      .preview {
+        width: 100px;
+        max-height: 100px;
+      }
+      .workflow-step {
+        grid-template-columns: 38px minmax(0, 1fr) 28px;
+        padding: 11px 12px;
+      }
+      .workflow-icon {
+        width: 38px;
+        height: 38px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="moleculeField" aria-hidden="true"></canvas>
+  <header>
+    <h1>Application Form</h1>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="top-links"><a href="/candidate-entry/dashboard">Already registered? Open candidate dashboard</a></div>
+      <h2>Registration Form</h2>
+      <div id="intro" class="intro-loading">
+        <p style="margin:0;">Loading open exams...</p>
+      </div>
+      <div id="closedNotice" class="closed" hidden>No exam is currently open for registration.</div>
+
+      <div id="applicationSummary" class="application-summary">
+        <div class="summary-row"><strong>Session:</strong><span id="summaryAdvert">Open Registration Window</span></div>
+        <div class="summary-row"><strong>Exam / Stream:</strong><span id="summaryExamStream">Loading...</span></div>
+        <div class="summary-row"><strong>Application Number:</strong><span id="summaryApplicationNumber">Will be generated after submit</span></div>
+        <div class="summary-row"><strong>Status:</strong><span id="summaryStatus">Draft in progress</span></div>
+      </div>
+      <div id="summaryStageChecks" class="summary-stage-grid" aria-label="Application completion checks"></div>
+
+      <form id="candidateForm" hidden novalidate>
+        <div class="registration-layout">
+        <aside class="registration-sidebar">
+          <h3>Navigation</h3>
+          <div class="file-note" style="margin-top:0;">Move across stages and track completion from here.</div>
+          <nav id="applicationTable" class="workflow-rail" aria-label="Application stage navigation">
+            <div id="workflowTableBody"></div>
+          </nav>
+          <div id="homePrompt" class="closed home-prompt" hidden>Open any application stage from the left navigation. Completion checks update automatically as you fill the form.</div>
+        </aside>
+
+        <div class="registration-content">
+        <div id="stepViewHeader" class="step-view-header" hidden>
+          <a id="applicationTableBackLink" href="/candidate-entry/registration" class="secondary">← Back To Overview</a>
+          <div class="file-note" style="margin:0;">Application stage</div>
+        </div>
+
+        <div id="stepWorkspace" class="step-workspace">
+        <div id="stepPanelTitle" class="step-panel-title">Personal Information</div>
+        <div class="step-progress-wrap">
+          <div class="step-progress-meta" id="stepProgressMeta">Stage 1 of 5</div>
+          <img src="/assets/progress_bar.gif" alt="Progress animation">
+        </div>
+        <div class="step-health">
+          <div class="step-health-card">
+            <strong>Current Step</strong>
+            <span id="stepStatusSummary">Complete the required fields for this stage.</span>
+          </div>
+          <div class="step-health-card">
+            <strong>Workflow Progress</strong>
+            <span id="workflowCompletionSummary">0 of 5 stages complete</span>
+          </div>
+          <div class="step-health-card">
+            <strong>Draft Storage</strong>
+            <span id="draftSaveSummary">Autosaving draft and checks in this browser session.</span>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field visible full">
+            <label for="examCode">Exam</label>
+            <select id="examCode" name="examCode" required></select>
+          </div>
+
+          <div id="streamField" class="field full" data-step-scope="personal">
+            <label for="streamCode">Sub-stream</label>
+            <select id="streamCode" name="streamCode"></select>
+            <div id="streamNote" class="file-note" hidden></div>
+          </div>
+
+          <div class="field" data-field="FULL_NAME">
+            <label for="fullName">Full Name</label>
+            <input id="fullName" name="fullName" autocomplete="name">
+          </div>
+
+          <div class="field" data-field="DATE_OF_BIRTH">
+            <label for="dateOfBirth">Date Of Birth</label>
+            <input id="dateOfBirth" name="dateOfBirth" type="date">
+          </div>
+
+          <div class="field" data-field="EMAIL">
+            <label for="email">Email ID</label>
+            <input id="email" name="email" type="email" autocomplete="email">
+          </div>
+
+          <div class="field" data-field="ALTERNATE_EMAIL">
+            <label for="alternateEmail">Alternate Email</label>
+            <input id="alternateEmail" name="alternateEmail" type="email">
+          </div>
+
+          <div class="field" data-field="PHONE">
+            <label for="phone">Candidate Phone</label>
+            <div class="phone-row">
+              <select id="phoneCode" aria-label="Candidate phone country code"></select>
+              <input id="phone" name="phone" inputmode="tel" autocomplete="tel">
+            </div>
+          </div>
+
+          <div class="field" data-field="PASSWORD">
+            <label for="password">Password</label>
+            <div class="password-row">
+              <input id="password" name="password" type="password" minlength="8" autocomplete="new-password">
+              <button id="toggleRegistrationPassword" type="button" class="secondary password-toggle">Show</button>
+            </div>
+            <div id="passwordStrength" class="strength" data-score="0" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div id="passwordStrengthNote" class="strength-note">Use 8+ characters with uppercase, lowercase, number, and symbol.</div>
+          </div>
+
+          <div class="field" data-field="GENDER">
+            <label for="gender">Gender</label>
+            <select id="gender" name="gender">
+              <option value="">Select</option>
+              <option>Female</option>
+              <option>Male</option>
+              <option>Other</option>
+              <option>Prefer not to say</option>
+            </select>
+          </div>
+
+          <div class="field full" data-field="ADDRESS">
+            <label for="address">Address</label>
+            <textarea id="address" name="address"></textarea>
+          </div>
+
+          <div class="field" data-field="NATIONALITY">
+            <label for="nationality">Country / Nationality</label>
+            <select id="nationality" name="nationality"></select>
+          </div>
+
+          <div class="field" data-field="STATE">
+            <label for="state">State / Province</label>
+            <input id="state" name="state" list="stateList" autocomplete="address-level1">
+            <datalist id="stateList"></datalist>
+            <div id="stateHint" class="field-hint">Choose your country first to get built-in state suggestions.</div>
+          </div>
+
+          <div class="field" data-field="PINCODE">
+            <label for="pincode" id="pincodeLabel">Pincode</label>
+            <input id="pincode" name="pincode" inputmode="text" autocomplete="postal-code">
+            <div id="pincodeHint" class="field-hint">Postal code format updates automatically with the selected country.</div>
+          </div>
+
+          <div class="field" data-field="PARENT_NAME">
+            <label for="parentName">Parent Name</label>
+            <input id="parentName" name="parentName">
+          </div>
+
+          <div class="field" data-field="PARENT_PHONE">
+            <label for="parentPhone">Parent Phone</label>
+            <div class="phone-row">
+              <select id="parentPhoneCode" aria-label="Parent phone country code"></select>
+              <input id="parentPhone" name="parentPhone" inputmode="tel">
+            </div>
+          </div>
+
+          <div class="field" data-field="GUARDIAN_NAME">
+            <label for="guardianName">Guardian Name</label>
+            <input id="guardianName" name="guardianName">
+          </div>
+
+          <div class="field" data-field="GUARDIAN_PHONE">
+            <label for="guardianPhone">Guardian Phone</label>
+            <div class="phone-row">
+              <select id="guardianPhoneCode" aria-label="Guardian phone country code"></select>
+              <input id="guardianPhone" name="guardianPhone" inputmode="tel">
+            </div>
+          </div>
+
+          <div class="field" data-field="GUARDIAN_RELATION">
+            <label for="guardianRelation">Guardian Relation</label>
+            <input id="guardianRelation" name="guardianRelation" placeholder="e.g. Uncle, Aunt, Local guardian">
+          </div>
+
+          <div class="field full" data-field="UG_DETAILS" data-step-scope="education">
+            <label for="ugDetails">UG Details</label>
+            <textarea id="ugDetails" name="ugDetails" placeholder="College, branch, year, CGPA/percentage"></textarea>
+          </div>
+
+          <div class="field full" data-field="PG_DETAILS" data-step-scope="education">
+            <label for="pgDetails">PG Details</label>
+            <textarea id="pgDetails" name="pgDetails" placeholder="College, specialization, year, CGPA/percentage"></textarea>
+          </div>
+
+          <div class="field" data-field="PHOTO">
+            <label for="photo">Candidate Photo</label>
+            <input id="photo" name="photo" type="file" accept="image/png,image/jpeg">
+            <img id="photoPreview" class="preview" alt="Photo preview" hidden>
+            <div class="file-note">JPG/PNG only, max 100KB.</div>
+          </div>
+
+          <div class="field" data-field="SIGNATURE">
+            <label for="signature">Signature</label>
+            <input id="signature" name="signature" type="file" accept="image/png,image/jpeg">
+            <img id="signaturePreview" class="preview" alt="Signature preview" hidden>
+            <div class="file-note">JPG/PNG only, max 100KB.</div>
+          </div>
+
+          <div class="field" data-field="ID_CARD">
+            <label for="idCard">ID Card</label>
+            <input id="idCard" name="idCard" type="file" accept="application/pdf,image/png,image/jpeg">
+            <div class="file-note">PDF/JPG/PNG, max 1MB.</div>
+          </div>
+
+          <div class="field" data-field="CLASS_10_MARKSHEET">
+            <label for="class10Marksheet">Class 10 Marksheet</label>
+            <input id="class10Marksheet" name="class10Marksheet" type="file" accept="application/pdf,image/png,image/jpeg">
+            <div class="file-note">PDF/JPG/PNG, max 1MB.</div>
+          </div>
+
+          <div class="field" data-field="CLASS_12_MARKSHEET">
+            <label for="class12Marksheet">Class 12 Marksheet</label>
+            <input id="class12Marksheet" name="class12Marksheet" type="file" accept="application/pdf,image/png,image/jpeg">
+            <div class="file-note">PDF/JPG/PNG, max 1MB.</div>
+          </div>
+
+          <div class="field" data-field="UG_DETAILS" data-step-scope="uploads">
+            <label for="ugDocument">UG Document</label>
+            <input id="ugDocument" name="ugDocument" type="file" accept="application/pdf,image/png,image/jpeg">
+            <div class="file-note">PDF/JPG/PNG, max 1MB.</div>
+          </div>
+
+          <div class="field" data-field="PG_DETAILS" data-step-scope="uploads">
+            <label for="pgDocument">PG Document</label>
+            <input id="pgDocument" name="pgDocument" type="file" accept="application/pdf,image/png,image/jpeg">
+            <div class="file-note">PDF/JPG/PNG, max 1MB.</div>
+          </div>
+
+          <div id="customFieldsHost" class="full"></div>
+        </div>
+
+        <div id="feePanel" class="fee-panel">
+          <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink);margin-bottom:10px;">
+            <input id="feeStageReady" type="checkbox" style="width:auto;margin:0;">
+            Mark fee stage as reviewed and ready
+          </label>
+          <label for="feeNote">Fee Remark</label>
+          <textarea id="feeNote" placeholder="Add payment note, exemption note, or testing remark here."></textarea>
+        </div>
+
+        <div id="previewPanel" class="preview-panel">
+          <div class="preview-block full">
+            <h3>Final Application Review</h3>
+            <div class="file-note">Review the full application below before final submission. All saved registration details and document names should appear here.</div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-block">
+              <h3>Personal Details</h3>
+              <div id="previewPersonal"></div>
+            </div>
+            <div class="preview-block">
+              <h3>Education</h3>
+              <div id="previewEducation"></div>
+            </div>
+            <div class="preview-block">
+              <h3>Uploads</h3>
+              <div id="previewUploads"></div>
+            </div>
+            <div class="preview-block">
+              <h3>Candidate Media</h3>
+              <div id="previewMedia"></div>
+            </div>
+            <div class="preview-block">
+              <h3>Fee / Final Check</h3>
+              <div id="previewFee"></div>
+            </div>
+          </div>
+          <div class="file-note" style="margin-top:12px;">Final preview is generated from the same form below. Once everything is complete, submit the application.</div>
+        </div>
+
+        <div class="step-tools">
+          <div>
+            <button id="prevStepButton" type="button" class="secondary">Previous</button>
+            <button id="nextStepButton" type="button">Next</button>
+          </div>
+          <div class="submit-row">
+            <button id="clearDraftButton" type="button" class="secondary">Clear Draft</button>
+            <button id="refreshStatusButton" type="button" class="secondary" hidden>Refresh Status</button>
+            <button id="submitRegistrationButton" type="submit" hidden>Submit Registration</button>
+          </div>
+        </div>
+        </div>
+        </div>
+        </div>
+      </form>
+      <div id="submitLoader" class="submit-loader">
+        <div id="submitDialog" class="submit-dialog" role="dialog" aria-modal="true" aria-labelledby="submitDialogTitle">
+          <div class="submit-dialog-icon">
+            <img src="/assets/loading_image_big.gif" alt="">
+          </div>
+          <div class="submit-check" aria-hidden="true">&#10003;</div>
+          <h3 id="submitDialogTitle">Final submission in progress</h3>
+          <p id="submitDialogText">Saving application...</p>
+        </div>
+      </div>
+      <div id="result" class="result"></div>
+    </section>
+  </main>
+
+  <script src="/assets/ui-guard.js"></script>
+  <script src="/assets/geo/country-registry.js"></script>
+  <script>
+    let openExams = [];
+    let activeStep = 'personal';
+    let activeCustomFields = [];
+    const stepOrder = ['personal', 'education', 'uploads', 'fee', 'preview'];
+    const alwaysRequiredFields = new Set(['FULL_NAME', 'DATE_OF_BIRTH', 'EMAIL', 'PHONE', 'PASSWORD']);
+    const locationCatalog = ((window.CANDIDATE_LOCATION_REGISTRY && Array.isArray(window.CANDIDATE_LOCATION_REGISTRY))
+      ? window.CANDIDATE_LOCATION_REGISTRY
+      : [{
+          country: 'India',
+          iso2: 'IN',
+          iso3: 'IND',
+          code: '+91',
+          phoneDigits: 10,
+          postalLabel: 'Pincode',
+          postalPlaceholder: '6-digit PIN code',
+          postalMaxLength: 6,
+          postalPatternSource: '^\\d{6}$',
+          postalPatternFlags: '',
+          states: ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry']
+        }])
+      .map((entry) => ({
+        ...entry,
+        postalPattern: entry.postalPatternSource ? new RegExp(entry.postalPatternSource, entry.postalPatternFlags || '') : null
+      }));
+    const countryIndex = new Map(locationCatalog.map((entry) => [entry.country, entry]));
+    const countryIsoIndex = new Map(locationCatalog.map((entry) => [String(entry.iso2 || '').toUpperCase(), entry]));
+    let activeLocationCatalog = [...locationCatalog];
+    const stepLabels = {
+      personal: 'Personal Information',
+      education: 'Education Details',
+      uploads: 'Uploads',
+      fee: 'Fee',
+      preview: 'Final Preview'
+    };
+    const defaultStepFields = {
+      personal: ['FULL_NAME', 'DATE_OF_BIRTH', 'EMAIL', 'ALTERNATE_EMAIL', 'PHONE', 'PASSWORD', 'GENDER', 'ADDRESS', 'NATIONALITY', 'STATE', 'PINCODE', 'PARENT_NAME', 'PARENT_PHONE', 'GUARDIAN_NAME', 'GUARDIAN_PHONE', 'GUARDIAN_RELATION'],
+      education: ['UG_DETAILS', 'PG_DETAILS'],
+      uploads: ['PHOTO', 'SIGNATURE', 'ID_CARD', 'CLASS_10_MARKSHEET', 'CLASS_12_MARKSHEET']
+    };
+    let fieldStepConfig = {};
+    let requiredFieldConfig = {};
+    const customStepTitles = {
+      personal: 'Personal Information',
+      education: 'Education Details',
+      uploads: 'Uploads'
+    };
+    const registrationViewMode = requestedStep() === 'personal' && !new URLSearchParams(window.location.search).get('step')
+      && !window.location.pathname.toLowerCase().includes('candidate-registration-personal')
+      && !window.location.pathname.toLowerCase().includes('candidate-registration-education')
+      && !window.location.pathname.toLowerCase().includes('candidate-registration-uploads')
+      && !window.location.pathname.toLowerCase().includes('candidate-registration-fee')
+      && !window.location.pathname.toLowerCase().includes('candidate-registration-preview')
+      ? 'home'
+      : 'step';
+    const draftStorageKey = 'candidateRegistrationDraftV3';
+    const draftDbName = 'candidateRegistrationDraftFiles';
+    const draftFileStore = 'files';
+
+    function stepHref(step) {
+      const map = {
+        personal: 'candidate-registration-personal.html',
+        education: 'candidate-registration-education.html',
+        uploads: 'candidate-registration-uploads.html',
+        fee: 'candidate-registration-fee.html',
+        preview: 'candidate-registration-preview.html'
+      };
+      return candidateSecureHref(map[step] || 'candidate-registration-personal.html', 'registration-personal');
+    }
+
+    function secureCandidateToken() {
+      const match = window.location.pathname.match(/^\/candidate-secure\/([^/]+)\//);
+      return match ? match[1] : '';
+    }
+
+    function candidateSecureHref(fileName, entryPage) {
+      const token = secureCandidateToken();
+      return token ? ('/candidate-secure/' + encodeURIComponent(token) + '/' + fileName) : ('/candidate-entry/' + entryPage);
+    }
+
+    function registrationHomeHref() {
+      return candidateSecureHref('candidate-registration.html', 'registration');
+    }
+
+    function requestedStep() {
+      const path = window.location.pathname.toLowerCase();
+      const fromPath = path.includes('candidate-registration-education') ? 'education'
+        : path.includes('candidate-registration-uploads') ? 'uploads'
+        : path.includes('candidate-registration-fee') ? 'fee'
+        : path.includes('candidate-registration-preview') ? 'preview'
+        : path.includes('candidate-registration-personal') ? 'personal'
+        : '';
+      const step = fromPath || new URLSearchParams(window.location.search).get('step') || 'personal';
+      return stepOrder.includes(step) ? step : 'personal';
+    }
+
+    function updateRegistrationLayoutMode() {
+      const isStepMode = registrationViewMode === 'step';
+      document.getElementById('applicationTableBackLink').href = registrationHomeHref();
+      document.getElementById('applicationTable').hidden = false;
+      document.getElementById('homePrompt').hidden = isStepMode;
+      document.getElementById('stepViewHeader').hidden = !isStepMode;
+      document.getElementById('stepWorkspace').classList.remove('hidden');
+      document.getElementById('submitLoader').classList.toggle('hidden', !isStepMode);
+    }
+
+    function safeJsonParse(value, fallback) {
+      try {
+        return value ? JSON.parse(value) : fallback;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function loadDraft() {
+      return safeJsonParse(sessionStorage.getItem(draftStorageKey), {
+        values: {},
+        files: {},
+        activeStep: 'personal',
+        lastSavedAt: null
+      });
+    }
+
+    function saveDraft(draft) {
+      sessionStorage.setItem(draftStorageKey, JSON.stringify(draft));
+    }
+
+    function openDraftDb() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+          reject(new Error('Browser draft file storage is unavailable.'));
+          return;
+        }
+        const request = indexedDB.open(draftDbName, 1);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(draftFileStore)) {
+            db.createObjectStore(draftFileStore);
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function draftFilePut(key, file) {
+      const db = await openDraftDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(draftFileStore, 'readwrite');
+        tx.objectStore(draftFileStore).put(file, key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+    }
+
+    async function draftFileGet(key) {
+      const db = await openDraftDb();
+      const file = await new Promise((resolve, reject) => {
+        const tx = db.transaction(draftFileStore, 'readonly');
+        const request = tx.objectStore(draftFileStore).get(key);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return file;
+    }
+
+    async function draftFileDelete(key) {
+      const db = await openDraftDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(draftFileStore, 'readwrite');
+        tx.objectStore(draftFileStore).delete(key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+    }
+
+    async function clearDraftFiles() {
+      const db = await openDraftDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(draftFileStore, 'readwrite');
+        tx.objectStore(draftFileStore).clear();
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+    }
+
+    async function jsonRequest(url, method, payload) {
+      const headers = { 'Content-Type': 'application/json' };
+      if (method !== 'GET') headers['X-Candidate-CSRF'] = await candidateSecurityToken();
+      const response = await fetch(url, {
+        method,
+        headers,
+        body: payload ? JSON.stringify(payload) : undefined
+      });
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
+      if (!response.ok) throw new Error(data.message || text || response.statusText);
+      return data;
+    }
+
+    async function formRequest(url, formData) {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'X-Candidate-CSRF': await candidateSecurityToken() },
+        body: formData
+      });
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
+      if (!response.ok) throw new Error(data.detail || data.message || text || response.statusText);
+      return data;
+    }
+
+    async function candidateSecurityToken() {
+      if (window.__candidateSecurityTokenCache) return window.__candidateSecurityTokenCache;
+      const response = await fetch('/api/public/candidate-security-token', { cache: 'no-store' });
+      const data = await response.json();
+      window.__candidateSecurityTokenCache = data.token || '';
+      return window.__candidateSecurityTokenCache;
+    }
+
+    function currentExam() {
+      const code = document.getElementById('examCode').value;
+      return openExams.find((exam) => exam.examCode === code);
+    }
+
+    function isVisibleField(fieldName) {
+      const node = document.querySelector('[data-field="' + fieldName + '"]');
+      return Boolean(node && node.classList.contains('visible'));
+    }
+
+    function fieldValue(id) {
+      const node = document.getElementById(id);
+      if (!node) return '';
+      if (node.type === 'file') {
+        if (node.files[0]) return node.files[0].name;
+        const draft = loadDraft();
+        return draft.files?.[id]?.name || '';
+      }
+      return String(node.value || '').trim();
+    }
+
+    function draftFileKey(inputId) {
+      return 'candidate-registration:' + inputId;
+    }
+
+    function ensureDraftNote(inputId) {
+      let note = document.getElementById(inputId + 'DraftNote');
+      if (!note) {
+        note = document.createElement('div');
+        note.id = inputId + 'DraftNote';
+        note.className = 'file-note';
+        const input = document.getElementById(inputId);
+        input.insertAdjacentElement('afterend', note);
+      }
+      return note;
+    }
+
+    function setDraftFileNote(inputId, message = '') {
+      const note = ensureDraftNote(inputId);
+      note.textContent = message;
+      note.hidden = !message;
+    }
+
+    function collectDraftValues() {
+      const values = {};
+      document.querySelectorAll('input, select, textarea').forEach((node) => {
+        if (!node.id || node.type === 'file' || node.id === 'submitRegistrationButton') return;
+        if (node.type === 'checkbox') {
+          values[node.id] = node.checked;
+        } else {
+          values[node.id] = node.value;
+        }
+      });
+      return values;
+    }
+
+    async function persistDraft() {
+      const draft = loadDraft();
+      draft.values = collectDraftValues();
+      draft.activeStep = activeStep;
+      draft.lastSavedAt = Date.now();
+      saveDraft(draft);
+      updateDraftSaveSummary(draft.lastSavedAt);
+    }
+
+    function formatDraftTime(value) {
+      if (!value) return 'Autosaving draft in this browser session.';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return 'Draft saved in this browser session.';
+      return 'Last saved at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '.';
+    }
+
+    function updateDraftSaveSummary(value) {
+      document.getElementById('draftSaveSummary').textContent = formatDraftTime(value);
+    }
+
+    async function handleDraftFileChange(inputId, previewId = '') {
+      const input = document.getElementById(inputId);
+      const file = input.files[0];
+      const draft = loadDraft();
+      if (!file) {
+        delete draft.files[inputId];
+        saveDraft(draft);
+        await draftFileDelete(draftFileKey(inputId));
+        setDraftFileNote(inputId, '');
+        if (previewId) {
+          const preview = document.getElementById(previewId);
+          preview.hidden = true;
+          preview.removeAttribute('src');
+        }
+        return;
+      }
+      draft.files[inputId] = {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        updatedAt: Date.now()
+      };
+      saveDraft(draft);
+      await draftFilePut(draftFileKey(inputId), file);
+      setDraftFileNote(inputId, 'Saved in draft: ' + file.name);
+      if (previewId && file.type.startsWith('image/')) {
+        const preview = document.getElementById(previewId);
+        preview.src = URL.createObjectURL(file);
+        preview.hidden = false;
+      }
+    }
+
+    async function restoreDraftFiles() {
+      const draft = loadDraft();
+      const fileInputs = [
+        ['photo', 'photoPreview'],
+        ['signature', 'signaturePreview'],
+        ['idCard', ''],
+        ['class10Marksheet', ''],
+        ['class12Marksheet', ''],
+        ['ugDocument', ''],
+        ['pgDocument', '']
+      ];
+        for (const [inputId, previewId] of fileInputs) {
+          if (draft.files[inputId]) {
+            setDraftFileNote(inputId, 'Saved in draft: ' + draft.files[inputId].name);
+            if (previewId) {
+              const file = await draftFileGet(draftFileKey(inputId)).catch(() => null);
+            if (file && file.type.startsWith('image/')) {
+              const preview = document.getElementById(previewId);
+              preview.src = URL.createObjectURL(file);
+              preview.hidden = false;
+            }
+          }
+          } else {
+            setDraftFileNote(inputId, '');
+          }
+        }
+        activeCustomFields.filter((field) => field.type === 'IMAGE_UPLOAD' || field.type === 'PDF_UPLOAD').forEach((field) => {
+          const inputId = customFieldInputId(field);
+          if (draft.files[inputId]) {
+            setDraftFileNote(inputId, 'Saved in draft: ' + draft.files[inputId].name);
+          } else {
+            setDraftFileNote(inputId, '');
+          }
+        });
+      }
+
+    function applyDraftValues() {
+      const draft = loadDraft();
+      Object.entries(draft.values || {}).forEach(([id, value]) => {
+        const node = document.getElementById(id);
+        if (!node || node.type === 'file') return;
+        if (node.type === 'checkbox') {
+          node.checked = Boolean(value);
+        } else {
+          node.value = value ?? '';
+        }
+      });
+      applyCountryLocationMeta();
+      activeStep = requestedStep() || (stepOrder.includes(draft.activeStep) ? draft.activeStep : 'personal');
+      updateDraftSaveSummary(draft.lastSavedAt);
+    }
+
+    function customFieldInputId(field) {
+      return 'customField_' + field.key;
+    }
+
+    function activeFieldsForStep(step) {
+      return [
+        ...Object.entries(fieldStepConfig).filter((entry) => entry[1] === step).map((entry) => entry[0]),
+        ...activeCustomFields.filter((field) => field.step === step).map((field) => 'CUSTOM__' + field.key)
+      ];
+    }
+
+    function defaultStepForField(fieldName) {
+      if (defaultStepFields.education.includes(fieldName)) return 'education';
+      if (defaultStepFields.uploads.includes(fieldName)) return 'uploads';
+      return 'personal';
+    }
+
+    function buildFieldStepConfig(exam) {
+      const configured = exam && exam.candidateFieldSteps ? exam.candidateFieldSteps : {};
+      const required = exam && exam.candidateRequiredFields ? exam.candidateRequiredFields : {};
+      const allFields = [...new Set([
+        ...defaultStepFields.personal,
+        ...defaultStepFields.education,
+        ...defaultStepFields.uploads
+      ])];
+      fieldStepConfig = Object.fromEntries(allFields.map((fieldName) => {
+        const step = String(configured[fieldName] || defaultStepForField(fieldName)).toLowerCase();
+        return [fieldName, stepOrder.includes(step) && step !== 'fee' && step !== 'preview' ? step : defaultStepForField(fieldName)];
+      }));
+      requiredFieldConfig = Object.fromEntries(allFields.map((fieldName) => [
+        fieldName,
+        alwaysRequiredFields.has(fieldName) || required[fieldName] === 'true'
+      ]));
+    }
+
+    function renderCustomFields(fields = []) {
+      activeCustomFields = Array.isArray(fields) ? fields : [];
+      const host = document.getElementById('customFieldsHost');
+      host.innerHTML = '';
+      activeCustomFields.forEach((field) => {
+        const wrapper = document.createElement('div');
+        const isUpload = field.type === 'IMAGE_UPLOAD' || field.type === 'PDF_UPLOAD';
+        wrapper.className = 'field visible' + (field.step ? '' : ' full');
+        wrapper.dataset.field = 'CUSTOM__' + field.key;
+        wrapper.dataset.customField = field.key;
+        wrapper.dataset.stepScope = field.step || 'personal';
+        if (field.type === 'TEXTAREA' || isUpload) {
+          wrapper.classList.add('full');
+        }
+        const label = escapeHtml(field.label || field.key);
+        const inputId = customFieldInputId(field);
+        const requiredMark = field.required ? ' *' : '';
+        const maxSizeText = field.maxSizeKb ? ('Max ' + field.maxSizeKb + 'KB.') : '';
+        let control = '';
+        if (field.type === 'TEXTAREA') {
+          control = '<textarea id="' + inputId + '" name="' + inputId + '" placeholder="Enter ' + label + '"></textarea>';
+        } else if (field.type === 'IMAGE_UPLOAD') {
+          control = '<input id="' + inputId + '" name="' + inputId + '" type="file" accept="image/png,image/jpeg,image/webp">';
+        } else if (field.type === 'PDF_UPLOAD') {
+          control = '<input id="' + inputId + '" name="' + inputId + '" type="file" accept="application/pdf">';
+        } else {
+          control = '<input id="' + inputId + '" name="' + inputId + '" placeholder="Enter ' + label + '">';
+        }
+        wrapper.innerHTML = '<label for="' + inputId + '">' + label + requiredMark + '</label>'
+          + control
+          + (isUpload ? '<div class="file-note">' + escapeHtml(maxSizeText || 'Upload the required file.') + '</div>' : '');
+        host.appendChild(wrapper);
+      });
+      bindDynamicFieldEvents();
+    }
+
+    function bindDynamicFieldEvents() {
+      activeCustomFields.forEach((field) => {
+        const node = document.getElementById(customFieldInputId(field));
+        if (!node) return;
+        node.onchange = async () => {
+          if (field.type === 'IMAGE_UPLOAD' || field.type === 'PDF_UPLOAD') {
+            await handleDraftFileChange(customFieldInputId(field)).catch(() => {});
+          }
+          await persistDraft();
+          refreshPreview();
+          rebuildWorkflowTable();
+        };
+        if (node.type !== 'file') {
+          node.oninput = () => {
+            persistDraft();
+            refreshPreview();
+            rebuildWorkflowTable();
+          };
+        }
+      });
+    }
+
+    function customFieldValue(field) {
+      return fieldValue(customFieldInputId(field));
+    }
+
+    function setSubmitBusy(isBusy) {
+      const overlay = document.getElementById('submitLoader');
+      const dialog = document.getElementById('submitDialog');
+      dialog.classList.remove('success');
+      document.getElementById('submitDialogTitle').textContent = 'Final submission in progress';
+      document.getElementById('submitDialogText').textContent = 'Saving application...';
+      overlay.classList.toggle('hidden', !isBusy);
+      overlay.classList.toggle('active', isBusy);
+      document.getElementById('submitRegistrationButton').disabled = isBusy;
+      document.getElementById('prevStepButton').disabled = isBusy || activeStep === 'personal';
+      document.getElementById('nextStepButton').disabled = isBusy || activeStep === 'preview';
+      document.getElementById('refreshStatusButton').disabled = isBusy;
+    }
+
+    function setSubmitSuccess(registrationId) {
+      const overlay = document.getElementById('submitLoader');
+      const dialog = document.getElementById('submitDialog');
+      dialog.classList.add('success');
+      document.getElementById('submitDialogTitle').textContent = 'Registration saved successfully';
+      document.getElementById('submitDialogText').textContent = 'Application number ' + registrationId + ' has been created. Opening candidate login next.';
+      overlay.classList.remove('hidden');
+      overlay.classList.add('active');
+    }
+
+    function setSubmitFailure(message) {
+      const overlay = document.getElementById('submitLoader');
+      const dialog = document.getElementById('submitDialog');
+      dialog.classList.remove('success');
+      document.getElementById('submitDialogTitle').textContent = 'Registration could not be saved';
+      document.getElementById('submitDialogText').textContent = message || 'Please check the highlighted details and submit again.';
+      overlay.classList.remove('hidden');
+      overlay.classList.add('active');
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        overlay.classList.add('hidden');
+      }, 2600);
+    }
+
+    function pulseStepProgress() {
+      const wrap = document.querySelector('.step-progress-wrap');
+      wrap.classList.add('active');
+      window.clearTimeout(pulseStepProgress._timer);
+      pulseStepProgress._timer = window.setTimeout(() => wrap.classList.remove('active'), 900);
+    }
+
+    function applyExamFields() {
+      const exam = currentExam();
+      if (!exam) return;
+      buildFieldStepConfig(exam);
+      renderCustomFields(exam.customFields || []);
+      const enabled = new Set(exam.enabledFields || []);
+      document.querySelectorAll('[data-field]').forEach((field) => {
+        const active = field.dataset.customField ? true : enabled.has(field.dataset.field);
+        field.classList.toggle('visible', active);
+        const control = field.querySelector('input, select, textarea');
+        if (control) {
+          const isCustomRequired = field.dataset.customField
+            ? Boolean(activeCustomFields.find((item) => item.key === field.dataset.customField)?.required)
+            : false;
+          control.required = active && (Boolean(requiredFieldConfig[field.dataset.field]) || isCustomRequired);
+          if (!active) {
+            control.value = '';
+          }
+        }
+      });
+      applyAllowedCountryRestrictions(exam);
+
+      const streamField = document.getElementById('streamField');
+      const streamSelect = document.getElementById('streamCode');
+      const streamNote = document.getElementById('streamNote');
+      const streams = (exam.streams || []).filter((stream) => stream.enabled);
+      const showStreamField = Boolean(exam.streamSelectionRequired || streams.length);
+      streamField.classList.toggle('visible', showStreamField);
+      streamSelect.required = Boolean(showStreamField && streams.length);
+      const draftStream = loadDraft().values?.streamCode || '';
+      const previousStream = streamSelect.value || draftStream;
+      streamSelect.innerHTML = showStreamField
+        ? '<option value="">' + escapeHtml(streams.length ? 'Select sub-stream' : 'No sub-stream added yet') + '</option>' + streams.map((stream) =>
+            '<option value="' + escapeHtml(stream.shortCode) + '">' + escapeHtml(stream.shortCode + ' - ' + stream.fullName) + '</option>'
+          ).join('')
+        : '';
+      streamSelect.disabled = !streams.length;
+      const restoredStream = streams.find((stream) => String(stream.shortCode || '').toUpperCase() === String(previousStream || '').toUpperCase());
+      streamSelect.value = showStreamField && restoredStream ? restoredStream.shortCode : '';
+      if (showStreamField && !streams.length) {
+        streamNote.hidden = false;
+        streamNote.textContent = 'Stream selection is enabled. Admin still needs to add an enabled stream. Refresh this page after it is added.';
+      } else if (showStreamField) {
+        streamNote.hidden = false;
+        streamNote.textContent = 'Choose the correct stream before moving ahead.';
+      } else {
+        streamNote.hidden = true;
+        streamNote.textContent = '';
+      }
+      document.getElementById('summaryAdvert').textContent = exam.name + ' Registration';
+      syncSummary();
+      applyStepVisibility();
+      rebuildWorkflowTable();
+      refreshPreview();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('"', '&quot;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+    }
+
+    async function loadOpenExams(options = {}) {
+      const preserveSelection = Boolean(options.preserveSelection);
+      const liveSync = Boolean(options.liveSync);
+      const form = document.getElementById('candidateForm');
+      const closed = document.getElementById('closedNotice');
+      const intro = document.getElementById('intro');
+      const examSelect = document.getElementById('examCode');
+      const previousExamCode = preserveSelection ? examSelect.value : '';
+      openExams = await jsonRequest('/api/public/exams/open', 'GET');
+      if (!openExams.length) {
+        form.hidden = true;
+        closed.hidden = false;
+        intro.innerHTML = '<p style="margin:0;">No exam is open right now.</p>';
+        document.getElementById('summaryAdvert').textContent = 'Registration Closed';
+        document.getElementById('summaryExamStream').textContent = 'Not available';
+        document.getElementById('summaryApplicationNumber').textContent = 'Not generated';
+        document.getElementById('summaryStatus').textContent = 'Registration unavailable';
+        document.getElementById('summaryStageChecks').innerHTML = '';
+        return;
+      }
+      closed.hidden = true;
+      form.hidden = false;
+      intro.innerHTML = '<p style="margin:0;">Choose an open exam and complete the enabled fields.</p>';
+      updateRegistrationLayoutMode();
+      examSelect.innerHTML = openExams.map((exam) =>
+        '<option value="' + escapeHtml(exam.examCode) + '">' + escapeHtml(exam.name || 'Open registration') + '</option>'
+      ).join('');
+      const draft = loadDraft();
+      const draftExamCode = draft.values?.examCode || '';
+      if (!preserveSelection && draftExamCode && openExams.some((exam) => exam.examCode === draftExamCode)) {
+        examSelect.value = draftExamCode;
+      }
+      if (preserveSelection && previousExamCode && openExams.some((exam) => exam.examCode === previousExamCode)) {
+        examSelect.value = previousExamCode;
+      }
+      if (!liveSync) {
+        applyDraftValues();
+      }
+      applyExamFields();
+      if (!liveSync) {
+        await restoreDraftFiles();
+      }
+      renderStep(requestedStep());
+    }
+
+    document.getElementById('examCode').addEventListener('change', applyExamFields);
+
+    function wirePreview(inputId, previewId) {
+      document.getElementById(inputId).addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        const preview = document.getElementById(previewId);
+        if (!file || !file.type.startsWith('image/')) {
+          preview.hidden = true;
+          preview.removeAttribute('src');
+        } else {
+          preview.src = URL.createObjectURL(file);
+          preview.hidden = false;
+        }
+        await handleDraftFileChange(inputId, previewId);
+        await persistDraft();
+        refreshPreview();
+        rebuildWorkflowTable();
+      });
+    }
+
+    function bindDraftFileInput(inputId, previewId = '') {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      input.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (previewId) {
+          const preview = document.getElementById(previewId);
+          if (!file || !file.type.startsWith('image/')) {
+            preview.hidden = true;
+            preview.removeAttribute('src');
+          } else {
+            preview.src = URL.createObjectURL(file);
+            preview.hidden = false;
+          }
+        }
+        await handleDraftFileChange(inputId, previewId);
+        await persistDraft();
+        refreshPreview();
+        rebuildWorkflowTable();
+      });
+    }
+
+    wirePreview('photo', 'photoPreview');
+    wirePreview('signature', 'signaturePreview');
+    ['idCard', 'class10Marksheet', 'class12Marksheet', 'ugDocument', 'pgDocument'].forEach((inputId) => {
+      bindDraftFileInput(inputId);
+    });
+
+    function selectedCountryConfig() {
+      const currentValue = document.getElementById('nationality')?.value || 'India';
+      return countryIndex.get(currentValue) || activeLocationCatalog[0] || locationCatalog[0];
+    }
+
+    function normalizeLocalPhoneDigits(value) {
+      return String(value || '').replace(/\D+/g, '');
+    }
+
+    function syncPhoneField(codeSelect, phoneInput) {
+      const config = selectedCountryConfig();
+      const digits = normalizeLocalPhoneDigits(phoneInput.value);
+      const limitedDigits = config.phoneDigits ? digits.slice(0, config.phoneDigits) : digits.slice(0, 15);
+      phoneInput.value = limitedDigits;
+      return limitedDigits;
+    }
+
+    function stripPhonePrefix(phoneInput) {
+      phoneInput.value = normalizeLocalPhoneDigits(String(phoneInput.value || '').replace(/^\+\d+\s*/, ''));
+    }
+
+    function serializedPhoneValue(id) {
+      const phoneInput = document.getElementById(id);
+      const codeSelect = document.getElementById(id + 'Code');
+      if (!phoneInput) return '';
+      const digits = syncPhoneField(codeSelect || { value: '' }, phoneInput);
+      if (!digits) return '';
+      return codeSelect && codeSelect.value ? (codeSelect.value + ' ' + digits) : digits;
+    }
+
+    function applyCountryLocationMeta() {
+      const config = selectedCountryConfig();
+      const stateInput = document.getElementById('state');
+      const stateList = document.getElementById('stateList');
+      const stateHint = document.getElementById('stateHint');
+      const pincodeInput = document.getElementById('pincode');
+      const pincodeLabel = document.getElementById('pincodeLabel');
+      const pincodeHint = document.getElementById('pincodeHint');
+      if (stateList) {
+        stateList.innerHTML = (config.states || []).map((state) => '<option value="' + escapeHtml(state) + '"></option>').join('');
+      }
+      if (stateInput) {
+        stateInput.placeholder = config.states?.length ? 'Start typing to choose from built-in states' : 'Enter state / province';
+      }
+      if (stateHint) {
+        stateHint.textContent = config.states?.length
+          ? 'Built-in suggestions loaded for ' + config.country + '.'
+          : 'No built-in state list for this country yet. Enter the state / province manually.';
+      }
+      if (pincodeLabel) pincodeLabel.textContent = config.postalLabel || 'Pincode';
+      if (pincodeInput) {
+        pincodeInput.placeholder = config.postalPlaceholder || 'Postal / ZIP code';
+        pincodeInput.maxLength = config.postalMaxLength || 12;
+      }
+      if (pincodeHint) {
+        pincodeHint.textContent = 'Expected format: ' + (config.postalPlaceholder || 'Postal / ZIP code');
+      }
+      ['phoneCode', 'parentPhoneCode', 'guardianPhoneCode'].forEach((id) => {
+        const select = document.getElementById(id);
+        if (select) {
+          select.value = config.code;
+          const phoneInput = document.getElementById(id.replace('Code', ''));
+          if (phoneInput) syncPhoneField(select, phoneInput);
+        }
+      });
+    }
+
+    function applyAllowedCountryRestrictions(exam) {
+      const allowed = (exam?.allowedCountryIso2s || []).map((value) => String(value || '').toUpperCase()).filter(Boolean);
+      activeLocationCatalog = allowed.length
+        ? allowed.map((iso2) => countryIsoIndex.get(iso2)).filter(Boolean)
+        : [...locationCatalog];
+      if (!activeLocationCatalog.length) {
+        activeLocationCatalog = [...locationCatalog];
+      }
+      setupCountryPhoneControls();
+      const nationalityField = document.querySelector('[data-field="NATIONALITY"]');
+      const nationalitySelect = document.getElementById('nationality');
+      const lockedToSingleCountry = activeLocationCatalog.length === 1;
+      if (nationalityField) {
+        nationalityField.hidden = lockedToSingleCountry;
+      }
+      if (nationalitySelect) {
+        nationalitySelect.disabled = lockedToSingleCountry;
+      }
+    }
+
+    function setupCountryPhoneControls() {
+      const countrySelect = document.getElementById('nationality');
+      if (!countrySelect) return;
+      const previousCountry = countrySelect.value;
+      const options = activeLocationCatalog.length ? activeLocationCatalog : locationCatalog;
+      countrySelect.innerHTML = options.map((item) => '<option value="' + escapeHtml(item.country) + '" data-code="' + escapeHtml(item.code) + '"' + (item.country === 'India' ? ' selected' : '') + '>' + escapeHtml(item.country + ' (' + item.code + ')') + '</option>').join('');
+      const restoredCountry = options.find((item) => item.country === previousCountry);
+      countrySelect.value = restoredCountry ? restoredCountry.country : options[0]?.country || 'India';
+      ['phone', 'parentPhone', 'guardianPhone'].forEach((id) => {
+        const codeSelect = document.getElementById(id + 'Code');
+        const phoneInput = document.getElementById(id);
+        if (!codeSelect || !phoneInput) return;
+        codeSelect.innerHTML = options.map((item) => '<option value="' + escapeHtml(item.code) + '"' + (item.code === '+91' ? ' selected' : '') + '>' + escapeHtml(item.code + ' ' + item.country) + '</option>').join('');
+        if (!phoneInput.dataset.countryPhoneBound) {
+          phoneInput.addEventListener('focus', () => stripPhonePrefix(phoneInput));
+          phoneInput.addEventListener('input', () => {
+            const config = selectedCountryConfig();
+            const digits = normalizeLocalPhoneDigits(phoneInput.value);
+            phoneInput.value = config.phoneDigits ? digits.slice(0, config.phoneDigits) : digits.slice(0, 15);
+          });
+          phoneInput.addEventListener('blur', () => syncPhoneField(codeSelect, phoneInput));
+          codeSelect.addEventListener('change', () => syncPhoneField(codeSelect, phoneInput));
+          phoneInput.dataset.countryPhoneBound = 'true';
+        }
+        syncPhoneField(codeSelect, phoneInput);
+      });
+      if (!countrySelect.dataset.countryMetaBound) {
+        countrySelect.addEventListener('change', applyCountryLocationMeta);
+        countrySelect.dataset.countryMetaBound = 'true';
+      }
+      applyCountryLocationMeta();
+    }
+    setupCountryPhoneControls();
+
+    function validatePhoneAndLocationClient() {
+      const config = selectedCountryConfig();
+      const phoneFields = [
+        ['Candidate phone', document.getElementById('phone')],
+        ['Parent phone', document.getElementById('parentPhone')],
+        ['Guardian phone', document.getElementById('guardianPhone')]
+      ];
+      for (const [label, input] of phoneFields) {
+        if (!input || !input.closest('.visible')) continue;
+        const digits = normalizeLocalPhoneDigits(input.value);
+        if (!digits) {
+          if (label === 'Candidate phone') return label + ' is required.';
+          continue;
+        }
+        if (config.phoneDigits && digits.length !== config.phoneDigits) {
+          return label + ' must be exactly ' + config.phoneDigits + ' digits for ' + config.country + '.';
+        }
+        if (!config.phoneDigits && (digits.length < 6 || digits.length > 15)) {
+          return label + ' must contain 6 to 15 digits.';
+        }
+      }
+      const pincodeInput = document.getElementById('pincode');
+      if (pincodeInput && pincodeInput.closest('.visible')) {
+        const value = String(pincodeInput.value || '').trim();
+        if (value && config.postalPattern && !config.postalPattern.test(value)) {
+          return (config.postalLabel || 'Postal code') + ' format is invalid for ' + config.country + '.';
+        }
+      }
+      return '';
+    }
+
+    function passwordScore(value) {
+      let score = 0;
+      if (value.length >= 8) score++;
+      if (/[a-z]/.test(value)) score++;
+      if (/[A-Z]/.test(value)) score++;
+      if (/[0-9]/.test(value)) score++;
+      if (/[^A-Za-z0-9]/.test(value)) score++;
+      return score;
+    }
+
+    function updatePasswordStrength() {
+      const password = document.getElementById('password').value;
+      const score = passwordScore(password);
+      document.getElementById('passwordStrength').dataset.score = String(score);
+      const note = document.getElementById('passwordStrengthNote');
+      if (!password) {
+        note.textContent = 'Use 8+ characters with uppercase, lowercase, number, and symbol.';
+      } else if (score < 5) {
+        note.textContent = 'Weak password: add missing uppercase, lowercase, number, symbol, or length.';
+      } else {
+        note.textContent = 'Strong password.';
+      }
+      rebuildWorkflowTable();
+      refreshPreview();
+    }
+
+    document.getElementById('password').addEventListener('input', updatePasswordStrength);
+
+    document.getElementById('toggleRegistrationPassword').addEventListener('click', () => {
+      const input = document.getElementById('password');
+      const reveal = input.type === 'password';
+      input.type = reveal ? 'text' : 'password';
+      document.getElementById('toggleRegistrationPassword').textContent = reveal ? 'Hide' : 'Show';
+    });
+
+    function stepStatus(step) {
+      if (step === 'personal') return validatePersonal();
+      if (step === 'education') return validateEducation();
+      if (step === 'uploads') return validateUploads();
+      if (step === 'fee') return validateFee();
+      return validatePreview();
+    }
+
+    function validatePersonal() {
+      const missing = [];
+      validateRequiredBuiltInForStep('personal', missing);
+      if (document.getElementById('streamField').classList.contains('visible') && !fieldValue('streamCode')) {
+        missing.push('Sub-stream');
+      }
+      activeCustomFields.filter((field) => field.step === 'personal' && field.required).forEach((field) => {
+        if (!customFieldValue(field)) missing.push(field.label);
+      });
+      return { ok: missing.length === 0, text: missing.length ? ('Missing: ' + missing.join(', ')) : 'Saved / complete' };
+    }
+
+    function validateEducation() {
+      const needed = [];
+      validateRequiredBuiltInForStep('education', needed);
+      activeCustomFields.filter((field) => field.step === 'education' && field.required).forEach((field) => {
+        if (!customFieldValue(field)) needed.push(field.label);
+      });
+      return { ok: needed.length === 0, text: needed.length ? ('Missing: ' + needed.join(', ')) : 'Saved / complete' };
+    }
+
+    function validateUploads() {
+      const needed = [];
+      validateRequiredBuiltInForStep('uploads', needed);
+      activeCustomFields.filter((field) => field.step === 'uploads' && field.required).forEach((field) => {
+        if (!customFieldValue(field)) needed.push(field.label);
+      });
+      return { ok: needed.length === 0, text: needed.length ? ('Missing: ' + needed.join(', ')) : 'Saved / complete' };
+    }
+
+    function validateRequiredBuiltInForStep(step, missing) {
+      const fieldMap = [
+        ['FULL_NAME', 'fullName', 'Full Name'],
+        ['DATE_OF_BIRTH', 'dateOfBirth', 'Date Of Birth'],
+        ['EMAIL', 'email', 'Email'],
+        ['ALTERNATE_EMAIL', 'alternateEmail', 'Alternate Email'],
+        ['PHONE', 'phone', 'Phone'],
+        ['PASSWORD', 'password', 'Strong Password'],
+        ['GENDER', 'gender', 'Gender'],
+        ['ADDRESS', 'address', 'Address'],
+        ['STATE', 'state', 'State / Province'],
+        ['PINCODE', 'pincode', 'Pincode'],
+        ['NATIONALITY', 'nationality', 'Nationality'],
+        ['PARENT_NAME', 'parentName', 'Parent Name'],
+        ['PARENT_PHONE', 'parentPhone', 'Parent Phone'],
+        ['GUARDIAN_NAME', 'guardianName', 'Guardian Name'],
+        ['GUARDIAN_PHONE', 'guardianPhone', 'Guardian Phone'],
+        ['GUARDIAN_RELATION', 'guardianRelation', 'Guardian Relation'],
+        ['UG_DETAILS', step === 'uploads' ? 'ugDocument' : 'ugDetails', step === 'uploads' ? 'UG Document' : 'UG Details'],
+        ['PG_DETAILS', step === 'uploads' ? 'pgDocument' : 'pgDetails', step === 'uploads' ? 'PG Document' : 'PG Details'],
+        ['PHOTO', 'photo', 'Photo'],
+        ['SIGNATURE', 'signature', 'Signature'],
+        ['ID_CARD', 'idCard', 'ID Card'],
+        ['CLASS_10_MARKSHEET', 'class10Marksheet', 'Class 10 Marksheet'],
+        ['CLASS_12_MARKSHEET', 'class12Marksheet', 'Class 12 Marksheet']
+      ];
+      fieldMap.forEach((item) => {
+        if (fieldStepConfig[item[0]] !== step || !isVisibleField(item[0]) || !requiredFieldConfig[item[0]]) return;
+        if (item[0] === 'PASSWORD') {
+          if (passwordScore(document.getElementById('password').value) < 5) missing.push(item[2]);
+          return;
+        }
+        if (!fieldValue(item[1])) missing.push(item[2]);
+      });
+    }
+
+    function validateFee() {
+      const ok = document.getElementById('feeStageReady').checked;
+      return { ok, text: ok ? 'Saved / complete' : 'Fee stage pending' };
+    }
+
+    function validatePreview() {
+      const ready = ['personal', 'education', 'uploads', 'fee'].every((step) => stepStatus(step).ok);
+      return { ok: ready, text: ready ? 'Preview ready' : 'Finish previous stages first' };
+    }
+
+    function rebuildWorkflowTable() {
+      const tbody = document.getElementById('workflowTableBody');
+      const summaryChecks = document.getElementById('summaryStageChecks');
+      const icons = {
+        personal: '👤',
+        education: '🎓',
+        uploads: '📄',
+        fee: '₹',
+        preview: '👁'
+      };
+      const statuses = stepOrder.map((step) => {
+        const status = stepStatus(step);
+        return { step, status };
+      });
+      tbody.innerHTML = statuses.map(({ step, status }) => {
+        const classes = [
+          'workflow-step',
+          status.ok ? 'complete' : 'pending',
+          step === activeStep ? 'active' : ''
+        ].filter(Boolean).join(' ');
+        const check = status.ok ? '&#10003;' : (step === activeStep ? '&rarr;' : '&#9675;');
+        return '<a class="' + classes + '" href="' + stepHref(step) + '" data-step-link="' + step + '">'
+          + '<span class="workflow-icon" aria-hidden="true">' + escapeHtml(icons[step] || '•') + '</span>'
+          + '<span class="workflow-copy"><strong>' + escapeHtml(stepLabels[step]) + '</strong><span>' + escapeHtml(status.text) + '</span></span>'
+          + '<span class="workflow-check" aria-hidden="true">' + check + '</span>'
+          + '</a>';
+      }).join('');
+      summaryChecks.innerHTML = statuses.map(({ step, status }) => {
+        const classes = [
+          'summary-stage-chip',
+          status.ok ? 'complete' : 'pending',
+          step === activeStep ? 'active' : ''
+        ].filter(Boolean).join(' ');
+        const mark = status.ok ? '&#10003;' : (step === activeStep ? '&rarr;' : '&#9675;');
+        return '<a class="' + classes + '" href="' + stepHref(step) + '" data-step-link="' + step + '">'
+          + '<span class="summary-stage-mark" aria-hidden="true">' + mark + '</span>'
+          + '<span class="summary-stage-copy"><strong>' + escapeHtml(stepLabels[step]) + '</strong><span>' + escapeHtml(status.text) + '</span></span>'
+          + '</a>';
+      }).join('');
+      tbody.querySelectorAll('[data-step-link]').forEach((link) => {
+        link.addEventListener('click', async (event) => {
+          event.preventDefault();
+          await navigateToStep(link.dataset.stepLink);
+        });
+      });
+      summaryChecks.querySelectorAll('[data-step-link]').forEach((link) => {
+        link.addEventListener('click', async (event) => {
+          event.preventDefault();
+          await navigateToStep(link.dataset.stepLink);
+        });
+      });
+      const ready = stepStatus('preview').ok;
+      const completedSteps = statuses.filter((item) => item.status.ok).length;
+      document.getElementById('workflowCompletionSummary').textContent = completedSteps + ' of ' + stepOrder.length + ' stages complete';
+      document.getElementById('stepStatusSummary').textContent = stepStatus(activeStep).text;
+      document.getElementById('submitRegistrationButton').hidden = !ready || activeStep !== 'preview';
+      document.getElementById('summaryStatus').textContent = ready ? 'Ready for final submission' : 'Draft in progress';
+    }
+
+    function applyStepVisibility() {
+      document.querySelectorAll('.field.visible').forEach((field) => {
+        const fieldName = field.dataset.field;
+        const scope = field.dataset.stepScope || '';
+        const show = fieldName
+          ? activeFieldsForStep(activeStep).includes(fieldName) && (!scope || scope === activeStep)
+          : (!scope || scope === activeStep);
+        field.classList.toggle('step-hidden', !show);
+      });
+      document.getElementById('feePanel').classList.toggle('active', activeStep === 'fee');
+      document.getElementById('previewPanel').classList.toggle('active', activeStep === 'preview');
+      document.getElementById('stepPanelTitle').textContent = stepLabels[activeStep];
+      document.getElementById('nextStepButton').disabled = activeStep === 'preview';
+      document.getElementById('prevStepButton').disabled = activeStep === 'personal';
+      document.getElementById('submitRegistrationButton').hidden = !(activeStep === 'preview' && stepStatus('preview').ok);
+    }
+
+    function renderStep(step) {
+      activeStep = step;
+      applyStepVisibility();
+      refreshPreview();
+      rebuildWorkflowTable();
+      const index = stepOrder.indexOf(step) + 1;
+      document.getElementById('stepProgressMeta').textContent = 'Stage ' + index + ' of ' + stepOrder.length;
+      pulseStepProgress();
+    }
+
+    async function navigateToStep(step) {
+      await persistDraft();
+      window.location.href = stepHref(step);
+    }
+
+    function syncSummary() {
+      const exam = currentExam();
+      const examText = exam ? exam.name : 'No active exam';
+      const streamText = document.getElementById('streamField').classList.contains('visible')
+        ? (document.getElementById('streamCode').selectedOptions[0]?.textContent || 'Select sub-stream')
+        : 'No stream selection needed';
+      document.getElementById('summaryExamStream').textContent = examText + ' | ' + streamText;
+    }
+
+    function renderPreviewBlock(targetId, lines) {
+      const target = document.getElementById(targetId);
+      const activeLines = lines.filter((line) => line[1]);
+      target.innerHTML = activeLines.length
+        ? activeLines.map((line) => '<div><strong>' + escapeHtml(line[0]) + ':</strong> ' + escapeHtml(line[1]) + '</div>').join('')
+        : '<div class="file-note">No details added yet.</div>';
+    }
+
+    function renderPreviewMedia() {
+      const target = document.getElementById('previewMedia');
+      const items = [];
+      const photoPreview = document.getElementById('photoPreview');
+      const signaturePreview = document.getElementById('signaturePreview');
+      if (fieldValue('photo')) {
+        items.push('<div><strong>Photo:</strong> ' + escapeHtml(fieldValue('photo')) + '</div>'
+          + (photoPreview && !photoPreview.hidden && photoPreview.src
+            ? '<img class="preview" alt="Candidate photo preview" src="' + escapeHtml(photoPreview.src) + '">'
+            : ''));
+      }
+      if (fieldValue('signature')) {
+        items.push('<div><strong>Signature:</strong> ' + escapeHtml(fieldValue('signature')) + '</div>'
+          + (signaturePreview && !signaturePreview.hidden && signaturePreview.src
+            ? '<img class="preview" alt="Candidate signature preview" src="' + escapeHtml(signaturePreview.src) + '">'
+            : ''));
+      }
+      target.innerHTML = items.length
+        ? items.join('<div style="height:10px"></div>')
+        : '<div class="file-note">No photo or signature attached.</div>';
+    }
+
+    function refreshPreview() {
+      syncSummary();
+      renderPreviewBlock('previewPersonal', [
+        ['Exam', currentExam() ? currentExam().name : ''],
+        ['Sub-stream', document.getElementById('streamField').classList.contains('visible') ? (document.getElementById('streamCode').selectedOptions[0]?.textContent || 'Select sub-stream') : 'Not applicable'],
+        ['Full Name', fieldValue('fullName')],
+        ['Date Of Birth', fieldValue('dateOfBirth')],
+        ['Email', fieldValue('email')],
+        ['Alternate Email', fieldValue('alternateEmail')],
+        ['Phone', fieldValue('phone')],
+        ['Gender', fieldValue('gender')],
+        ['Nationality', fieldValue('nationality')],
+        ['State / Province', fieldValue('state')],
+        ['Address', fieldValue('address')],
+        ['Pincode', fieldValue('pincode')],
+        ['Parent Name', fieldValue('parentName')],
+        ['Parent Phone', fieldValue('parentPhone')],
+        ['Guardian Name', fieldValue('guardianName')],
+        ['Guardian Phone', fieldValue('guardianPhone')],
+        ['Guardian Relation', fieldValue('guardianRelation')],
+        ...activeCustomFields.filter((field) => field.step === 'personal').map((field) => [field.label, customFieldValue(field)])
+      ]);
+      renderPreviewBlock('previewEducation', [
+        ['UG Details', fieldValue('ugDetails')],
+        ['PG Details', fieldValue('pgDetails')],
+        ...activeCustomFields.filter((field) => field.step === 'education').map((field) => [field.label, customFieldValue(field)])
+      ]);
+      renderPreviewBlock('previewUploads', [
+        ['Photo', fieldValue('photo')],
+        ['Signature', fieldValue('signature')],
+        ['ID Card', fieldValue('idCard')],
+        ['Class 10 Marksheet', fieldValue('class10Marksheet')],
+        ['Class 12 Marksheet', fieldValue('class12Marksheet')],
+        ['UG Document', fieldValue('ugDocument')],
+        ['PG Document', fieldValue('pgDocument')],
+        ...activeCustomFields.filter((field) => field.step === 'uploads').map((field) => [field.label, customFieldValue(field)])
+      ]);
+      renderPreviewMedia();
+      renderPreviewBlock('previewFee', [
+        ['Fee Stage', document.getElementById('feeStageReady').checked ? 'Ready / reviewed' : 'Pending'],
+        ['Remark', fieldValue('feeNote')]
+      ]);
+    }
+
+    document.getElementById('prevStepButton').addEventListener('click', async () => {
+      const index = stepOrder.indexOf(activeStep);
+      if (index > 0) await navigateToStep(stepOrder[index - 1]);
+    });
+    document.getElementById('nextStepButton').addEventListener('click', async () => {
+      const index = stepOrder.indexOf(activeStep);
+      const currentStatus = stepStatus(activeStep);
+      if (!currentStatus.ok) {
+        document.getElementById('result').innerHTML = '<span class="error">Current step incomplete</span>\n' + currentStatus.text;
+        pulseStepProgress();
+        return;
+      }
+      if (index < stepOrder.length - 1) await navigateToStep(stepOrder[index + 1]);
+    });
+    document.getElementById('clearDraftButton').addEventListener('click', async () => {
+      if (!confirm('Clear the saved registration draft from this browser session?')) return;
+      sessionStorage.removeItem(draftStorageKey);
+      await clearDraftFiles().catch(() => {});
+      document.getElementById('candidateForm').reset();
+      updateDraftSaveSummary(null);
+      loadOpenExams().catch((error) => {
+        document.getElementById('result').innerHTML = '<span class="error">Could not reload registration form</span>\n' + error.message;
+      });
+      document.getElementById('result').innerHTML = '<span class="ok">Draft cleared</span>\nAll saved draft values and files for this browser session were removed.';
+    });
+    document.getElementById('refreshStatusButton').addEventListener('click', () => {
+      refreshPreview();
+      rebuildWorkflowTable();
+      document.getElementById('result').innerHTML = '<span class="ok">Workflow refreshed</span>\nApplication table and preview have been updated.';
+    });
+    document.getElementById('feeStageReady').addEventListener('change', () => {
+      refreshPreview();
+      rebuildWorkflowTable();
+    });
+    document.getElementById('examCode').addEventListener('change', () => {
+      persistDraft();
+      syncSummary();
+    });
+    document.getElementById('streamCode').addEventListener('change', () => {
+      persistDraft();
+      syncSummary();
+    });
+    document.querySelectorAll('input, select, textarea').forEach((node) => {
+      node.addEventListener('change', () => {
+        persistDraft();
+        refreshPreview();
+        rebuildWorkflowTable();
+      });
+      if (node.type !== 'file') {
+        node.addEventListener('input', () => {
+          persistDraft();
+          refreshPreview();
+          rebuildWorkflowTable();
+        });
+      }
+    });
+
+    document.getElementById('candidateForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      form.noValidate = true;
+      const result = document.getElementById('result');
+      if (!stepStatus('preview').ok) {
+        result.innerHTML = '<span class="error">Registration failed</span>\nComplete all application stages before final submit.';
+        return;
+      }
+      if (document.getElementById('password').closest('.visible') && passwordScore(document.getElementById('password').value) < 5) {
+        result.innerHTML = '<span class="error">Registration failed</span>\nUse a stronger password before submitting.';
+        return;
+      }
+      const locationError = validatePhoneAndLocationClient();
+      if (locationError) {
+        result.innerHTML = '<span class="error">Registration failed</span>\n' + escapeHtml(locationError);
+        return;
+      }
+      result.textContent = '';
+      setSubmitBusy(true);
+      try {
+        ['phone', 'parentPhone', 'guardianPhone'].forEach((id) => {
+          const input = document.getElementById(id);
+          if (input) input.dispatchEvent(new Event('blur'));
+        });
+        await persistDraft();
+        const formData = new FormData();
+        form.querySelectorAll('input, select, textarea').forEach((node) => {
+          if (!node.name) return;
+          if (node.type === 'file' || node.id === 'submitRegistrationButton') return;
+          if (['phone', 'parentPhone', 'guardianPhone'].includes(node.id)) {
+            formData.append(node.name, serializedPhoneValue(node.id));
+            return;
+          }
+          if (node.type === 'checkbox') {
+            formData.append(node.name, node.checked ? 'true' : 'false');
+          } else {
+            formData.append(node.name, node.value ?? '');
+          }
+        });
+        const fileInputs = ['photo', 'signature', 'idCard', 'class10Marksheet', 'class12Marksheet', 'ugDocument', 'pgDocument'];
+        for (const inputId of fileInputs) {
+          const input = document.getElementById(inputId);
+          const liveFile = input.files[0];
+          const storedFile = liveFile || await draftFileGet(draftFileKey(inputId)).catch(() => null);
+          if (storedFile) {
+            formData.append(input.name, storedFile, storedFile.name);
+          }
+        }
+        for (const field of activeCustomFields.filter((item) => item.type === 'IMAGE_UPLOAD' || item.type === 'PDF_UPLOAD')) {
+          const inputId = customFieldInputId(field);
+          const input = document.getElementById(inputId);
+          const liveFile = input?.files?.[0];
+          const storedFile = liveFile || await draftFileGet(draftFileKey(inputId)).catch(() => null);
+          if (storedFile) {
+            formData.append(input.name, storedFile, storedFile.name);
+          }
+        }
+        const data = await formRequest('/api/students/register-with-files', formData);
+        result.innerHTML = '<span class="ok">Registration successful</span>\n'
+          + 'Application Number: ' + data.registrationId + '\n'
+          + 'Exam: ' + (currentExam() ? currentExam().name : 'Selected exam') + '\n'
+          + 'Stream: ' + (data.streamCode || '-') + '\n'
+          + 'Name: ' + data.fullName + '\n'
+          + 'Redirecting to login page...';
+        document.getElementById('summaryApplicationNumber').textContent = data.registrationId;
+        document.getElementById('summaryStatus').textContent = 'Submitted successfully';
+        setSubmitSuccess(data.registrationId);
+        sessionStorage.removeItem(draftStorageKey);
+        clearDraftFiles().catch(() => {});
+        updateDraftSaveSummary(null);
+        form.reset();
+        applyExamFields();
+        setTimeout(() => {
+          window.location.href = '/candidate-entry/dashboard?registered=' + encodeURIComponent(data.registrationId);
+        }, 1400);
+      } catch (error) {
+        setSubmitBusy(false);
+        result.innerHTML = '<span class="error">Registration failed</span>\n' + error.message;
+        setSubmitFailure(error.message);
+      }
+    });
+
+    loadOpenExams().catch((error) => {
+      document.getElementById('result').innerHTML = '<span class="error">Could not load open exams</span>\n' + error.message;
+      document.getElementById('intro').innerHTML = '<p style="margin:0;">Could not load open exams.</p>';
+    });
+    setInterval(() => {
+      loadOpenExams({ preserveSelection: true, liveSync: true }).catch(() => {});
+    }, 5000);
+    window.addEventListener('focus', () => {
+      loadOpenExams({ preserveSelection: true, liveSync: true }).catch(() => {});
+    });
+
+    function initMoleculeField() {
+      const canvas = document.getElementById('moleculeField');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const molecules = Array.from({ length: 12 }, (_, index) => ({
+        x: 80 + (index % 4) * 260 + Math.random() * 80,
+        y: 80 + Math.floor(index / 4) * 180 + Math.random() * 70,
+        vx: (Math.random() - 0.5) * 0.45,
+        vy: (Math.random() - 0.5) * 0.35,
+        size: 12 + Math.random() * 10,
+        split: 0,
+        atoms: []
+      }));
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function splitMolecule(molecule) {
+        molecule.split = 70;
+        molecule.atoms = Array.from({ length: 5 }, (_, atomIndex) => {
+          const angle = (Math.PI * 2 * atomIndex) / 5 + Math.random() * 0.4;
+          return {
+            x: molecule.x,
+            y: molecule.y,
+            vx: Math.cos(angle) * (1.1 + Math.random() * 0.9),
+            vy: Math.sin(angle) * (1.1 + Math.random() * 0.9),
+            r: 3 + Math.random() * 2
+          };
+        });
+      }
+
+      document.addEventListener('click', (event) => {
+        let hit = null;
+        let best = 64;
+        molecules.forEach((molecule) => {
+          const dx = event.clientX - molecule.x;
+          const dy = event.clientY - molecule.y;
+          const distance = Math.hypot(dx, dy);
+          if (distance < best) {
+            best = distance;
+            hit = molecule;
+          }
+        });
+        if (hit) splitMolecule(hit);
+      });
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        molecules.forEach((molecule) => {
+          molecule.x += molecule.vx;
+          molecule.y += molecule.vy;
+          if (molecule.x < 30 || molecule.x > canvas.width - 30) molecule.vx *= -1;
+          if (molecule.y < 30 || molecule.y > canvas.height - 30) molecule.vy *= -1;
+
+          ctx.strokeStyle = 'rgba(13,92,166,0.18)';
+          ctx.fillStyle = 'rgba(13,92,166,0.12)';
+          ctx.lineWidth = 1.4;
+
+          if (molecule.split > 0) {
+            molecule.split -= 1;
+            molecule.atoms.forEach((atom) => {
+              atom.x += atom.vx;
+              atom.y += atom.vy;
+              atom.vx *= 0.985;
+              atom.vy *= 0.985;
+              ctx.beginPath();
+              ctx.arc(atom.x, atom.y, atom.r, 0, Math.PI * 2);
+              ctx.fill();
+            });
+            if (molecule.split === 0) {
+              molecule.atoms = [];
+            }
+            return;
+          }
+
+          const orbit = molecule.size + 10;
+          for (let i = 0; i < 3; i += 1) {
+            const angle = (performance.now() / 1400) + i * (Math.PI * 2 / 3);
+            const ox = molecule.x + Math.cos(angle) * orbit;
+            const oy = molecule.y + Math.sin(angle) * orbit * 0.58;
+            ctx.beginPath();
+            ctx.moveTo(molecule.x, molecule.y);
+            ctx.lineTo(ox, oy);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(ox, oy, 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.beginPath();
+          ctx.arc(molecule.x, molecule.y, molecule.size * 0.35, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(7,58,112,0.18)';
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      }
+
+      resize();
+      window.addEventListener('resize', resize);
+      requestAnimationFrame(draw);
+    }
+
+    initMoleculeField();
+  </script>
+</body>
+</html>

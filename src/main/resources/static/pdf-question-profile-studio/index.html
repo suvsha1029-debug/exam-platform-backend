@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF Question Profile Studio</title>
+  <link rel="stylesheet" href="./assets/css/import-studio.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Standalone Profile Studio</p>
+        <h1>Structured PDF Question Profile Studio</h1>
+        <p class="hero-copy">
+          Built for strict exam-paper layouts only. This separate studio is for profile-based PDF extraction:
+          choose a template profile, detect content-only question and option snippets, review them, then export clean
+          JSON for the exam platform.
+        </p>
+      </div>
+      <div class="hero-note">
+        <strong>Separate Track</strong>
+        <span>Independent from the older importer route.</span>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="panel stage-panel">
+        <div class="panel-head">
+          <h2>Workflow</h2>
+          <div class="stage-strip">
+            <span class="stage active">1. Source</span>
+            <span class="stage">2. Detect</span>
+            <span class="stage">3. Review</span>
+            <span class="stage">4. Export</span>
+          </div>
+        </div>
+
+        <div class="panel-body">
+          <div class="upload-zone" id="uploadZone">
+            <input id="pdfFile" type="file" accept=".pdf" hidden>
+            <button id="choosePdfBtn" class="primary" type="button">Choose PDF</button>
+            <p>Use only fixed-layout PDFs matching your exact bordered exam-paper format.</p>
+            <small>Best path: detect rows, crop snippets, assign IDs, then review. OCR-heavy scans should be handled later.</small>
+            <div id="sourceStatus" class="source-status">No PDF loaded yet.</div>
+          </div>
+
+          <div class="source-grid">
+            <label class="field full">
+              <span>Strict Template Name</span>
+              <input id="templateName" type="text" placeholder="e.g. Gate Table Layout v1">
+            </label>
+            <label class="field">
+              <span>Template Profile</span>
+              <select id="templateProfile"></select>
+            </label>
+            <label class="field">
+              <span>Export Target</span>
+              <select id="exportTarget">
+                <option value="legacy-image">Pre-Git Image Frame JSON</option>
+                <option value="review-plain">Plain Review JSON</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Question Legend Prefix</span>
+              <input id="questionPrefix" type="text" value="Q.">
+            </label>
+            <label class="field">
+              <span>Option Legend Style</span>
+              <select id="optionStyle">
+                <option value="paren-alpha">(A) (B) (C) (D)</option>
+                <option value="alpha-dot">A. B. C. D.</option>
+                <option value="alpha-bracket">[A] [B] [C] [D]</option>
+              </select>
+            </label>
+            <div id="profileSummary" class="profile-summary full"></div>
+            <label class="field">
+              <span>Question ID Prefix</span>
+              <input id="questionIdPrefix" type="text" value="QIMP">
+            </label>
+            <label class="field">
+              <span>Option ID Prefix</span>
+              <input id="optionIdPrefix" type="text" value="OPT">
+            </label>
+            <div class="format-note full">
+              The importer now treats labels and borders as viewer chrome, not image content. Question numbers,
+              option labels, border lines, and row frames stay outside the cropped PNGs. Only question body and
+              option body content should be exported into snippet images.
+            </div>
+          </div>
+
+          <div class="panel-actions">
+            <button id="parseBtn" class="primary" type="button">Detect & Build Snippets</button>
+            <button id="resetBtn" class="ghost danger" type="button">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel review-panel">
+        <div class="panel-head">
+          <h2>Review Queue</h2>
+          <div class="review-stats">
+            <span id="questionCountPill" class="pill">0 Questions</span>
+            <span id="warningCountPill" class="pill warning">0 Warnings</span>
+          </div>
+        </div>
+
+        <div class="review-shell">
+          <aside class="question-list">
+            <div class="list-head">
+              <strong>Parsed Questions</strong>
+            </div>
+            <div id="questionList" class="list-body"></div>
+          </aside>
+
+          <section class="question-editor">
+            <div class="editor-head">
+              <div>
+                <strong id="editorTitle">No question selected</strong>
+                <div id="editorMeta" class="editor-meta">Upload or parse a paper to begin.</div>
+              </div>
+              <div class="editor-actions">
+                <button id="prevQuestionBtn" type="button" class="ghost">Previous</button>
+                <button id="nextQuestionBtn" type="button" class="ghost">Next</button>
+              </div>
+            </div>
+
+            <div class="editor-grid">
+              <label class="field">
+                <span>Source Question No.</span>
+                <input id="sourceQuestionNo" type="text">
+              </label>
+              <label class="field">
+                <span>Generated Question ID</span>
+                <input id="generatedQuestionId" type="text">
+              </label>
+              <label class="field">
+                <span>Question Type</span>
+                <select id="questionTypeSingle">
+                  <option value="MCQ">MCQ</option>
+                  <option value="MSQ">MSQ</option>
+                  <option value="NAT">NAT</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Marks / Negative</span>
+                <div class="dual-inline">
+                  <input id="questionMarksSingle" type="number" value="1" min="0" step="0.01" placeholder="Marks">
+                  <input id="questionNegMarksSingle" type="number" value="0" min="0" step="0.01" placeholder="Negative">
+                </div>
+              </label>
+              <div class="field full">
+                <span>Question Snippet Preview</span>
+                <div class="question-snippet-box">
+                  <img id="questionSnippetPreview" class="question-snippet-preview" alt="Question snippet preview">
+                </div>
+              </div>
+            </div>
+
+            <div id="optionFields" class="option-grid"></div>
+
+            <div class="warning-box">
+              <strong>Parse Warnings</strong>
+              <div id="questionWarnings">No warnings.</div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="panel export-panel">
+        <div class="panel-head">
+          <h2>Export</h2>
+          <div class="release-note">Review-first only. No direct publish.</div>
+        </div>
+        <div class="panel-body">
+          <div class="export-grid">
+            <label class="field">
+              <span>Exam Code</span>
+              <input id="examCode" type="text" placeholder="EX2027EC39N">
+            </label>
+            <label class="field">
+              <span>Section Code</span>
+              <input id="sectionCode" type="text" placeholder="EC">
+            </label>
+            <label class="field">
+              <span>Question Type</span>
+              <select id="questionTypeDefault">
+                <option value="MCQ">MCQ</option>
+                <option value="MSQ">MSQ</option>
+                <option value="NAT">NAT</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Marks Per Question</span>
+              <input id="questionMarksDefault" type="number" value="1" min="0">
+            </label>
+            <label class="field">
+              <span>Negative Marks Default</span>
+              <input id="questionNegMarksDefault" type="number" value="0" min="0" step="0.01">
+            </label>
+          </div>
+
+          <div class="panel-actions">
+            <button id="exportJsonBtn" class="primary" type="button">Export JSON</button>
+            <button id="copyJsonBtn" class="ghost" type="button">Copy JSON</button>
+          </div>
+
+          <label class="field full">
+            <span>Export Preview</span>
+            <textarea id="exportPreview" readonly placeholder="Parsed JSON preview will appear here..."></textarea>
+          </label>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="./assets/js/import-studio.js"></script>
+</body>
+</html>

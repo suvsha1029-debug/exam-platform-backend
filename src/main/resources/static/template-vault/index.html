@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Template Vault</title>
+  <style>
+    :root {
+      --bg: #eef3f8;
+      --card: #ffffff;
+      --ink: #142033;
+      --muted: #607089;
+      --line: #b8c7d8;
+      --accent: #334155;
+      --good: #208652;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(51,65,85,.14), transparent 34%),
+        linear-gradient(135deg, #f7fafc, var(--bg));
+      padding: 42px;
+    }
+    main {
+      width: min(980px, 100%);
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0 0 8px;
+      letter-spacing: .02em;
+    }
+    p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 18px 42px rgba(31, 45, 61, .12);
+    }
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+    .tag {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #e8f6ef;
+      color: var(--good);
+      font: 700 12px Arial, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font: 800 14px Arial, sans-serif;
+    }
+    .note {
+      margin-top: 22px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--accent);
+      background: #fff;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Template Vault</h1>
+    <p>Browser-openable copies of the current gold UI templates. These are references only; the active app pages remain separate.</p>
+    <section class="grid">
+      <article class="card">
+        <span class="tag">Response Sheet</span>
+        <h2>Candidate Response Sheet Template</h2>
+        <p>Saved web and print/PDF response-sheet layout with candidate details, watermarking, question panels, status box, activity block, borders, and page numbering.</p>
+        <a href="/template-vault/response-sheet/candidate-response-sheet-template.html">Open Response Sheet</a>
+      </article>
+      <article class="card">
+        <span class="tag">Exam UI</span>
+        <h2>Candidate Exam UI Template</h2>
+        <p>Saved candidate exam interface reference with sections, palette, question pane, controls, secure submit workflow, and visual styling.</p>
+        <a href="/template-vault/exam-ui/candidate-exam-ui-template.html">Open Exam UI</a>
+      </article>
+    </section>
+    <div class="note">Open this page at <strong>/template-vault/</strong> while the exam platform server is running.</div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exam Lobby</title>
+  <link rel="stylesheet" href="/assets/candidate-institutional.css">
+  <script src="/assets/candidate-institutional.js" defer></script>
+  <style>
+    :root { --blue:#0d5ca6; --blue2:#073a70; --line:#9dbce4; --ink:#10243f; --muted:#607089; --good:#0b7a35; --bad:#b00020; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; font-family:Arial, Helvetica, sans-serif; color:var(--ink); background:#eef5ff; }
+    .shell { min-height:100vh; display:grid; grid-template-rows:auto 1fr; }
+    header { padding:16px 26px; color:#fff; background:linear-gradient(180deg, var(--blue) 0%, var(--blue2) 100%); display:flex; justify-content:space-between; align-items:center; gap:18px; }
+    header h1 { margin:0; font-size:20px; letter-spacing:.04em; }
+    header p { margin:4px 0 0; color:#d8ecff; font-size:13px; }
+    .candidate-chip { padding:10px 14px; border:1px solid rgba(255,255,255,.5); border-radius:12px; background:rgba(255,255,255,.12); font-weight:900; }
+    main { display:grid; place-items:center; padding:28px; }
+    .card { width:min(720px, 100%); border:2px solid var(--line); border-radius:24px; background:#fff; box-shadow:0 26px 70px rgba(16,36,63,.2); padding:30px; text-align:center; }
+    .card h2 { margin:0 0 10px; color:var(--blue2); font-size:30px; }
+    .status { margin:18px auto; padding:16px; border:1px dashed var(--line); border-radius:14px; background:#f5f9ff; font-family:"Courier New", monospace; white-space:pre-wrap; text-align:left; }
+    .timer { font-size:42px; font-weight:900; color:var(--blue2); letter-spacing:.04em; margin:18px 0; }
+    button { border:0; border-radius:12px; padding:14px 22px; font-weight:900; color:#fff; background:linear-gradient(180deg, #287bd4 0%, #0d5ca6 100%); cursor:pointer; box-shadow:0 4px 0 rgba(6,52,103,.28); }
+    button:disabled { cursor:not-allowed; filter:grayscale(.6); opacity:.62; }
+    .danger { background:linear-gradient(180deg, #d94b4b 0%, #9b1f1f 100%); }
+    .muted { color:var(--blue2); background:#eef6ff; border:2px solid var(--line); box-shadow:none; }
+    .exam-ui { display:none; width:100%; min-height:100vh; grid-template-columns:1fr 280px; background:#fff; }
+    .exam-ui.visible { display:grid; }
+    .question-area { padding:24px 32px 86px; overflow:auto; }
+    .side { border-left:1px solid #b8cbe5; background:#e6eef8; padding:16px; }
+    .question-head { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #d7e7fb; padding-bottom:12px; margin-bottom:18px; }
+    .question-image { width:auto; height:auto; max-width:min(700px, 100%); max-height:72vh; object-fit:contain; display:block; image-rendering:auto; }
+    .option { display:flex; align-items:center; gap:12px; margin:22px 0; min-height:48px; }
+    .option img { max-width:min(600px, calc(100vw - 420px)); max-height:110px; width:auto; height:auto; object-fit:contain; display:block; image-rendering:auto; }
+    .option-letter { width:28px; font-weight:900; }
+    .nat-box { width:min(420px,100%); border:2px solid var(--line); border-radius:10px; padding:12px; font-size:18px; }
+    .nav { display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-top:14px; }
+    .nav button { padding:10px 6px; border-radius:8px; box-shadow:none; }
+    .active-q { background:linear-gradient(180deg, #e34b26 0%, #b52716 100%); }
+    .bottom-bar { position:fixed; left:0; right:280px; bottom:0; padding:12px 20px; background:#dbeafe; border-top:1px solid #b8cbe5; display:flex; justify-content:flex-end; gap:12px; }
+    @media (max-width:900px) { .exam-ui { grid-template-columns:1fr; } .side { border-left:0; border-top:1px solid #b8cbe5; } .bottom-bar { right:0; } .option img { max-width:calc(100vw - 120px); } }
+  </style>
+</head>
+<body>
+  <div id="lobbyShell" class="shell">
+    <header>
+      <div>
+        <h1>Exam Lobby</h1>
+      </div>
+      <div class="candidate-chip" id="candidateChip">REG ID</div>
+    </header>
+    <main>
+      <section class="card">
+        <h2 id="examName">Exam</h2>
+        <div class="timer" id="countdown">--:--</div>
+        <div id="lobbyStatus" class="status">Loading exam lobby...</div>
+        <button type="button" id="enterFullscreen">Enter Full Screen</button>
+        <button type="button" id="launchExam" disabled>Launch Exam</button>
+      </section>
+    </main>
+  </div>
+
+  <div id="examUi" class="exam-ui">
+    <section class="question-area">
+      <div class="question-head">
+        <div>
+          <strong id="questionTitle">Q.1</strong>
+          <span id="questionMeta"></span>
+        </div>
+        <div id="examClock">Exam beta</div>
+      </div>
+      <div id="questionRender"></div>
+    </section>
+    <aside class="side">
+      <h3 id="sideExamName">Exam</h3>
+      <p id="sideCandidate"></p>
+      <strong>Choose a Question</strong>
+      <div class="nav" id="questionNav"></div>
+    </aside>
+    <div class="bottom-bar">
+      <button type="button" class="muted" id="previousQuestion">Previous</button>
+      <button type="button" id="nextQuestion">Save & Next</button>
+      <button type="button" class="danger" id="submitExam" disabled>Submit</button>
+    </div>
+  </div>
+
+  <script src="/assets/ui-guard.js"></script>
+  <script src="/assets/candidate-error.js"></script>
+  <script>
+    let candidate = JSON.parse(sessionStorage.getItem('candidateDashboardData') || 'null');
+    let paper = null;
+    let currentQuestionIndex = 0;
+    const answers = {};
+
+    function escapeHtml(value) {
+      return String(value ?? '').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+
+    async function jsonPost(url, payload) {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Candidate-CSRF': await candidateSecurityToken() },
+        body: JSON.stringify(payload)
+      });
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
+      if (!response.ok) throw new Error(data.detail || data.message || text || response.statusText);
+      return data;
+    }
+
+    async function candidateSecurityToken() {
+      if (window.__candidateSecurityTokenCache) return window.__candidateSecurityTokenCache;
+      const response = await fetch('/api/public/candidate-security-token', { cache: 'no-store' });
+      const data = await response.json();
+      window.__candidateSecurityTokenCache = data.token || '';
+      return window.__candidateSecurityTokenCache;
+    }
+
+    function requireCandidate() {
+      if (!candidate || !candidate.dateOfBirth) {
+        openCandidateError('auth-required');
+        return false;
+      }
+      document.getElementById('candidateChip').textContent = candidate.registrationId;
+      document.getElementById('examName').textContent = candidate.examName || candidate.examCode || 'Exam';
+      document.getElementById('sideExamName').textContent = candidate.examName || candidate.examCode || 'Exam';
+      document.getElementById('sideCandidate').textContent = 'Registration ID: ' + candidate.registrationId;
+      return true;
+    }
+
+    async function refreshLobby() {
+      try {
+        candidate = await jsonPost('/api/candidate/exam-login', {
+          registrationId: candidate.registrationId,
+          dateOfBirth: candidate.dateOfBirth
+        });
+        sessionStorage.setItem('candidateDashboardData', JSON.stringify(candidate));
+        renderLobby();
+      } catch (error) {
+        document.getElementById('lobbyStatus').innerHTML = '<span style="color:#b00020;font-weight:900">Lobby refresh failed</span>\n' + escapeHtml(error.message);
+      }
+    }
+
+    function renderLobby() {
+      const status = document.getElementById('lobbyStatus');
+      const launch = document.getElementById('launchExam');
+      const startAt = candidate.examStartAt ? new Date(candidate.examStartAt) : null;
+      const now = new Date();
+      let lines = [
+        'Registration ID: ' + candidate.registrationId,
+        'Question paper: ' + (candidate.questionPaperUploaded ? 'uploaded' : 'not uploaded'),
+        'Lobby: ' + (candidate.examLobbyAvailable ? 'login window open' : 'waiting/closed'),
+        'Admin launch: ' + (candidate.examLaunchEnabled ? 'enabled' : 'disabled'),
+        candidate.examAccessMessage || ''
+      ];
+      if (startAt) lines.splice(1, 0, 'Exam starts at: ' + startAt.toLocaleString());
+      status.textContent = lines.join('\n');
+      const canLaunch = candidate.questionPaperUploaded && candidate.examLaunchEnabled && startAt && now >= startAt;
+      launch.disabled = !canLaunch;
+      if (!startAt) {
+        document.getElementById('countdown').textContent = '--:--';
+        return;
+      }
+      const diffSeconds = Math.max(0, Math.floor((startAt.getTime() - now.getTime()) / 1000));
+      const minutes = String(Math.floor(diffSeconds / 60)).padStart(2, '0');
+      const seconds = String(diffSeconds % 60).padStart(2, '0');
+      document.getElementById('countdown').textContent = diffSeconds > 0 ? minutes + ':' + seconds : 'LIVE';
+    }
+
+    async function enterFullscreen() {
+      const root = document.documentElement;
+      if (root.requestFullscreen) {
+        await root.requestFullscreen().catch(() => {});
+      }
+    }
+
+    async function launchExam() {
+      await enterFullscreen();
+      document.getElementById('launchExam').disabled = true;
+      document.getElementById('lobbyStatus').textContent = 'Creating secure exam session...';
+      try {
+        const dateOfBirth = candidate.dateOfBirth || candidate.dob || '';
+        if (!dateOfBirth) {
+          throw new Error('Date of birth is missing. Reopen the exam entry page and verify again.');
+        }
+        const session = await jsonPost('/api/candidate/exam-viewer-session', {
+          registrationId: candidate.registrationId,
+          dateOfBirth
+        });
+        window.location.replace(session.url);
+      } catch (error) {
+        openCandidateError(candidateErrorReasonFromMessage(error.message));
+      }
+    }
+
+    function questions() {
+      return paper && Array.isArray(paper.questions) ? paper.questions : [];
+    }
+
+    function renderNav() {
+      document.getElementById('questionNav').innerHTML = questions().map((_, index) =>
+        '<button type="button" data-q="' + index + '" class="' + (index === currentQuestionIndex ? 'active-q' : '') + '">Q.' + (index + 1) + '</button>'
+      ).join('');
+      document.querySelectorAll('[data-q]').forEach((button) => {
+        button.addEventListener('click', () => renderQuestion(Number(button.dataset.q)));
+      });
+    }
+
+    function renderQuestion(index) {
+      const qs = questions();
+      if (!qs.length) {
+        document.getElementById('questionRender').textContent = 'No questions found in the uploaded paper.';
+        return;
+      }
+      currentQuestionIndex = Math.max(0, Math.min(index, qs.length - 1));
+      const q = qs[currentQuestionIndex];
+      const title = q.question_number || q.questionNumber || ('Q.' + (currentQuestionIndex + 1));
+      const type = q.question_type || q.questionType || q.type || 'MCQ';
+      const marks = q.marks ?? q.max_marks ?? q.maxMarks ?? q.positive_marks ?? q.positiveMarks ?? q.mark ?? '-';
+      const negative = q.negative_marks ?? q.negativeMarks ?? q.neg_marks ?? q.negative ?? '-';
+      document.getElementById('questionTitle').textContent = title;
+      document.getElementById('questionMeta').textContent = ' | ' + type + ' | Marks: ' + marks + ' | Negative: ' + negative;
+      const image = firstPresent(q, ['questionViewerImage', 'question_viewer_image', 'viewerImage', 'viewer_image', 'questionDisplayImage', 'question_display_image', 'displayImage', 'display_image', 'questionBaseImage', 'question_base_image', 'baseImage', 'base_image', 'question_image', 'questionImage', 'image']);
+      const body = image
+        ? '<img class="question-image" alt="' + escapeHtml(title) + '" src="' + escapeHtml(image) + '">'
+        : '<p>' + escapeHtml(q.body || q.question_text || q.questionText || q.content || '(No question image/text)') + '</p>';
+      document.getElementById('questionRender').innerHTML = body + renderOptions(q);
+      renderNav();
+    }
+
+    function renderOptions(q) {
+      const type = String(q.question_type || 'MCQ').toUpperCase();
+      if (type === 'NAT') {
+        return '<div class="option"><span class="option-letter">Ans</span><input class="nat-box" data-answer="' + escapeHtml(q.question_id || q.question_number || currentQuestionIndex) + '" value="' + escapeHtml(answers[currentQuestionIndex] || '') + '" placeholder="Enter numerical answer"></div>';
+      }
+      const entries = normalizeOptions(q.options);
+      if (!entries.length) return '<p>No options are available for this question.</p>';
+      return entries.map(([letter, value]) => {
+        const inputType = type === 'MSQ' ? 'checkbox' : 'radio';
+        const name = 'q-' + currentQuestionIndex;
+        const rendered = renderOptionValue(value);
+        return '<label class="option"><input type="' + inputType + '" name="' + name + '" value="' + escapeHtml(letter) + '"><span class="option-letter">' + escapeHtml(letter) + '.</span>' + rendered + '</label>';
+      }).join('');
+    }
+
+    function normalizeOptions(options) {
+      if (!options) return [];
+      if (Array.isArray(options)) {
+        return options.map((value, index) => [String.fromCharCode(65 + index), value]);
+      }
+      return Object.entries(options).filter(([key]) => /^[A-Z]$/i.test(key)).sort();
+    }
+
+    function renderOptionValue(value) {
+      if (typeof value === 'string' && value.startsWith('data:image/')) {
+        return '<img alt="option" src="' + escapeHtml(value) + '">';
+      }
+      if (value && typeof value === 'object') {
+        const image = firstPresent(value, ['viewerImage', 'viewer_image', 'optionViewerImage', 'option_viewer_image', 'displayImage', 'display_image', 'optionDisplayImage', 'option_display_image', 'baseImage', 'base_image', 'optionBaseImage', 'option_base_image', 'image', 'option_image', 'optionImage']);
+        if (typeof image === 'string' && image.startsWith('data:image/')) {
+          return '<img alt="option" src="' + escapeHtml(image) + '">';
+        }
+        return '<span>' + escapeHtml(value.text || value.label || JSON.stringify(value)) + '</span>';
+      }
+      return '<span>' + escapeHtml(value || '(empty)') + '</span>';
+    }
+
+    function firstPresent(row, keys) {
+      for (const key of keys) {
+        const value = row && row[key];
+        if (typeof value === 'string' && value.trim()) return value;
+      }
+      return '';
+    }
+
+    document.getElementById('enterFullscreen').addEventListener('click', enterFullscreen);
+    document.getElementById('launchExam').addEventListener('click', launchExam);
+    document.getElementById('previousQuestion').addEventListener('click', () => renderQuestion(currentQuestionIndex - 1));
+    document.getElementById('nextQuestion').addEventListener('click', () => renderQuestion(currentQuestionIndex + 1));
+    document.getElementById('submitExam').addEventListener('click', () => alert('Submission is not available from this screen.'));
+
+    if (requireCandidate()) {
+      renderLobby();
+      refreshLobby();
+      setInterval(renderLobby, 1000);
+      setInterval(refreshLobby, 20000);
+    }
+  </script>
+</body>
+</html>

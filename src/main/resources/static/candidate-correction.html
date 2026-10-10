@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Application Corrections</title><link rel="stylesheet" href="/assets/candidate-details.css"><link rel="stylesheet" href="/assets/candidate-correction.css"></head>
+<body>
+<header class="correction-header"><div><span>Candidate services</span><h1>Application corrections</h1></div><a href="/candidate-entry/details">Back to dashboard</a></header>
+<main class="correction-main">
+<div class="correction-identity"><strong id="candidateTitle">Loading application...</strong><span id="candidateMeta"></span></div>
+<ol class="correction-steps" aria-label="Submission progress"><li aria-current="step">01 &nbsp; Edit details</li><li>02 &nbsp; Review application</li><li>03 &nbsp; Submitted</li></ol>
+<p id="result" role="status" aria-live="polite"></p>
+<section id="editPanel" hidden><h2>Permitted corrections</h2><form id="correctionForm"><div id="editFields"></div><div class="correction-actions"><button type="submit">Review application</button><a href="/candidate-entry/details">Cancel</a></div></form></section>
+<section id="reviewPanel" hidden><h2 id="reviewTitle">Review application</h2><div id="applicationReview"></div><h2>Supporting documents</h2><div id="documentReview"></div><div id="confirmation"><label class="confirm-line"><input type="checkbox" id="confirmDetails"> I confirm that the details and documents above are correct.</label><div class="correction-actions"><button id="finalSubmit" type="button" disabled>Final submit</button><button id="backEdit" type="button" class="secondary">Back to edit</button></div></div><div id="successActions" class="correction-actions" hidden><a href="/candidate-entry/details">Back to dashboard</a><button id="editAgain" type="button" class="secondary">Make another correction</button></div></section>
+</main><script src="/assets/application-document.js"></script><script src="/assets/candidate-correction.js"></script></body></html>

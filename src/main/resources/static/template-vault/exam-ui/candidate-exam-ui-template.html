@@ -1,0 +1,1332 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Online Exam</title>
+  <style>
+    :root {
+      --top:#2f2f2f; --blue:#3f444c; --blue2:#2f3136; --side:#e8eef5;
+      --line:#b7c9dc; --ink:#111; --muted:#555; --purple:#6b4aa0;
+      --green:#79c94a; --orange:#d54d22; --red:#b00020;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Arial, Helvetica, sans-serif; color:var(--ink); background:#fff; user-select:none; }
+    button { font-family:Arial, Helvetica, sans-serif; cursor:pointer; }
+    .hidden { display:none !important; }
+    .lobby { min-height:100vh; display:grid; grid-template-rows:auto 1fr; background:#dbeafe; }
+    .lobby header { padding:16px 24px; color:#fff; background:linear-gradient(#0d5ca6,#073a70); display:flex; justify-content:space-between; align-items:center; }
+    .lobby-card { width:min(760px, calc(100% - 32px)); margin:auto; background:#fff; border:2px solid #9dbce4; border-radius:18px; box-shadow:0 22px 54px rgba(16,36,63,.2); padding:28px; text-align:center; }
+    .lobby-card h1 { margin:0 0 8px; color:#073a70; }
+    .entry-form { display:grid; gap:14px; max-width:420px; margin:22px auto; text-align:left; }
+    .entry-form label { color:#123b69; font-size:12px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    .entry-form input { width:100%; border:2px solid #9dbce4; border-radius:10px; padding:13px 14px; font-size:16px; user-select:text; }
+    .lobby-timer { font-size:42px; font-weight:900; color:#073a70; margin:18px 0; }
+    .status { margin:16px 0; padding:14px; border:1px dashed #9dbce4; border-radius:12px; background:#f5f9ff; text-align:left; white-space:pre-wrap; font-family:"Courier New", monospace; }
+    .verified-pill { display:inline-block; margin:8px 0 4px; padding:8px 14px; border:1px solid #9dbce4; border-radius:999px; background:#eef6ff; color:#073a70; font-weight:800; }
+    .primary { border:0; border-radius:3px; padding:9px 18px; color:#fff; background:#3f444c; font-weight:700; }
+    .secondary { border:1px solid #aaa; border-radius:3px; padding:8px 16px; color:#222; background:#fff; font-weight:700; }
+    .danger { border:0; border-radius:3px; padding:9px 18px; color:#fff; background:#c7402b; font-weight:700; }
+    .exam { height:100vh; display:grid; grid-template-rows:32px 30px 1fr 42px; background:#fff; }
+    .topbar { background:#2b2b2b; color:#f7f64e; display:flex; align-items:center; justify-content:space-between; padding:0 10px; font-size:12px; font-weight:700; }
+    .top-actions { display:flex; align-items:center; gap:8px; }
+    .top-actions button { height:22px; padding:0 8px; border:1px solid #b9bec8; border-radius:2px; color:#3f3d8f; background:#d8dbe2; font-size:11px; font-weight:700; }
+    .top-actions .green { background:#d8dbe2; color:#3f3d8f; border-color:#b9bec8; }
+    .sections { display:flex; align-items:center; gap:3px; background:#f0f0f0; border-bottom:1px solid #ccc; padding:2px 6px; overflow:hidden; }
+    .section-label { font-size:12px; font-weight:700; }
+    .section-tab { border:1px solid #aaa; background:#fff; color:#333; height:24px; padding:0 12px; border-radius:2px; font-size:12px; font-weight:700; white-space:nowrap; }
+    .section-tab.active { background:#cbbdf4; color:#241642; border-color:#9b7fe8; }
+    .main { min-height:0; display:grid; grid-template-columns:minmax(0, 1fr) 250px; }
+    .left { min-width:0; display:grid; grid-template-rows:32px 1fr; border-right:1px solid #b7c9dc; }
+    .question-type { display:flex; justify-content:space-between; align-items:center; padding:0 10px; background:#f8f8f8; border-bottom:1px solid #ddd; font-size:13px; }
+    .marks { font-style:italic; }
+    .pos { color:#2f6f4f; font-weight:700; }
+    .neg { color:#c21b1b; font-weight:700; }
+    .question-scroll { overflow:auto; padding:12px 16px 64px; scrollbar-width:thin; scrollbar-color:#147eb3 #f0f4f8; }
+    .question-scroll::-webkit-scrollbar { width:6px; }
+    .question-scroll::-webkit-scrollbar-track { background:#f0f4f8; }
+    .question-scroll::-webkit-scrollbar-thumb { background:#b8cfe0; border-radius:3px; }
+    .q-number { font-size:13px; font-weight:700; margin-bottom:10px; }
+    .question-skeleton { border:1px solid #d7dee8; background:#f7f9fc; padding:16px; max-width:700px; }
+    .question-skeleton .bar { height:14px; margin:10px 0; background:linear-gradient(90deg,#e9edf5,#f8fafc,#e9edf5); background-size:180% 100%; animation:skeletonSweep 1.1s linear infinite; }
+    .question-skeleton .bar.short { width:45%; }
+    .question-skeleton .bar.mid { width:70%; }
+    @keyframes skeletonSweep { from { background-position:180% 0; } to { background-position:-180% 0; } }
+    .question-image { width:auto; height:auto; max-width:min(700px, calc(100vw - 330px)); max-height:72vh; object-fit:contain; display:block; image-rendering:auto; }
+    .options-list { display:flex; flex-direction:column; margin-top:10px; }
+    .option-item { display:flex; align-items:center; gap:10px; margin:0; padding:6px 4px; min-height:0; cursor:pointer; background:transparent !important; border:none !important; box-shadow:none !important; }
+    .option-item:hover, .option-item.selected { background:transparent !important; }
+    .option-ctrl { width:14px; height:14px; border:1px solid #555; border-radius:50%; background:#fff; flex:0 0 14px; margin-top:2px; position:relative; box-sizing:border-box; }
+    .option-ctrl.check { width:18px; height:18px; border-radius:3px; border:2px solid #147eb3; flex-basis:18px; }
+    .option-ctrl.selected { background:#fff; box-shadow:none; }
+    .option-ctrl.selected::after { content:""; position:absolute; top:50%; left:50%; width:7px; height:7px; border-radius:50%; background:#333; transform:translate(-50%,-50%); }
+    .option-ctrl.check.selected { background:#147eb3; }
+    .option-ctrl.check.selected::after { width:5px; height:9px; border-radius:0; border-right:2px solid #fff; border-bottom:2px solid #fff; background:transparent; transform:translate(-50%,-58%) rotate(40deg); }
+    .option-label { display:flex; align-items:center; gap:10px; min-width:0; flex:1; color:#1a1a1a; font-size:13px; line-height:1.5; pointer-events:none; }
+    .option-label strong { min-width:22px; }
+    .option-label img { max-width:min(600px, calc(100vw - 390px)); max-height:110px; width:auto; height:auto; object-fit:contain; display:block; image-rendering:auto; pointer-events:none; user-select:none; -webkit-user-drag:none; }
+    .nat-wrap { margin-top:30px; display:flex; align-items:center; gap:12px; }
+    .nat-input { width:260px; border:2px solid #999; border-radius:3px; padding:8px 10px; font-size:16px; user-select:text; }
+    .nat-pad { display:grid; grid-template-columns:repeat(4, 48px); gap:6px; margin-top:12px; }
+    .nat-pad button { height:34px; border:1px solid #aaa; background:#fff; border-radius:3px; font-weight:700; }
+    .right { min-height:0; display:grid; grid-template-rows:auto auto 1fr auto; background:var(--side); }
+    .user { display:flex; gap:12px; align-items:center; padding:10px; border-bottom:1px solid #b7c9dc; background:#f6f8fb; }
+    .avatar { width:70px; height:70px; border:1px solid #aaa; background:#e9eef3; display:grid; place-items:center; font-size:30px; color:#4e2b7b; }
+    .legend { padding:10px 12px; display:grid; grid-template-columns:1fr; gap:8px; border-bottom:1px solid #b7c9dc; font-size:12px; }
+    .legend-row { display:flex; align-items:center; gap:9px; }
+    .bubble { width:32px; height:27px; display:grid; place-items:center; color:#fff; font-weight:700; font-size:12px; border:1.5px solid #94a3b8; border-radius:4px; }
+    .answered { background:#79c94a; color:#0f2a12; border-color:#4f9f2d; }
+    .not_answered { background:#d54d22; clip-path:polygon(0 0,100% 0,100% 75%,70% 100%,30% 100%,0 75%); }
+    .not_visited { background:#e8e8e8; color:#444; border:1px solid #aaa; }
+    .review { background:#714aa5; border-color:#5f3f94; }
+    .review_marked { background:linear-gradient(135deg, #714aa5 0 55%, #79c94a 56% 100%); border-color:#5f3f94; position:relative; }
+    .review_marked::after { content:"✓"; position:absolute; right:-4px; bottom:-5px; color:#30a83a; font-size:18px; }
+    .palette-wrap { min-height:0; overflow:auto; padding:10px 12px; }
+    .palette-title { padding:6px 8px; background:#d8ccfa; color:#241642; font-weight:700; margin:-10px -12px 10px; }
+    .palette { display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; }
+    .qbtn { height:42px; border:1.5px solid #94a3b8; border-radius:4px; font-weight:700; }
+    .qbtn.active { outline:3px solid #333; }
+    .right-submit { padding:10px; border-top:1px solid #b7c9dc; }
+    .right-submit button { width:100%; height:34px; background:#c7402b; color:#fff; border:0; border-radius:3px; font-weight:800; }
+    .footer { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:6px 12px; background:#dbeafe; border-top:1px solid #b7c9dc; }
+    .footer-left, .footer-right { display:flex; gap:10px; }
+    .modal-back { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:7000; }
+    .modal { display:none; position:fixed; top:42px; left:50%; transform:translateX(-50%); width:min(900px,94vw); max-height:calc(100vh - 84px); background:#fff; border-radius:4px; box-shadow:0 5px 28px rgba(0,0,0,.45); z-index:7010; overflow:hidden; }
+    .modal-head { display:flex; justify-content:space-between; align-items:center; padding:10px 16px; color:#3f3d8f; background:#d8dbe2; font-weight:700; }
+    .modal-body { padding:20px 26px; overflow:auto; max-height:calc(100vh - 136px); font-size:13px; line-height:1.8; }
+    .dark body, body.dark { background:#111; color:#e8e8e8; }
+    body.dark .exam, body.dark .question-scroll { background:#151515; color:#eee; }
+    body.dark .question-type, body.dark .sections { background:#222; color:#eee; border-color:#444; }
+    body.dark .right { background:#1f2a36; color:#eee; }
+    body.dark .user, body.dark .footer { background:#202a34; }
+    body.dark .modal { background:#151515; color:#eee; }
+    @media (max-width:900px) {
+      .main { grid-template-columns:1fr; }
+      .right { display:none; }
+      .question-image { max-width:100%; }
+      .option-label img { max-width:calc(100vw - 110px); }
+    }
+  </style>
+</head>
+<body>
+  <div id="lobby" class="lobby">
+    <header>
+      <div><strong>Exam Lobby</strong><br><small>Candidate entry screen</small></div>
+      <div id="lobbyReg">REG ID</div>
+    </header>
+    <main class="lobby-card">
+      <h1 id="lobbyExamName">Exam</h1>
+      <div id="examEntry">
+        <form class="entry-form" id="examEntryForm" action="/candidate-entry/exam-launch" method="post" target="secureExamWindow">
+          <label for="examRegistrationId">Registration ID</label>
+          <input id="examRegistrationId" name="registrationId" autocomplete="username" required>
+          <label for="examDateOfBirth">Date of Birth</label>
+          <input id="examDateOfBirth" name="dateOfBirth" type="date" autocomplete="bday" required>
+          <button class="primary" type="submit">Verify & Launch Exam</button>
+      </form>
+      </div>
+      <div id="examLobbyControls" class="hidden">
+        <div id="verifiedCandidate" class="verified-pill">Verified candidate</div>
+      </div>
+      <div class="lobby-timer" id="lobbyTimer">--:--</div>
+      <div class="status" id="lobbyStatus">Loading...</div>
+      <button class="secondary hidden" id="fullscreenBtn" type="button">Enter Full Screen</button>
+      <button class="primary hidden" id="launchBtn" type="button" disabled>Launch Exam</button>
+      <button class="secondary hidden" id="freshStartBtn" type="button">Fresh Start</button>
+      <button class="danger hidden" id="logoutBtn" type="button">Logout</button>
+    </main>
+  </div>
+
+  <div id="exam" class="exam hidden">
+    <div class="topbar">
+      <div id="examNameTop">Exam</div>
+      <div class="top-actions">
+        <button type="button" onclick="openInstructions()">Instructions</button>
+        <button type="button" class="green" onclick="openQuestionPaper()">Question Paper</button>
+        <span>Time Left : <span id="tH">--</span>:<span id="tM">--</span>:<span id="tS">--</span></span>
+        <button type="button" onclick="toggleTheme()">Theme</button>
+      </div>
+    </div>
+    <div class="sections">
+      <span class="section-label">Sections</span>
+      <button class="section-tab" type="button" onclick="prevSection()">&lt;</button>
+      <div id="sectionTabs" style="display:flex;gap:3px;overflow:hidden"></div>
+      <button class="section-tab" type="button" onclick="nextSection()">&gt;</button>
+    </div>
+    <div class="main">
+      <section class="left">
+        <div class="question-type">
+          <span id="qType">Question Type: MCQ</span>
+          <span class="marks">Marks for correct answer: <span class="pos" id="qMarks">-</span> | Negative Marks: <span class="neg" id="qNeg">-</span></span>
+        </div>
+        <div class="question-scroll">
+          <div class="q-number" id="qNumber">Question No. 1</div>
+          <div id="qBody"></div>
+          <div id="qOptions"></div>
+        </div>
+      </section>
+      <aside class="right">
+        <div class="user">
+          <div class="avatar">ID</div>
+          <div><strong id="candidateName">Candidate</strong><br><small id="candidateReg">Registration ID</small></div>
+        </div>
+        <div class="legend">
+          <div class="legend-row"><span class="bubble answered" id="cAnswered">0</span> Answered</div>
+          <div class="legend-row"><span class="bubble not_answered" id="cNotAnswered">0</span> Not Answered</div>
+          <div class="legend-row"><span class="bubble not_visited" id="cNotVisited">0</span> Not Visited</div>
+          <div class="legend-row"><span class="bubble review" id="cReview">0</span> Marked for Review</div>
+          <div class="legend-row"><span class="bubble review_marked" id="cReviewMarked">0</span> Answered & Marked for Review</div>
+        </div>
+        <div class="palette-wrap">
+          <div class="palette-title" id="paletteTitle">Choose a Question</div>
+          <div class="palette" id="palette"></div>
+        </div>
+        <div class="right-submit"><button id="submitBtn" type="button" onclick="openSubmit()">Submit</button></div>
+      </aside>
+    </div>
+    <div class="footer">
+      <div class="footer-left">
+        <button class="primary" type="button" onclick="markReview()">Mark for Review & Next</button>
+        <button class="secondary" type="button" onclick="clearResponse()">Clear Response</button>
+      </div>
+      <div class="footer-right">
+        <button class="secondary" type="button" onclick="previousQuestion()">Previous</button>
+        <button class="primary" type="button" onclick="saveNext()">Save & Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalBack" class="modal-back" onclick="closeModals()"></div>
+  <div id="modal" class="modal">
+    <div class="modal-head"><span id="modalTitle">Modal</span><button class="danger" type="button" onclick="closeModals()">Close</button></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+
+  <script src="/assets/ui-guard.js"></script>
+  <script src="/assets/candidate-error.js"></script>
+  <script>
+    const bootParams = new URLSearchParams(window.location.search);
+    if (bootParams.has('fresh')) {
+      sessionStorage.removeItem('candidateExamAuth');
+      sessionStorage.removeItem('candidateDashboardData');
+      localStorage.removeItem('candidateExamAuth');
+      localStorage.removeItem('candidateDashboardData');
+      localStorage.removeItem('candidateDashboardPassword');
+    }
+    let candidate = JSON.parse(sessionStorage.getItem('candidateDashboardData') || 'null');
+    let examAuth = JSON.parse(sessionStorage.getItem('candidateExamAuth') || 'null');
+    let paper = null, examData = null, curSec = 0, curQ = 0, timerInt = null, timerSec = 0, submittingExam = false, examStarted = false, submitReason = 'manual';
+    let questionRenderSeq = 0;
+    let serverExamMode = false;
+    let serverExamSaving = false;
+    let serverExamSaveQueue = [];
+    let serverExamSaveIdlePromise = null;
+    let serverExamSaveIdleResolve = null;
+    const serverExamLocalRevisions = {};
+    const serverExamPendingSaveTimers = {};
+    const SERVER_NAT_INPUT_SAVE_DELAY_MS = 320;
+    const state = {};
+
+    function esc(v) { return String(v ?? '').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+    async function postJson(url, payload) {
+      const res = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json', 'X-Candidate-CSRF': await candidateSecurityToken() }, body:JSON.stringify(payload) });
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
+      if (!res.ok) throw new Error(data.detail || data.message || text || res.statusText);
+      return data;
+    }
+    async function candidateSecurityToken() {
+      if (window.__candidateSecurityTokenCache) return window.__candidateSecurityTokenCache;
+      const response = await fetch('/api/public/candidate-security-token', { cache: 'no-store' });
+      const data = await response.json();
+      window.__candidateSecurityTokenCache = data.token || '';
+      return window.__candidateSecurityTokenCache;
+    }
+    function key(si, qi) { return si + ':' + qi; }
+    function isImg(v) { return typeof v === 'string' && /^data:image\//.test(v); }
+    function serverStateRevision(stateKey) { return serverExamLocalRevisions[stateKey] || 0; }
+    function bumpServerStateRevision(stateKey) {
+      const next = serverStateRevision(stateKey) + 1;
+      serverExamLocalRevisions[stateKey] = next;
+      return next;
+    }
+    function clearScheduledServerSave(stateKey) {
+      const timer = serverExamPendingSaveTimers[stateKey];
+      if (!timer) return;
+      clearTimeout(timer);
+      delete serverExamPendingSaveTimers[stateKey];
+    }
+    function scheduleServerCurrentStateSave(si = curSec, qi = curQ, delayMs = SERVER_NAT_INPUT_SAVE_DELAY_MS) {
+      const stateKey = key(si, qi);
+      clearScheduledServerSave(stateKey);
+      serverExamPendingSaveTimers[stateKey] = setTimeout(() => {
+        delete serverExamPendingSaveTimers[stateKey];
+        saveServerCurrentState(si, qi).catch((error) => console.warn('Server answer autosave failed', error));
+      }, delayMs);
+    }
+    async function flushScheduledServerCurrentState(si = curSec, qi = curQ) {
+      const stateKey = key(si, qi);
+      clearScheduledServerSave(stateKey);
+      await saveServerCurrentState(si, qi);
+    }
+    const questionActivity = {};
+    let activeQuestionKey = null;
+    let activeQuestionEnteredAt = Date.now();
+
+    function nowIso() { return new Date().toISOString(); }
+    function normalizeAnswer(value) { return value == null ? '' : String(value); }
+    function ensureActivity(k, si, qi) {
+      if (!questionActivity[k]) {
+        const row = state[k] || { answer:null, status:'not_visited' };
+        questionActivity[k] = {
+          sectionIndex: si,
+          questionIndex: qi,
+          firstViewedAt: nowIso(),
+          lastViewedAt: nowIso(),
+          timeSpentMs: 0,
+          viewCount: 0,
+          revisitCount: 0,
+          firstAnsweredAt: '',
+          lastAnsweredAt: '',
+          answerTimeMs: 0,
+          answerChangedCount: 0,
+          markedForReviewCount: 0,
+          finalStatus: row.status || 'not_visited',
+          lastAnswer: normalizeAnswer(row.answer),
+          lastStatus: row.status || 'not_visited'
+        };
+      }
+      return questionActivity[k];
+    }
+    function enterQuestion(si, qi) {
+      const k = key(si, qi);
+      activeQuestionKey = k;
+      activeQuestionEnteredAt = Date.now();
+      const activity = ensureActivity(k, si, qi);
+      activity.viewCount += 1;
+      activity.revisitCount = Math.max(0, activity.viewCount - 1);
+      activity.lastViewedAt = nowIso();
+      scanQuestionActivity();
+    }
+    function leaveQuestion() {
+      if (!activeQuestionKey) return;
+      const activity = ensureActivity(activeQuestionKey, curSec, curQ);
+      activity.timeSpentMs += Math.max(0, Date.now() - activeQuestionEnteredAt);
+      activeQuestionEnteredAt = Date.now();
+    }
+    function scanQuestionActivity() {
+      Object.entries(state).forEach(([k, row]) => {
+        const [si, qi] = k.split(':').map(Number);
+        const activity = ensureActivity(k, si, qi);
+        const answer = normalizeAnswer(row.answer);
+        const status = row.status || 'not_visited';
+        if (answer && !activity.firstAnsweredAt) {
+          activity.firstAnsweredAt = nowIso();
+          activity.answerTimeMs = Math.max(0, Date.parse(activity.firstAnsweredAt) - Date.parse(activity.firstViewedAt || activity.firstAnsweredAt));
+        }
+        if (answer && answer !== activity.lastAnswer) {
+          if (activity.lastAnswer) activity.answerChangedCount += 1;
+          activity.lastAnsweredAt = nowIso();
+        }
+        if ((status === 'review' || status === 'review_marked') && status !== activity.lastStatus) {
+          activity.markedForReviewCount += 1;
+        }
+        activity.finalStatus = status;
+        activity.lastAnswer = answer;
+        activity.lastStatus = status;
+      });
+    }
+    function activitySnapshot(si, qi, status) {
+      scanQuestionActivity();
+      const activity = ensureActivity(key(si, qi), si, qi);
+      return {
+        timeSpentMs: Math.round(activity.timeSpentMs || 0),
+        revisitCount: Math.max(0, activity.revisitCount || 0),
+        firstViewedAt: activity.firstViewedAt || '',
+        lastViewedAt: activity.lastViewedAt || '',
+        firstAnsweredAt: activity.firstAnsweredAt || '',
+        lastAnsweredAt: activity.lastAnsweredAt || '',
+        answerTimeMs: Math.round(activity.answerTimeMs || 0),
+        answerChangedCount: activity.answerChangedCount || 0,
+        markedForReviewCount: activity.markedForReviewCount || 0,
+        finalStatus: status || activity.finalStatus || 'not_visited'
+      };
+    }
+    function flushQuestionActivity() {
+      leaveQuestion();
+      scanQuestionActivity();
+    }
+
+    function requireCandidate() {
+      if (!candidate || !examAuth) {
+        renderExamEntry();
+        return false;
+      }
+      renderExamIdentity();
+      return true;
+    }
+
+    function renderExamEntry() {
+      document.getElementById('examEntry').classList.remove('hidden');
+      document.getElementById('examLobbyControls').classList.add('hidden');
+      document.getElementById('fullscreenBtn').classList.add('hidden');
+      document.getElementById('launchBtn').classList.add('hidden');
+      document.getElementById('lobbyTimer').classList.add('hidden');
+      document.getElementById('lobbyReg').textContent = 'EXAM ENTRY';
+      document.getElementById('lobbyExamName').textContent = 'Exam Entry';
+      document.getElementById('lobbyStatus').textContent = 'Enter candidate details.';
+      if (candidate?.registrationId) document.getElementById('examRegistrationId').value = candidate.registrationId;
+      if (candidate?.dateOfBirth) document.getElementById('examDateOfBirth').value = candidate.dateOfBirth;
+    }
+
+    function renderExamIdentity() {
+      document.getElementById('examEntry').classList.add('hidden');
+      document.getElementById('examLobbyControls').classList.remove('hidden');
+      document.getElementById('fullscreenBtn').classList.add('hidden');
+      document.getElementById('launchBtn').classList.remove('hidden');
+      document.getElementById('launchBtn').textContent = 'Verify & Launch Exam';
+      document.getElementById('freshStartBtn').classList.add('hidden');
+      document.getElementById('logoutBtn').classList.add('hidden');
+      document.getElementById('lobbyTimer').classList.remove('hidden');
+      document.getElementById('lobbyReg').textContent = candidate.registrationId;
+      document.getElementById('lobbyExamName').textContent = candidate.examName || candidate.examCode || 'Exam';
+      document.getElementById('candidateName').textContent = candidate.fullName || 'Candidate';
+      document.getElementById('candidateReg').textContent = candidate.registrationId;
+      document.getElementById('examNameTop').textContent = candidate.examName || candidate.examCode || 'Exam';
+      document.getElementById('verifiedCandidate').textContent = 'Verified: ' + candidate.registrationId;
+    }
+
+    async function refreshLobby() {
+      try {
+        candidate = await postJson('/api/candidate/exam-login', examAuth);
+        sessionStorage.setItem('candidateDashboardData', JSON.stringify(candidate));
+        renderExamIdentity();
+        renderLobby();
+      } catch (e) {
+        document.getElementById('lobbyStatus').textContent = 'Lobby refresh failed\n' + e.message;
+      }
+    }
+
+    function renderLobby() {
+      const start = candidate.examStartAt ? new Date(candidate.examStartAt) : null;
+      const canLaunch = candidate.examLobbyAvailable && candidate.questionPaperUploaded && candidate.examLaunchEnabled;
+      document.getElementById('launchBtn').disabled = !examAuth || !canLaunch;
+      document.getElementById('lobbyStatus').textContent = [
+        'Registration ID: ' + candidate.registrationId,
+        'Candidate auth: verified with database',
+        'Exam lobby: ' + (candidate.examLobbyAvailable ? 'enabled' : 'not enabled by admin yet'),
+        'Question paper: ' + (candidate.questionPaperUploaded ? 'uploaded' : 'not uploaded'),
+        'Manual launch: ' + (candidate.examLaunchEnabled ? 'enabled - you can start now' : 'disabled by admin'),
+        start ? 'Scheduled time reference: ' + start.toLocaleString() : 'Scheduled time reference: not configured',
+        canLaunch ? 'Ready: use Verify & Launch Exam to open the exam viewer.' : 'Waiting: admin must enable lobby, upload paper, and enable launch before the exam opens.',
+        candidate.examAccessMessage || ''
+      ].join('\\n');
+      if (canLaunch) {
+        document.getElementById('lobbyTimer').textContent = 'READY';
+        return;
+      }
+      if (!start) { document.getElementById('lobbyTimer').textContent = 'WAIT'; return; }
+      const now = new Date();
+      const diff = Math.max(0, Math.floor((start.getTime() - now.getTime()) / 1000));
+      document.getElementById('lobbyTimer').textContent = diff ? String(Math.floor(diff / 60)).padStart(2,'0') + ':' + String(diff % 60).padStart(2,'0') : 'LIVE';
+    }
+
+    async function fullscreen() {
+      if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen().catch(() => {});
+    }
+
+    async function launchExam() {
+      if (!examAuth) {
+        renderExamEntry();
+        return;
+      }
+      const popup = window.open('about:blank', 'secureExamWindow', securePopupFeatures());
+      if (!popup) {
+        document.getElementById('lobbyStatus').textContent = 'Popup was blocked. Allow popups for this site, then press Verify & Launch Exam again.';
+        return;
+      }
+      try {
+        document.getElementById('lobbyStatus').textContent = 'Creating secure exam session...';
+        const session = await postJson('/api/candidate/exam-viewer-session', {
+          registrationId: examAuth.registrationId,
+          dateOfBirth: examAuth.dateOfBirth
+        });
+        popup.location.href = session.url;
+        popup.focus();
+      } catch (error) {
+        try { popup.close(); } catch (_) {}
+        handleLaunchError(error);
+      }
+    }
+
+    async function startInternalExam(auth) {
+      examAuth = auth;
+      sessionStorage.setItem('candidateExamAuth', JSON.stringify(examAuth));
+      launchExam();
+    }
+
+    async function startSecureExamWindow() {
+      renderExamIdentity();
+      document.getElementById('lobby').classList.add('hidden');
+      document.getElementById('exam').classList.remove('hidden');
+      if (bootParams.has('secureWindow')) {
+        history.replaceState(null, '', '/candidate-secure-exam-window');
+      }
+      installExamWindowGuards();
+      installSecureWindowHardGuards();
+      await initExam();
+    }
+
+    function installSecureWindowHardGuards() {
+      if (!bootParams.has('secureWindow')) return;
+      window.addEventListener('pageshow', (event) => {
+        if (event.persisted) location.replace('/candidate-error.html?reason=session-closed');
+      });
+      document.addEventListener('keydown', (event) => {
+        const pressed = String(event.key || '').toLowerCase();
+        if (pressed === 'f5' || ((event.ctrlKey || event.metaKey) && pressed === 'r')) {
+          event.preventDefault();
+        }
+      }, true);
+    }
+
+    function handleLaunchError(error) {
+      const message = error && error.message ? error.message : 'Could not launch the exam.';
+      const reason = candidateErrorReasonFromMessage(message);
+      if (reason === 'auth-mismatch' || reason === 'session-closed') {
+        openCandidateError(reason);
+        return;
+      }
+      const status = document.getElementById('lobbyStatus');
+      status.innerHTML = '<span style="color:#b00020;font-weight:900">Launch failed</span><br>'
+        + esc(message)
+        + '<br><br>No response sheet was submitted. Check admin launch/paper settings, then press Verify & Launch again.';
+    }
+
+    function firstValue(obj, keys, fallback = '') {
+      for (const key of keys) {
+        const value = obj && obj[key];
+        if (value !== undefined && value !== null && String(value).trim() !== '') return value;
+      }
+      return fallback;
+    }
+
+    function displayQuestionImage(q) {
+      return firstValue(q, [
+        'question_image',
+        'questionImage',
+        'question_png',
+        'image',
+        'questionBaseImage',
+        'question_base_image',
+        'baseImage',
+        'questionDisplayImage',
+        'question_display_image',
+        'displayImage',
+        'display_image',
+        'questionViewerImage',
+        'question_viewer_image',
+        'viewerImage',
+        'viewer_image'
+      ], '');
+    }
+
+    function toExamData(data) {
+      const questions = extractPaperQuestions(data);
+      const map = new Map();
+      questions.forEach((q, i) => {
+        const sec = firstValue(q, ['section', 'section_name', 'sectionName', 'subject', 'subject_name', 'subjectName'], 'Section 1');
+        if (!map.has(sec)) map.set(sec, []);
+        map.get(sec).push({
+          rawId: firstValue(q, ['question_id', 'questionId', 'bank_question_id', 'bankQuestionId', 'qid', 'id'], 'Q' + (i + 1)),
+          id: firstValue(q, ['question_number', 'questionNumber', 'number', 'display_number', 'displayNumber'], 'Q.' + (map.get(sec).length + 1)),
+          type: normalizeQuestionType(q),
+          marks: firstValue(q, ['marks', 'max_marks', 'maxMarks', 'positive_marks', 'positiveMarks', 'positive_mark', 'positiveMark', 'question_marks', 'questionMarks', 'maximum_marks', 'maximumMarks', 'weight', 'weightage', 'score', 'mark'], '-'),
+          neg: firstValue(q, ['negative_marks', 'negativeMarks', 'neg_marks', 'negMarks', 'negative', 'negative_mark', 'negativeMark', 'negative_score', 'negativeScore'], '0'),
+          questionImage: displayQuestionImage(q),
+          body: firstValue(q, ['body', 'question_text', 'questionText', 'content', 'text', 'statement'], ''),
+          options: normalizeOptions(q)
+        });
+      });
+      return { sections:[...map.entries()].map(([name, questions]) => ({ name, questions })) };
+    }
+
+    function extractPaperQuestions(data) {
+      const root = parseJsonMaybe(data);
+      const fromSections = extractSectionQuestions(root);
+      if (fromSections.length) return fromSections;
+      const direct = firstQuestionArray(root);
+      if (direct.length) return direct;
+      if (root && typeof root === 'object') {
+        for (const key of ['paper', 'questionPaper', 'question_paper', 'selectedPaper', 'selected_paper', 'payload', 'data', 'examPaper', 'exam_paper']) {
+          const nested = root[key];
+          const nestedSections = extractSectionQuestions(nested);
+          if (nestedSections.length) return nestedSections;
+          const nestedQuestions = firstQuestionArray(nested);
+          if (nestedQuestions.length) return nestedQuestions;
+        }
+      }
+      return [];
+    }
+
+    function parseJsonMaybe(value) {
+      if (typeof value !== 'string') return value;
+      try {
+        return JSON.parse(value);
+      } catch (_) {
+        return value;
+      }
+    }
+
+    function extractSectionQuestions(root) {
+      if (!root || typeof root !== 'object' || !Array.isArray(root.sections)) return [];
+      const out = [];
+      root.sections.forEach((section, sectionIndex) => {
+        const sectionName = firstValue(section, ['name', 'section', 'section_name', 'sectionName', 'subject', 'subject_name', 'subjectName'], 'Section ' + (sectionIndex + 1));
+        const list = arrayFrom(section && (section.questions || section.qs || section.items || section.rows || section.questionRows));
+        list.forEach((question) => {
+          if (isQuestionLike(question)) {
+            out.push({ ...question, section: firstValue(question, ['section', 'section_name', 'sectionName'], sectionName) });
+          }
+        });
+      });
+      return out;
+    }
+
+    function firstQuestionArray(root) {
+      if (!root || typeof root !== 'object') return [];
+      for (const key of ['questions', 'selectedQuestions', 'selected_questions', 'paperQuestions', 'paper_questions', 'questionRows', 'question_rows', 'qs', 'items', 'rows']) {
+        const list = arrayFrom(root[key]).filter(isQuestionLike);
+        if (list.length) return list;
+      }
+      return [];
+    }
+
+    function arrayFrom(value) {
+      if (Array.isArray(value)) return value;
+      if (value && typeof value === 'object') return Object.values(value);
+      return [];
+    }
+
+    function isQuestionLike(value) {
+      if (!value || typeof value !== 'object') return false;
+      return Boolean(
+        value.options || value.question_image || value.questionImage || value.question_viewer_image || value.questionViewerImage ||
+        value.question_text || value.questionText || value.body || value.content || value.statement ||
+        value.question_id || value.questionId || value.qid || value.id
+      );
+    }
+
+    function normalizeOptions(q) {
+      const options = q && (q.options || q.choices || q.option_list || q.optionList || q.optionMap || q.option_map);
+      const out = {};
+      if (Array.isArray(options)) {
+        options.forEach((value, index) => out[String.fromCharCode(65 + index)] = optionValue(value));
+      } else if (options && typeof options === 'object') {
+        Object.entries(options).forEach(([k, v]) => {
+          const key = String(k).toUpperCase();
+          if (/^[A-Z]$/.test(key)) out[key] = optionValue(v);
+        });
+      }
+      ['A', 'B', 'C', 'D', 'E'].forEach((letter) => {
+        if (out[letter] !== undefined) return;
+        const lower = letter.toLowerCase();
+        const value = firstValue(q, [
+          'option_' + lower, 'option' + letter, 'option' + lower,
+          lower, letter, 'choice_' + lower, 'choice' + letter
+        ], '');
+        if (value) out[letter] = value;
+      });
+      return out;
+    }
+
+    function optionValue(v) {
+      if (typeof v === 'string') return v;
+      if (v && typeof v === 'object') {
+        return firstValue(v, [
+          'viewerImage',
+          'optionViewerImage',
+          'option_viewer_image',
+          'viewer_image',
+          'displayImage',
+          'display_image',
+          'optionDisplayImage',
+          'option_display_image',
+          'optionBaseImage',
+          'option_base_image',
+          'baseImage',
+          'image',
+          'option_image',
+          'optionImage',
+          'text',
+          'label'
+        ], '');
+      }
+      return v ?? '';
+    }
+
+    function normalizeQuestionType(q) {
+      let raw = String(firstValue(q, [
+        'question_type', 'questionType', 'type',
+        'answer_type', 'answerType',
+        'question_nature', 'questionNature',
+        'response_type', 'responseType',
+        'selection_type', 'selectionType'
+      ], 'MCQ')).toUpperCase().replace(/[_-]+/g, ' ').trim();
+      if (!raw || raw === 'MCQ' || raw === 'QUESTION') {
+        const meta = q && (q.selection_meta || q.selectionMeta || q.metadata || q.meta);
+        const nested = meta && typeof meta === 'object'
+          ? firstValue(meta, ['question_type', 'questionType', 'type', 'answer_type', 'answerType', 'selection_type', 'selectionType'], '')
+          : '';
+        raw = String(nested || raw || 'MCQ').toUpperCase().replace(/[_-]+/g, ' ').trim();
+      }
+      if (raw.includes('NAT') || raw.includes('NUM')) return 'NAT';
+      if (raw.includes('MSQ')
+        || raw.includes('MULTI SELECT')
+        || raw.includes('MULTISELECT')
+        || raw.includes('MULTIPLE SELECT')
+        || raw.includes('MULTIPLE ANSWER')
+        || raw.includes('SELECT ALL')) return 'MSQ';
+      if (q && (q.multiple === true || q.multiSelect === true || q.multipleAnswers === true || q.allowMultiple === true || Number(q.maxSelections || q.max_selections || 0) > 1)) return 'MSQ';
+      if (q && ['correct_options', 'correctOptions', 'correct_option_ids', 'correctOptionIds', 'answers', 'answerOptions', 'answer_options'].some((key) => Array.isArray(q[key]) && q[key].filter(Boolean).length > 1)) return 'MSQ';
+      return 'MCQ';
+    }
+
+    function isMsqQuestion(q) {
+      return normalizeQuestionType(q || {}) === 'MSQ';
+    }
+
+    function safeExamStatus(value) {
+      return ['answered', 'not_answered', 'not_visited', 'review', 'review_marked'].includes(value) ? value : 'not_visited';
+    }
+
+    function serverQuestionToLocal(row) {
+      const raw = row && row.question && typeof row.question === 'object' ? row.question : {};
+      return {
+        displayIndex: Number(row.displayIndex || raw.displayIndex || 0),
+        rawId: firstValue(raw, ['question_id', 'questionId', 'bank_question_id', 'bankQuestionId', 'qid', 'id'], row.questionId || ''),
+        id: row.displayQuestionId || firstValue(raw, ['question_number', 'questionNumber', 'number', 'display_number', 'displayNumber'], 'Q.' + (row.displayIndex || '')),
+        type: normalizeQuestionType(raw),
+        marks: firstValue(raw, ['marks', 'max_marks', 'maxMarks', 'positive_marks', 'positiveMarks', 'positive_mark', 'positiveMark', 'question_marks', 'questionMarks', 'maximum_marks', 'maximumMarks', 'weight', 'weightage', 'score', 'mark'], '-'),
+        neg: firstValue(raw, ['negative_marks', 'negativeMarks', 'neg_marks', 'negMarks', 'negative', 'negative_mark', 'negativeMark', 'negative_score', 'negativeScore'], '0'),
+        questionImage: displayQuestionImage(raw),
+        body: firstValue(raw, ['body', 'question_text', 'questionText', 'content', 'text', 'statement'], ''),
+        options: normalizeOptions(raw)
+      };
+    }
+
+    function serverStateToLocal(serverState, q) {
+      const st = serverState || {};
+      const isNat = q.type === 'NAT';
+      const optionAnswer = Array.isArray(st.markedOptionIds) ? st.markedOptionIds.filter(Boolean).join(',') : '';
+      return {
+        answer: isNat ? (st.natAnswer || null) : (optionAnswer || null),
+        status: safeExamStatus(st.status)
+      };
+    }
+
+    async function initServerExam() {
+      const token = examAuth && examAuth.examSessionToken;
+      if (!token) throw new Error('No secure exam session token.');
+      const boot = await postJson('/api/candidate/server-exam/bootstrap', { examSessionToken: token });
+      if (!boot || !Array.isArray(boot.questions) || !boot.questions.length) {
+        throw new Error('Server question ledger is empty.');
+      }
+      const sectionMap = new Map();
+      boot.questions.forEach((summary, index) => {
+        const sectionName = summary.section || 'Section 1';
+        if (!sectionMap.has(sectionName)) sectionMap.set(sectionName, []);
+        sectionMap.get(sectionName).push({
+          displayIndex: Number(summary.displayIndex || index + 1),
+          rawId: '',
+          id: summary.displayQuestionId || ('Q.' + (index + 1)),
+          type: 'MCQ',
+          marks: '-',
+          neg: '0',
+          questionImage: '',
+          body: '',
+          options: {}
+        });
+      });
+      examData = { sections:[...sectionMap.entries()].map(([name, questions]) => ({ name, questions })) };
+      Object.keys(state).forEach((k) => delete state[k]);
+      examData.sections.forEach((sec, si) => sec.questions.forEach((q, qi) => {
+        const summary = boot.questions.find((item) => Number(item.displayIndex) === Number(q.displayIndex)) || {};
+        state[key(si, qi)] = { answer:null, status:safeExamStatus(summary.status) };
+      }));
+      serverExamMode = true;
+      examStarted = true;
+      buildSections();
+      startTimer();
+      await goTo(0, 0);
+    }
+
+    function serverDisplayIndex(si, qi) {
+      const q = examData && examData.sections && examData.sections[si] && examData.sections[si].questions[qi];
+      return Number(q && q.displayIndex ? q.displayIndex : qi + 1);
+    }
+
+    async function loadServerQuestion(si, qi, renderSeq) {
+      const row = await postJson('/api/candidate/server-exam/question', {
+        examSessionToken: examAuth.examSessionToken,
+        displayIndex: serverDisplayIndex(si, qi)
+      });
+      if (renderSeq !== questionRenderSeq) return null;
+      const q = serverQuestionToLocal(row);
+      examData.sections[si].questions[qi] = q;
+      state[key(si, qi)] = serverStateToLocal(row.state, q);
+      return q;
+    }
+
+    async function initExam() {
+      if (examAuth?.examSessionToken) {
+        try {
+          await initServerExam();
+          return;
+        } catch (error) {
+          console.warn('Server-driven exam bootstrap failed; falling back to embedded paper.', error);
+          serverExamMode = false;
+        }
+      }
+      examStarted = true;
+      examData.sections.forEach((sec, si) => sec.questions.forEach((q, qi) => state[key(si, qi)] = { answer:null, status:'not_visited' }));
+      buildSections();
+      startTimer();
+      goTo(0, 0);
+    }
+
+    function installExamWindowGuards() {
+      window.addEventListener('beforeunload', (event) => {
+        if (!examStarted || submittingExam || candidate?.responseSubmitted) return;
+        event.preventDefault();
+        event.returnValue = '';
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && examStarted && !submittingExam && !candidate?.responseSubmitted) {
+          sessionStorage.setItem('candidateExamLastHiddenAt', String(Date.now()));
+        }
+      });
+    }
+
+    function buildSections() {
+      document.getElementById('sectionTabs').innerHTML = examData.sections.map((sec, i) =>
+        '<button class="section-tab ' + (i === curSec ? 'active' : '') + '" onclick="switchSection(' + i + ')">' + esc(sec.name) + '</button>'
+      ).join('');
+    }
+    function switchSection(si) { curSec = si; curQ = 0; buildSections(); goTo(si, 0); }
+    function prevSection() { if (curSec > 0) switchSection(curSec - 1); }
+    function nextSection() { if (curSec < examData.sections.length - 1) switchSection(curSec + 1); }
+
+    async function goTo(si, qi) {
+      const leavingCurrentQuestion = activeQuestionKey !== null && (si !== curSec || qi !== curQ);
+      if (serverExamMode && leavingCurrentQuestion) {
+        try {
+          await flushScheduledServerCurrentState(curSec, curQ);
+        } catch (error) {
+          console.warn('Server navigation save failed', error);
+        }
+      }
+      leaveQuestion();
+      curSec = si; curQ = qi;
+      const renderSeq = ++questionRenderSeq;
+      let q = examData.sections[si].questions[qi];
+      let r = state[key(si, qi)] || { answer:null, status:'not_visited' };
+      if (r.status === 'not_visited') r.status = 'not_answered';
+      state[key(si, qi)] = r;
+      document.getElementById('qType').textContent = 'Question Type: ' + q.type;
+      document.getElementById('qMarks').textContent = q.marks;
+      document.getElementById('qNeg').textContent = String(q.neg) === '0' ? 'None' : q.neg;
+      document.getElementById('qNumber').textContent = 'Question No. ' + q.id;
+      document.getElementById('paletteTitle').textContent = examData.sections[si].name;
+      const scroller = document.querySelector('.question-scroll');
+      if (scroller) scroller.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.getElementById('qBody').innerHTML = questionSkeletonHtml();
+      document.getElementById('qOptions').innerHTML = '';
+      buildPalette();
+      updateCounts();
+      if (serverExamMode) {
+        try {
+          q = await loadServerQuestion(si, qi, renderSeq);
+          if (!q) return;
+          r = state[key(si, qi)] || { answer:null, status:'not_answered' };
+          document.getElementById('qType').textContent = 'Question Type: ' + q.type;
+          document.getElementById('qMarks').textContent = q.marks;
+          document.getElementById('qNeg').textContent = String(q.neg) === '0' ? 'None' : q.neg;
+          document.getElementById('qNumber').textContent = 'Question No. ' + q.id;
+          buildPalette();
+          updateCounts();
+        } catch (error) {
+          if (renderSeq !== questionRenderSeq) return;
+          document.getElementById('qBody').innerHTML = '<div style="border:1px solid #c7402b;padding:14px;color:#8b1b1b;background:#fff7f7"><b>Question load failed.</b><br>' + esc(error.message || 'Please try again.') + '</div>';
+          document.getElementById('qOptions').innerHTML = '';
+          return;
+        }
+      }
+      requestAnimationFrame(() => {
+        if (renderSeq !== questionRenderSeq) return;
+        document.getElementById('qBody').innerHTML = q.questionImage ? '<img class="question-image" alt="Question" src="' + esc(q.questionImage) + '">' : '<div>' + (q.body || '<em>No question content.</em>') + '</div>';
+        renderOptions(q, r);
+        enterQuestion(si, qi);
+      });
+    }
+
+    function questionSkeletonHtml() {
+      return '<div class="question-skeleton" aria-live="polite" aria-label="Loading question">'
+        + '<div class="bar mid"></div><div class="bar"></div><div class="bar short"></div>'
+        + '</div>';
+    }
+
+    function renderOptions(q, r) {
+      const area = document.getElementById('qOptions');
+      if (q.type === 'NAT') {
+        area.innerHTML = '<div class="nat-wrap"><strong>Answer:</strong><input id="natInput" class="nat-input" value="' + esc(r.answer || '') + '" inputmode="decimal"></div>'
+          + '<div class="nat-pad">' + ['7','8','9','Back','4','5','6','Clear','1','2','3','-','0','.'].map(x => '<button type="button" onclick="natKey(\'' + x + '\')">' + x + '</button>').join('') + '</div>';
+        document.getElementById('natInput').addEventListener('input', e => setAnswer(e.target.value.trim() || null));
+        return;
+      }
+      const selected = r.answer ? String(r.answer).split(',') : [];
+      area.innerHTML = '<div class="options-list">' + Object.entries(q.options).map(([letter, val]) => {
+        const chosen = selected.includes(letter);
+        const ctrlClass = 'option-ctrl ' + (isMsqQuestion(q) ? 'check ' : '') + (chosen ? 'selected' : '');
+        const content = isImg(val) ? '<img src="' + esc(val) + '" alt="Option ' + esc(letter) + '">' : '<span>' + esc(val || letter) + '</span>';
+        return '<div class="option-item" onclick="pickOption(\'' + letter + '\')"><span class="' + ctrlClass + '"></span><div class="option-label"><strong>' + esc(letter) + '.</strong>' + content + '</div></div>';
+      }).join('') + '</div>';
+    }
+
+    function pickOption(letter) {
+      const q = examData.sections[curSec].questions[curQ];
+      const r = state[key(curSec, curQ)];
+      if (isMsqQuestion(q)) {
+        const arr = r.answer ? r.answer.split(',') : [];
+        const idx = arr.indexOf(letter);
+        if (idx >= 0) arr.splice(idx, 1); else arr.push(letter);
+        setAnswer(arr.length ? arr.sort().join(',') : null);
+      } else {
+        setAnswer(r.answer === letter ? null : letter);
+      }
+      if (serverExamMode) {
+        renderOptions(q, r);
+        return;
+      }
+      goTo(curSec, curQ);
+    }
+    function setAnswer(value) {
+      const stateKey = key(curSec, curQ);
+      const r = state[stateKey];
+      r.answer = value;
+      r.status = value ? 'answered' : 'not_answered';
+      if (serverExamMode) bumpServerStateRevision(stateKey);
+      scanQuestionActivity();
+      buildPalette(); updateCounts();
+      if (serverExamMode) {
+        const q = examData?.sections?.[curSec]?.questions?.[curQ];
+        if (q?.type === 'NAT') scheduleServerCurrentStateSave(curSec, curQ);
+        else saveServerCurrentState(curSec, curQ).catch((error) => console.warn('Server answer save failed', error));
+      }
+    }
+    function natKey(x) {
+      const input = document.getElementById('natInput');
+      if (!input) return;
+      if (x === 'Back') input.value = input.value.slice(0, -1);
+      else if (x === 'Clear') input.value = '';
+      else if (x === '.' && input.value.includes('.')) return;
+      else if (x === '-') input.value = input.value.startsWith('-') ? input.value.slice(1) : '-' + input.value;
+      else input.value += x;
+      setAnswer(input.value.trim() || null);
+    }
+
+    function captureServerSaveSnapshot(si = curSec, qi = curQ) {
+      if (!serverExamMode || !examAuth?.examSessionToken || !examData?.sections?.[si]?.questions?.[qi]) return null;
+      flushQuestionActivity();
+      const q = examData.sections[si].questions[qi];
+      const r = state[key(si, qi)] || { answer:null, status:'not_answered' };
+      const isNat = q.type === 'NAT';
+      const answerValue = r.answer == null ? '' : String(r.answer);
+      return {
+        stateKey: key(si, qi),
+        q,
+        revision: serverStateRevision(key(si, qi)),
+        displayIndex: serverDisplayIndex(si, qi),
+        markedOptionIds: isNat || !answerValue ? [] : answerValue.split(',').filter(Boolean),
+        natAnswer: isNat ? answerValue : '',
+        status: r.status,
+        markedForReview: r.status === 'review' || r.status === 'review_marked',
+        timeSpentMs: activitySnapshot(si, qi, r.status).timeSpentMs || 0,
+        activity: activitySnapshot(si, qi, r.status)
+      };
+    }
+
+    function ensureServerExamSaveIdlePromise() {
+      if (!serverExamSaveIdlePromise) {
+        serverExamSaveIdlePromise = new Promise((resolve) => {
+          serverExamSaveIdleResolve = resolve;
+        });
+      }
+      return serverExamSaveIdlePromise;
+    }
+
+    function enqueueServerExamSave(snapshot) {
+      if (!snapshot) return;
+      const existingIndex = serverExamSaveQueue.findIndex((item) => item && item.stateKey === snapshot.stateKey);
+      if (existingIndex >= 0) serverExamSaveQueue[existingIndex] = snapshot;
+      else serverExamSaveQueue.push(snapshot);
+    }
+
+    function resolveServerExamSaveIdle() {
+      if (serverExamSaving || serverExamSaveQueue.length) return;
+      if (serverExamSaveIdleResolve) {
+        const resolve = serverExamSaveIdleResolve;
+        serverExamSaveIdleResolve = null;
+        serverExamSaveIdlePromise = null;
+        resolve();
+      }
+    }
+
+    async function flushServerExamSaves() {
+      if (!serverExamSaving && !serverExamSaveQueue.length) return;
+      await ensureServerExamSaveIdlePromise();
+    }
+
+    async function persistServerStateSnapshot(snapshot) {
+      if (!snapshot) return;
+      if (serverExamSaving) {
+        ensureServerExamSaveIdlePromise();
+        enqueueServerExamSave(snapshot);
+        return;
+      }
+      ensureServerExamSaveIdlePromise();
+      serverExamSaving = true;
+      try {
+        const answer = await postJson('/api/candidate/server-exam/answer', {
+          examSessionToken: examAuth.examSessionToken,
+          displayIndex: snapshot.displayIndex,
+          markedOptionIds: snapshot.markedOptionIds,
+          natAnswer: snapshot.natAnswer,
+          status: snapshot.status,
+          markedForReview: snapshot.markedForReview,
+          timeSpentMs: snapshot.timeSpentMs,
+          activity: snapshot.activity
+        });
+        if (answer && answer.state && snapshot.revision === serverStateRevision(snapshot.stateKey)) {
+          state[snapshot.stateKey] = serverStateToLocal(answer.state, snapshot.q);
+        }
+        updateCounts();
+        buildPalette();
+      } finally {
+        serverExamSaving = false;
+        if (serverExamSaveQueue.length) {
+          const queued = serverExamSaveQueue.shift();
+          setTimeout(() => persistServerStateSnapshot(queued).catch((error) => console.warn('Queued server answer save failed', error)), 150);
+        } else {
+          resolveServerExamSaveIdle();
+        }
+      }
+    }
+
+    async function saveServerCurrentState(si = curSec, qi = curQ) {
+      await persistServerStateSnapshot(captureServerSaveSnapshot(si, qi));
+    }
+
+    async function saveNext() {
+      state[key(curSec, curQ)].status = state[key(curSec, curQ)].answer ? 'answered' : 'not_answered';
+      if (serverExamMode) bumpServerStateRevision(key(curSec, curQ));
+      if (serverExamMode) await saveServerCurrentState(curSec, curQ).catch((error) => console.warn('Server save-next failed', error));
+      advance();
+    }
+    async function markReview() {
+      state[key(curSec, curQ)].status = state[key(curSec, curQ)].answer ? 'review_marked' : 'review';
+      if (serverExamMode) bumpServerStateRevision(key(curSec, curQ));
+      if (serverExamMode) await saveServerCurrentState(curSec, curQ).catch((error) => console.warn('Server mark-review failed', error));
+      advance();
+    }
+    async function clearResponse() {
+      state[key(curSec, curQ)] = { answer:null, status:'not_answered' };
+      if (serverExamMode) bumpServerStateRevision(key(curSec, curQ));
+      if (serverExamMode) await saveServerCurrentState(curSec, curQ).catch((error) => console.warn('Server clear-response failed', error));
+      goTo(curSec, curQ);
+    }
+    function previousQuestion() { if (curQ > 0) goTo(curSec, curQ - 1); else if (curSec > 0) { curSec--; curQ = examData.sections[curSec].questions.length - 1; buildSections(); goTo(curSec, curQ); } }
+    function advance() {
+      if (curQ + 1 < examData.sections[curSec].questions.length) goTo(curSec, curQ + 1);
+      else if (curSec + 1 < examData.sections.length) switchSection(curSec + 1);
+      else goTo(curSec, curQ);
+    }
+
+    function buildPalette() {
+      document.getElementById('palette').innerHTML = examData.sections[curSec].questions.map((q, qi) => {
+        const st = state[key(curSec, qi)].status;
+        return '<button type="button" class="qbtn bubble ' + st + (qi === curQ ? ' active' : '') + '" onclick="goTo(' + curSec + ',' + qi + ')">' + (qi + 1) + '</button>';
+      }).join('');
+    }
+    function updateCounts() {
+      const counts = { answered:0, not_answered:0, not_visited:0, review:0, review_marked:0 };
+      Object.values(state).forEach(s => counts[s.status]++);
+      document.getElementById('cAnswered').textContent = counts.answered;
+      document.getElementById('cNotAnswered').textContent = counts.not_answered;
+      document.getElementById('cNotVisited').textContent = counts.not_visited;
+      document.getElementById('cReview').textContent = counts.review;
+      document.getElementById('cReviewMarked').textContent = counts.review_marked;
+    }
+
+    function startTimer() {
+      const remaining = Number(examAuth?.remainingSeconds || 0);
+      if (remaining > 0) {
+        timerSec = Math.max(0, Math.floor(remaining));
+      } else {
+        const start = candidate.examStartAt ? new Date(candidate.examStartAt).getTime() : Date.now();
+        const duration = (candidate.durationMinutes || 180) * 60 * 1000;
+        timerSec = Math.max(0, Math.floor((start + duration - Date.now()) / 1000));
+      }
+      renderTimer();
+      if (timerSec <= 0) {
+        autoSubmitExam();
+        return;
+      }
+      if (timerInt) clearInterval(timerInt);
+      timerInt = setInterval(() => {
+        timerSec--;
+        renderTimer();
+        if (timerSec <= 0) autoSubmitExam();
+      }, 1000);
+    }
+    function renderTimer() {
+      const s = Math.max(0, timerSec), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+      document.getElementById('tH').textContent = String(h).padStart(2, '0');
+      document.getElementById('tM').textContent = String(m).padStart(2, '0');
+      document.getElementById('tS').textContent = String(sec).padStart(2, '0');
+    }
+    function openInstructions() {
+      showModal('General Instructions', '<p><b>1.</b> Timer is controlled by the exam schedule.</p><p><b>2.</b> Use the right palette to move between questions.</p><p><b>3.</b> Green means answered, orange means not answered, grey means not visited, purple means marked for review.</p><p><b>4.</b> Answered and marked for review will be evaluated.</p><p><b>5.</b> Use Save & Next, Mark for Review & Next, and Clear Response exactly like the exam viewer.</p>');
+    }
+    function openQuestionPaper() {
+      if (serverExamMode) {
+        showModal('Question Paper', '<p>The paper is delivered securely one question at a time. Use the question palette to review available questions.</p>');
+        return;
+      }
+      let html = '';
+      examData.sections.forEach(sec => {
+        html += '<h3 style="color:#5c4bb0;border-bottom:2px solid #b9a7e8">' + esc(sec.name) + '</h3>';
+        sec.questions.forEach(q => {
+          html += '<div style="border-bottom:1px solid #ddd;padding:14px 0"><b>' + esc(q.id) + ')</b> ';
+          html += q.questionImage ? '<img class="question-image" src="' + esc(q.questionImage) + '" style="max-width:min(700px,100%);max-height:72vh;width:auto;height:auto;object-fit:contain;display:block;margin:8px 0">' : q.body;
+          html += '<div style="font-size:12px;font-style:italic">Type: ' + esc(q.type) + ' | Marks: ' + esc(q.marks) + ' | Negative: ' + esc(q.neg) + '</div></div>';
+        });
+      });
+      showModal('Question Paper', html);
+    }
+    function openSubmit() {
+      if (!candidate.candidateSubmitEnabled && timerSec > 0) { showModal('Submit Locked', '<p>Submit is disabled by admin. The paper will be submitted when allowed or when time ends.</p>'); return; }
+      showModal('Submit Exam', '<p>Are you sure you want to submit?</p><button class="danger" onclick="doSubmit()">Submit Now</button>');
+    }
+
+    function autoSubmitExam() {
+      if (submittingExam || candidate?.responseSubmitted) return;
+      submitReason = 'timeout';
+      closeModals();
+      disableExamControls();
+      showModal('Time Over', '<p>Your exam time is over. The response sheet is being submitted automatically.</p>');
+      doSubmit();
+    }
+
+    function disableExamControls() {
+      document.querySelectorAll('button, input').forEach((el) => {
+        if (el.closest('#modal')) return;
+        el.disabled = true;
+      });
+      document.getElementById('submitBtn').textContent = 'Submitting...';
+    }
+    function buildResponsePayload() {
+      flushQuestionActivity();
+      const answers = [];
+      examData.sections.forEach((sec, si) => {
+        sec.questions.forEach((q, qi) => {
+          const r = state[key(si, qi)] || { answer:null, status:'not_visited' };
+          const isNat = q.type === 'NAT';
+          answers.push({
+            section: sec.name,
+            questionId: String(q.rawId || q.id || 'Q' + (answers.length + 1)),
+            displayQuestionId: String(q.id || q.rawId || answers.length + 1),
+            type: q.type,
+            markedOptionIds: isNat || !r.answer ? [] : String(r.answer).split(',').filter(Boolean),
+            natAnswer: isNat ? String(r.answer || '') : '',
+            status: r.status,
+            markedForReview: r.status === 'review' || r.status === 'review_marked',
+            activity: activitySnapshot(si, qi, r.status),
+            questionImage: q.questionImage || '',
+            body: q.body || '',
+            options: q.options || {}
+          });
+        });
+      });
+      return { registrationId: examAuth.registrationId, dateOfBirth: examAuth.dateOfBirth, examSessionToken: examAuth.examSessionToken || '', answers };
+    }
+
+    function draftStorageKey() {
+      return 'candidateExamDraft:' + (examAuth?.registrationId || 'candidate') + ':' + (examAuth?.examSessionToken || 'session');
+    }
+    function saveLocalDraft(payload) {
+      try {
+        sessionStorage.setItem(draftStorageKey(), JSON.stringify({ savedAt: new Date().toISOString(), payload }));
+      } catch (error) {
+        console.warn('Local exam draft save failed', error);
+      }
+    }
+    function captureLocalDraft() {
+      if (serverExamMode) return null;
+      if (!examStarted || submittingExam || !examAuth?.registrationId || !examAuth?.dateOfBirth) return null;
+      try {
+        const payload = buildResponsePayload();
+        saveLocalDraft(payload);
+        return payload;
+      } catch (error) {
+        console.warn('Local exam draft capture failed', error);
+        return null;
+      }
+    }
+    function latestDraftPayload() {
+      const live = buildResponsePayload();
+      try {
+        const stored = JSON.parse(sessionStorage.getItem(draftStorageKey()) || 'null');
+        const payload = stored && stored.payload;
+        if (!payload || !Array.isArray(payload.answers)) return live;
+        return payload.answers.length >= live.answers.length ? payload : live;
+      } catch (error) {
+        return live;
+      }
+    }
+    function clearLocalDraft() {
+      try {
+        sessionStorage.removeItem(draftStorageKey());
+      } catch (error) {
+        // Ignore cleanup failures after successful submit.
+      }
+    }
+
+    let draftSaving = false;
+    let draftQueued = false;
+    let lastDraftAt = 0;
+    async function saveDraft(force = false) {
+      if (serverExamMode) return;
+      if (!examStarted || submittingExam || !examAuth?.registrationId || !examAuth?.dateOfBirth) return;
+      const payload = captureLocalDraft();
+      if (!payload || !navigator.onLine) return;
+      const now = Date.now();
+      if (!force && now - lastDraftAt < 12000) return;
+      if (draftSaving) {
+        draftQueued = true;
+        return;
+      }
+      draftSaving = true;
+      lastDraftAt = now;
+      try {
+        await postJson('/api/candidate/exam-draft', payload);
+      } catch (error) {
+        console.warn('Exam draft autosave failed', error);
+      } finally {
+        draftSaving = false;
+        if (draftQueued) {
+          draftQueued = false;
+          setTimeout(() => saveDraft(true), 800);
+        }
+      }
+    }
+
+    async function doSubmit() {
+      if (submittingExam) return;
+      submittingExam = true;
+      disableExamControls();
+      clearInterval(timerInt);
+      try {
+        let saved;
+        if (serverExamMode) {
+          await saveServerCurrentState(curSec, curQ);
+          await flushServerExamSaves();
+          saved = await postJson('/api/candidate/server-exam/submit', { examSessionToken: examAuth.examSessionToken });
+        } else {
+          await saveDraft(true);
+          saved = await postJson('/api/candidate/exam-submit', latestDraftPayload());
+        }
+        candidate.responseSubmitted = true;
+        examStarted = false;
+        clearLocalDraft();
+        sessionStorage.setItem('candidateDashboardData', JSON.stringify(candidate));
+        if ((window.chrome && window.chrome.webview) || bootParams.has('nativeDesktop') || bootParams.has('desktopLaunch')) {
+          document.body.innerHTML = '<div style="min-height:100vh;display:grid;place-items:center;background:#e7f0fb;font-family:Arial"><div style="background:#fff;border:2px solid #12365f;padding:42px;text-align:center;box-shadow:0 18px 44px rgba(25,70,120,.25);max-width:560px"><h1>Exam Submitted</h1><p>The server has confirmed final submission. Waiting for SecureExamClient to close this view.</p><b>' + esc(saved.registrationId || examAuth?.registrationId || '-') + '</b></div></div>';
+          const message = { type:'candidate-exam-submitted', registrationId:saved.registrationId || examAuth?.registrationId || '' };
+          try {
+            if (window.chrome && window.chrome.webview) {
+              window.chrome.webview.postMessage(message);
+              setTimeout(() => window.chrome?.webview?.postMessage(message), 250);
+              setTimeout(() => window.chrome?.webview?.postMessage(message), 1000);
+            }
+          } catch (_) {}
+          return;
+        }
+        document.body.innerHTML = '<div style="min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#dff7ec,#dbeafe);font-family:Arial"><div style="background:#fff;border-top:5px solid #147eb3;padding:42px;text-align:center;box-shadow:0 18px 44px rgba(25,70,120,.25);border-radius:18px;max-width:520px"><div style="width:86px;height:86px;border-radius:50%;display:grid;place-items:center;margin:0 auto 18px;background:#19a866;color:#fff;font-size:54px;font-weight:900">&#10003;</div><h1>Examination Submitted</h1><p>' + (submitReason === 'timeout' ? 'Time ended and your response sheet was submitted automatically.' : 'Your response sheet has been saved securely.') + '</p><b>' + esc(saved.registrationId) + '</b><p style="color:#54708d">Questions saved: ' + esc(saved.questionCount) + '</p><p id="closeNote" style="color:#607089">This secure exam window will close automatically if your browser allows it.</p></div></div>';
+        setTimeout(() => {
+          if (window.opener && bootParams.has('secureWindow')) {
+            window.opener.postMessage({ type:'candidate-exam-submitted', registrationId:saved.registrationId }, window.location.origin);
+            setTimeout(() => window.close(), 1400);
+          }
+        }, 1200);
+      } catch (error) {
+        submittingExam = false;
+        showModal('Submit Failed', '<p>' + esc(error.message) + '</p><button class="danger" onclick="doSubmit()">Try Submit Again</button>');
+      }
+    }
+    function showModal(title, body) { document.getElementById('modalTitle').textContent = title; document.getElementById('modalBody').innerHTML = body; document.getElementById('modalBack').style.display = 'block'; document.getElementById('modal').style.display = 'block'; }
+    function closeModals() { document.getElementById('modalBack').style.display = 'none'; document.getElementById('modal').style.display = 'none'; }
+    function toggleTheme() { document.body.classList.toggle('dark'); }
+    function securePopupFeatures() {
+      const width = Math.max(1280, window.screen?.availWidth || 1380);
+      const height = Math.max(800, window.screen?.availHeight || 920);
+      return 'popup=yes,fullscreen=yes,width=' + width + ',height=' + height + ',left=0,top=0,menubar=no,toolbar=no,location=no,status=no,scrollbars=yes,resizable=no';
+    }
+
+    document.getElementById('examEntryForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      verifyAndLaunchExam();
+    });
+    document.getElementById('fullscreenBtn').addEventListener('click', fullscreen);
+    document.getElementById('launchBtn').addEventListener('click', launchExam);
+    document.getElementById('freshStartBtn').addEventListener('click', () => {
+      sessionStorage.removeItem('candidateExamAuth');
+      sessionStorage.removeItem('candidateDashboardData');
+      localStorage.removeItem('candidateExamAuth');
+      localStorage.removeItem('candidateDashboardData');
+      localStorage.removeItem('candidateDashboardPassword');
+      window.location.replace('/candidate-entry/exam?fresh=' + Date.now());
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      try {
+        sessionStorage.clear();
+        localStorage.removeItem('candidateExamAuth');
+        localStorage.removeItem('candidateDashboardData');
+        localStorage.removeItem('candidateDashboardPassword');
+      } finally {
+        candidate = null;
+        examAuth = null;
+        window.location.replace('/candidate-entry/exam?fresh=' + Date.now());
+      }
+    });
+    document.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; if (e.key === 'ArrowRight') saveNext(); if (e.key === 'ArrowLeft') previousQuestion(); });
+    document.addEventListener('change', () => captureLocalDraft(), true);
+    document.addEventListener('click', () => setTimeout(captureLocalDraft, 0), true);
+    window.addEventListener('online', () => saveDraft(true));
+    window.addEventListener('beforeunload', () => captureLocalDraft());
+    setInterval(() => saveDraft(false), 15000);
+    if (requireCandidate()) {
+      if (bootParams.has('secureWindow') && examAuth?.examSessionToken) {
+        startSecureExamWindow();
+      } else {
+        renderLobby();
+        refreshLobby();
+        setInterval(renderLobby, 1000);
+        setInterval(() => {
+          if (!examStarted) refreshLobby();
+        }, 20000);
+      }
+    }
+  </script>
+</body>
+</html>

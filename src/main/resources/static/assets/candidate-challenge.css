@@ -1,0 +1,22 @@
+body.candidate-institutional .challenge-workflow { padding: 14px 16px; background: #f7f8f9; border-top: 1px solid #cbd2d8; }
+body.candidate-institutional #challengeWorkflow .timeline-grid,
+body.candidate-institutional #challengeTimelineWrap.timeline-grid { display: block; margin: 12px 0; }
+body.candidate-institutional .challenge-schedule { width: 100%; table-layout: fixed; border-collapse: collapse; color: #25292d; font-size: 13px; line-height: 1.4; }
+.challenge-schedule caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+body.candidate-institutional .challenge-schedule th,
+body.candidate-institutional .challenge-schedule td { padding: 9px 12px; border: 1px solid #d5dadd; text-align: left; vertical-align: top; background: #fff; overflow-wrap: anywhere; }
+body.candidate-institutional .challenge-schedule thead th { background: #eef1f2; color: #596169; font-size: 11px; font-weight: 650; }
+.challenge-schedule tbody th { width: 28%; font-weight: 600; }
+.challenge-schedule time span, .challenge-schedule time small { display: block; }
+.challenge-schedule time small { color: #626970; margin-top: 2px; font-size: 12px; }
+.challenge-schedule .schedule-unset { color: #626970; }
+.challenge-readiness { display: flex; flex-wrap: wrap; gap: 8px 24px; color: #596169; font-size: 12px; }
+body.candidate-institutional .challenge-readiness strong { color: #286548; font-weight: 600; }
+body.candidate-institutional .challenge-modal-head h3 { font-size: 19px; font-weight: 650; text-transform: none; }
+body.candidate-institutional .challenge-modal-head p { font-size: 13px; }
+@media (max-width: 600px) {
+  body.candidate-institutional .challenge-workflow { padding: 12px; }
+  body.candidate-institutional .challenge-schedule th,
+  body.candidate-institutional .challenge-schedule td { padding: 8px 6px; font-size: 12px; }
+  .challenge-schedule time small { font-size: 11px; }
+}

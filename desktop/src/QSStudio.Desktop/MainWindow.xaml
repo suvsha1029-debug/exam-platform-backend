@@ -1,0 +1,281 @@
+<Window x:Class="QSStudio.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="QS Studio Desktop"
+        Height="860"
+        Width="1320"
+        MinHeight="720"
+        MinWidth="1080"
+        WindowStartupLocation="CenterScreen"
+        Background="#10131A">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#1B2433"/>
+            <Setter Property="Foreground" Value="#F4F7FB"/>
+            <Setter Property="BorderBrush" Value="#4ECDC4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,7"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="BorderBrush" Value="#4ECDC4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style TargetType="PasswordBox">
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="BorderBrush" Value="#4ECDC4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style x:Key="CompactExamToolButton" TargetType="Button">
+            <Setter Property="Background" Value="#F5F5F5"/>
+            <Setter Property="Foreground" Value="#111827"/>
+            <Setter Property="BorderBrush" Value="#777777"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="MinHeight" Value="24"/>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel LastChildFill="True">
+        <Border x:Name="TopShellBar" DockPanel.Dock="Top" Background="#181C25" BorderBrush="#4ECDC4" BorderThickness="0,0,0,2" Visibility="Collapsed">
+            <Grid Height="48" Margin="12,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="SECURE EXAM CLIENT" Foreground="#F4F7FB" FontSize="18" FontWeight="Bold" Margin="0,0,14,0"/>
+                    <TextBlock x:Name="GuardStatusText" Text="Ready" Foreground="#4ECDC4" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Grid.Column="1"
+                           x:Name="AddressText"
+                           Text="Candidate exam mode"
+                           Foreground="#B9C4D6"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="2" Text="READY" Foreground="#4ECDC4" FontWeight="Bold" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <Border x:Name="BottomStatusBar" DockPanel.Dock="Bottom" Background="#10131A" BorderBrush="#2B3445" BorderThickness="0,1,0,0" Visibility="Collapsed">
+            <Grid Height="30" Margin="12,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="StatusText" Text="Secure native exam client ready" Foreground="#B9C4D6" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="Native exam v0.2" Foreground="#6F7A8F" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <Grid Background="#0E1117">
+            <wv2:WebView2 x:Name="StudioView" Visibility="Collapsed"/>
+
+            <Grid x:Name="NativeExamRoot" Background="#EEF5FF">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Background="#091A31" BorderBrush="#000000" BorderThickness="0,0,0,2">
+                    <Grid Height="66">
+                        <Border x:Name="NativeInstituteLogoFrame" BorderBrush="#091A31" BorderThickness="0" Background="#091A31" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <Grid ClipToBounds="True">
+                                <Image x:Name="NativeInstituteLogoImage" Stretch="Uniform" Margin="0" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True"/>
+                                <TextBlock x:Name="NativeInstituteLogoFallback" Text="" Foreground="#091A31" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1" x:Name="NativeLoginPanel" MaxWidth="920" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Border Background="#FFFFFF" BorderBrush="#111827" BorderThickness="2" Padding="34">
+                        <StackPanel>
+                            <TextBlock Text="Exam Entry" Foreground="#091A31" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Enter application number and date of birth to begin." Foreground="#2B3445" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" Margin="0,12,0,26"/>
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="18"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="REGISTRATION ID" Foreground="#091A31" FontWeight="Bold"/>
+                                    <TextBox x:Name="NativeRegistrationBox" Margin="0,6,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="DATE OF BIRTH" Foreground="#091A31" FontWeight="Bold"/>
+                                    <DatePicker x:Name="NativeDobPicker" Margin="0,6,0,0" ToolTip="Select date of birth"/>
+                                    <TextBlock Text="YYYY-MM-DD" Foreground="#6B7280" FontSize="12" Margin="2,4,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                            <Button x:Name="NativeStartButton" Content="Preparing..." Click="NativeStartClicked" HorizontalAlignment="Center" Padding="24,10" IsEnabled="False"/>
+                            <TextBlock x:Name="NativeLoginMessage" Foreground="#2B3445" FontWeight="Bold" TextWrapping="Wrap" TextAlignment="Center" Margin="0,18,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="1" x:Name="NativeExamPanel" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="300"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.ColumnSpan="2" Background="#FFFFFF" BorderBrush="#111827" BorderThickness="0,0,0,2" Padding="14,8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock x:Name="NativeExamTitleText" Text="EXAM" Foreground="#091A31" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                                <TextBlock x:Name="NativeSubTitleText" Text="" Foreground="#146C64" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0" Visibility="Collapsed"/>
+                                <TextBlock x:Name="NativeInstituteLineText" Text="" Foreground="#2B3445" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" Visibility="Collapsed"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Content="Instructions" Click="NativeInstructionsClicked" Style="{StaticResource CompactExamToolButton}" Margin="0,0,6,0"/>
+                                <Button Content="Calculator" Click="NativeCalculatorClicked" Style="{StaticResource CompactExamToolButton}" Margin="0,0,6,0"/>
+                                <Button Content="Question Paper" Click="NativeQuestionPaperClicked" Style="{StaticResource CompactExamToolButton}" Margin="0,0,12,0"/>
+                                <TextBlock Text="Time Left :" Foreground="#091A31" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBlock x:Name="NativeTimerText" Text="--:--:--" Foreground="#B58700" FontSize="24" FontWeight="Black" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="NativeGuardText" Text="SECURE MODE" Foreground="#146C64" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" Margin="14,0,0,0" Visibility="Collapsed"/>
+                            </StackPanel>
+                            <DockPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,7,0,0">
+                                <TextBlock x:Name="NativeQuestionHeader" DockPanel.Dock="Left" Text="Question" Foreground="#091A31" FontSize="18" FontWeight="Bold"/>
+                                <TextBlock x:Name="NativeSectionHeader" DockPanel.Dock="Right" Text="" Foreground="#2B3445" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                            </DockPanel>
+                        </Grid>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="1" Background="#FFFFFF" VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="NativeQuestionStack" Margin="26">
+                            <TextBlock x:Name="NativeQuestionText" FontSize="22" Foreground="#000000" FontFamily="Cambria Math" TextWrapping="Wrap"/>
+                            <Image x:Name="NativeQuestionImage" Stretch="Uniform" HorizontalAlignment="Left" Margin="0,12,0,18" MaxWidth="1050" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True"/>
+                            <Border x:Name="NativeQuestionUnavailablePanel" Visibility="Collapsed" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" Padding="24" Margin="0,20,0,0">
+                                <TextBlock Text="Question content is not available. Please contact the invigilator." Foreground="#111827" FontSize="20" TextWrapping="Wrap"/>
+                            </Border>
+                            <StackPanel x:Name="NativeOptionsStack" Margin="0,14,0,0"/>
+                            <StackPanel x:Name="NativeNatPanel" Visibility="Collapsed" Margin="0,18,0,0">
+                                <TextBlock Text="NUMERICAL ANSWER" Foreground="#091A31" FontWeight="Bold"/>
+                                <TextBox x:Name="NativeNatAnswerBox" Width="280" HorizontalAlignment="Left" Margin="0,8,0,0" PreviewTextInput="NatAnswerPreviewTextInput" TextChanged="NativeNatAnswerTextChanged" DataObject.Pasting="NativeNatAnswerPasting"/>
+                                <TextBlock x:Name="NativeNatWarningText" Visibility="Collapsed" Width="420" Margin="0,6,0,0" Foreground="#8B1E1E" FontSize="12" FontWeight="Bold" TextWrapping="Wrap"/>
+                                <UniformGrid Columns="4" Width="280" HorizontalAlignment="Left" Margin="0,8,0,0">
+                                    <Button Content="7" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="8" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="9" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="Back" Click="NativeNatBackspaceClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="4" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="5" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="6" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="-" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="1" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="2" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="3" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="+" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="0" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="." Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="00" Click="NativeNatKeyClicked" Margin="2" Padding="10,6"/>
+                                    <Button Content="Clear" Click="NativeNatClearClicked" Margin="2" Padding="10,6"/>
+                                </UniformGrid>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <Border Grid.Column="1" Grid.Row="1" Background="#E4EEFD" BorderBrush="#111827" BorderThickness="2,0,0,0" Padding="14">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Top" Background="#FFFFFF" BorderBrush="#111827" BorderThickness="1" Padding="10" Margin="0,0,0,14">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="82"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="72" Height="84" BorderBrush="#111827" BorderThickness="1" Background="#F8FAFC">
+                                        <Grid>
+                                            <Image x:Name="NativeCandidatePhotoImage" Stretch="UniformToFill"/>
+                                            <TextBlock x:Name="NativeCandidatePhotoFallback" Text="PHOTO" Foreground="#6B7280" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                        <TextBlock x:Name="NativeCandidateNameText" Text="Candidate" Foreground="#091A31" FontSize="14" FontWeight="Bold" TextWrapping="Wrap"/>
+                                        <TextBlock x:Name="NativeCandidateRegText" Text="Application No." Foreground="#111827" FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <TextBlock DockPanel.Dock="Top" Text="QUESTION PALETTE" Foreground="#091A31" FontSize="17" FontWeight="Bold" Margin="0,0,0,12"/>
+                            <UniformGrid DockPanel.Dock="Bottom" Columns="2" Margin="0,14,0,0">
+                                <StackPanel Orientation="Horizontal" Margin="0,3">
+                                    <Border Width="18" Height="18" Background="#137642" BorderBrush="#111827" BorderThickness="1" Margin="0,0,7,0"/>
+                                    <TextBlock Text="Answered" Foreground="#111827" FontSize="12"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,3">
+                                    <Border Width="18" Height="18" Background="#AA3127" BorderBrush="#111827" BorderThickness="1" Margin="0,0,7,0"/>
+                                    <TextBlock Text="Not Answered" Foreground="#111827" FontSize="12"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,3">
+                                    <Border Width="18" Height="18" Background="#697280" BorderBrush="#111827" BorderThickness="1" Margin="0,0,7,0"/>
+                                    <TextBlock Text="Not Visited" Foreground="#111827" FontSize="12"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,3">
+                                    <Border Width="18" Height="18" Background="#642E9B" BorderBrush="#111827" BorderThickness="1" Margin="0,0,7,0"/>
+                                    <TextBlock Text="Marked Review" Foreground="#111827" FontSize="12"/>
+                                </StackPanel>
+                            </UniformGrid>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <WrapPanel x:Name="NativePalettePanel"/>
+                            </ScrollViewer>
+                        </DockPanel>
+                    </Border>
+
+                    <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#F7FAFF" BorderBrush="#111827" BorderThickness="0,2,0,0" Padding="16">
+                        <DockPanel>
+                            <StackPanel x:Name="NativeActionButtonsPanel" Orientation="Horizontal" DockPanel.Dock="Left">
+                                <Button x:Name="NativeSaveNextButton" Content="Save And Next" Click="NativeSaveNextClicked" Margin="0,0,10,0" Padding="18,9"/>
+                                <Button x:Name="NativeReviewNextButton" Content="Mark For Review And Next" Click="NativeReviewNextClicked" Margin="0,0,10,0" Padding="18,9"/>
+                                <Button x:Name="NativeClearButton" Content="Clear Response" Click="NativeClearClicked" Margin="0,0,10,0" Padding="18,9"/>
+                            </StackPanel>
+                            <Button x:Name="NativeSubmitButton" Content="Submit Exam" Click="NativeSubmitClicked" DockPanel.Dock="Right" Background="#8B1E1E" BorderBrush="#8B1E1E" Padding="22,9"/>
+                            <TextBlock x:Name="NativeExamMessage" Foreground="#091A31" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="1" x:Name="NativeCompletionPanel" Visibility="Collapsed" Background="#EEF5FF">
+                    <Border MaxWidth="820" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FFFFFF" BorderBrush="#111827" BorderThickness="2" Padding="38">
+                        <StackPanel>
+                            <TextBlock x:Name="NativeCompletionTitle" Text="Exam Submitted Successfully" Foreground="#064E3B" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <TextBlock x:Name="NativeCompletionBody" Text="You may now leave the exam window." Foreground="#111827" FontSize="18" TextWrapping="Wrap" TextAlignment="Center" Margin="0,18,0,24"/>
+                            <Border BorderBrush="#111827" BorderThickness="1" Padding="16" Background="#F8FAFC">
+                                <StackPanel>
+                                    <TextBlock x:Name="NativeCompletionTimeText" Text="System time: -" Foreground="#111827" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock x:Name="NativeCompletionIpText" Text="Machine IP: -" Foreground="#111827" FontSize="16" FontWeight="Bold" Margin="0,8,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <Button Content="Close Exam Window" Click="NativeCloseAfterSubmitClicked" HorizontalAlignment="Center" Margin="0,26,0,0" Padding="26,10"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</Window>

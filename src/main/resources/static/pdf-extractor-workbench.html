@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF Extractor Workbench</title>
+  <link rel="stylesheet" href="/assets/pdf-extractor/pdf-extractor.css">
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <h1>PDF Extractor Workbench</h1>
+    <p>Permanent PDF import path for structured exam papers. Upload a same-format paper, let the backend run the Python extractor, and download viewer JSON or pre-git JSON without opening PowerShell.</p>
+  </section>
+
+  <section class="card">
+    <form id="extractForm">
+      <div class="grid">
+        <div class="field">
+          <label for="pdfFile">PDF File</label>
+          <input id="pdfFile" name="file" type="file" accept=".pdf" required>
+        </div>
+        <div class="field">
+          <label for="format">Output Format</label>
+          <select id="format" name="format">
+            <option value="pre-git" selected>Pre-Git JSON</option>
+            <option value="viewer">Viewer JSON</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="profile">Profile</label>
+          <select id="profile" name="profile">
+            <option value="auto">Auto Detect</option>
+            <option value="gate_table_v1">GATE Bordered Table v1</option>
+            <option value="question_colon_v1">Question Colon Sheet v1</option>
+            <option value="compact_option_v1">Compact Option Block v1</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="dpi">DPI</label>
+          <input id="dpi" name="dpi" type="number" min="120" max="300" value="200">
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top:16px;grid-template-columns:1fr 1fr 1fr 1fr;">
+        <div class="field">
+          <label for="subject">Subject</label>
+          <input id="subject" name="subject" type="text" value="GEN">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" type="submit">Extract PDF</button>
+        <button class="btn secondary" type="button" id="downloadBtn" disabled>Download JSON</button>
+        <div class="status" id="statusText">Choose a PDF and run extraction.</div>
+      </div>
+    </form>
+
+    <div class="summary">
+      <span class="chip good" id="profileChip">Profile: -</span>
+      <span class="chip" id="countChip">Questions: 0</span>
+      <span class="chip" id="formatChip">Format: pre-git</span>
+    </div>
+  </section>
+
+  <section class="output">
+    <div class="panel">
+      <h2>Extractor Output</h2>
+      <div class="panel-body">
+        <pre id="outputPreview"></pre>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Workflow</h2>
+      <div class="panel-body help">
+        <p>Use this page for the permanent PDF path:</p>
+        <p><code>PDF -> backend extractor -> JSON -> viewer / pre-git</code></p>
+        <p>The extractor engine uses profile-based geometry, crops content-only frames, normalizes them to legacy canvas sizes, and returns stable JSON output.</p>
+        <p>For viewer usage, take the downloaded JSON and load it in your external <code>Viewer.html</code>. For question bank migration, use <code>Pre-Git JSON</code>.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="/assets/pdf-extractor/pdf-extractor.js"></script>
+</body>
+</html>

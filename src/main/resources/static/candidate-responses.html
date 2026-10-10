@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidate Response Sheet</title>
+  <link rel="stylesheet" href="/assets/candidate-institutional.css">
+  <script src="/assets/candidate-institutional.js" defer></script>
+  <style>
+    :root {
+      --ink: #161616;
+      --muted: #4d5662;
+      --line: #b9c4d0;
+      --paper: #ffffff;
+      --soft: #f2f5f8;
+      --head: #dfeaf5;
+      --blue: #1e5b88;
+      --answered: #397a22;
+      --not-answered: #b64b2b;
+      --nat: #6f4ca6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #edf1f5;
+      font-family: "Trebuchet MS", Verdana, sans-serif;
+      font-size: 14px;
+    }
+    .topbar {
+      position: relative;
+      background: #f8fafc;
+      border-bottom: 1px solid #c5d0dc;
+      padding: 10px clamp(12px, 3vw, 28px);
+      text-align: center;
+    }
+    .topbar h1 {
+      margin: 0;
+      font-size: clamp(20px, 2.6vw, 30px);
+      color: #253f5b;
+      letter-spacing: .02em;
+    }
+    .topbar p { margin: 5px 0 0; color: var(--muted); }
+    .sheet {
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      width: min(1280px, 98vw);
+      margin: 14px auto 32px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: 0 10px 28px rgba(24, 40, 58, .12);
+    }
+    .sheet-head {
+      position: relative;
+      z-index: 1;
+      display: block;
+      min-height: 62px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+    .sheet-heading { text-align: center; padding: 10px; }
+    .sheet-heading h2 { margin: 0; font-size: 22px; color: #172b42; }
+    .sheet-heading p { margin: 6px 0 0; color: #526170; font-size: 13px; }
+    .info-title {
+      margin: 0;
+      padding: 8px 10px;
+      background: #34495e;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      border-bottom: 1px solid var(--line);
+    }
+    .candidate-strip {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border: 2px solid #7f8a96;
+      background: #fff;
+      margin: 0;
+    }
+    .field {
+      min-height: 44px;
+      padding: 8px 10px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .field:nth-child(3n) { border-right: 0; }
+    .detail-label { color: #2f4052; font-weight: 900; margin-right: 5px; }
+    .label {
+      display: block;
+      color: #576574;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    .value {
+      color: #111827;
+      font-weight: 700;
+      word-break: break-word;
+    }
+    .exam-title {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--head);
+      border-bottom: 1px solid var(--line);
+      color: #173a59;
+      font-weight: 800;
+    }
+    .exam-title small {
+      display: block;
+      color: #526170;
+      font-weight: 700;
+      margin-top: 3px;
+    }
+    .layout {
+      display: block;
+      min-height: 620px;
+    }
+    .questions {
+      position: relative;
+      z-index: 1;
+      padding: 10px;
+      background: #696866;
+    }
+    .side { display: none; }
+    .side h2 { margin: 0; }
+    .legend, .palette, .mini-table { padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 8px 0;
+      color: #25313d;
+    }
+    .badge {
+      min-width: 30px;
+      height: 26px;
+      display: inline-grid;
+      place-items: center;
+      color: #fff;
+      border-radius: 4px 4px 12px 12px;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+    }
+    .badge.answered { background: var(--answered); }
+    .badge.not-answered { background: var(--not-answered); }
+    .badge.nat { background: var(--nat); border-radius: 50%; }
+    .badge.blank { background: #8b98a7; }
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .mini-table table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      font-size: 12px;
+    }
+    .mini-table th, .mini-table td {
+      border: 1px solid #d4dde7;
+      padding: 7px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .mini-table th { background: #e8eef5; color: #21364b; }
+    .section-title {
+      margin: 0;
+      padding: 6px;
+      background: #99999b;
+      border: 0;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      page-break-after: avoid;
+    }
+    .question {
+      border: 0;
+      margin-bottom: 0;
+      background: #fff;
+      page-break-inside: avoid;
+    }
+    .question-inner {
+      position: relative;
+      overflow: hidden;
+      background: #fff;
+    }
+    .question-inner::before {
+      content: none;
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: .2;
+      background-image: var(--response-watermark);
+      background-repeat: repeat;
+      background-size: 260px 170px;
+    }
+    .question-watermark {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      background-repeat: repeat;
+      background-size: 130px 85px;
+      opacity: .48;
+    }
+    .question-inner > *:not(.question-watermark) {
+      position: relative;
+      z-index: 1;
+    }
+    .questionPnlTbl {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+    .q-top-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 29%);
+      gap: 14px;
+      align-items: start;
+      padding: 0 10px 0 0;
+    }
+    .rw {
+      border-bottom: 1px solid #ccc;
+      padding: 0;
+    }
+    .rw:hover { background: #f9f7f7; }
+    .questionRowTbl {
+      width: 100%;
+      border-collapse: collapse;
+      padding: 4px 0;
+      table-layout: fixed;
+    }
+    .questionRowTbl td {
+      padding: 3px 1px;
+      font-size: 12px;
+      word-wrap: break-word;
+      vertical-align: top;
+      word-break: break-word;
+    }
+    .q-index {
+      width: 7%;
+      text-align: center;
+      font-weight: 800;
+      vertical-align: top;
+    }
+    .q-content {
+      width: 93%;
+      text-align: left;
+      overflow: visible;
+      display: table-cell;
+      max-width: 100%;
+    }
+    .q-options-label {
+      text-align: center;
+      font-weight: 800;
+      word-break: unset;
+    }
+    .menu-tbl {
+      width: 100%;
+      margin: 12px 0 0;
+      background-color: rgba(255,255,255,.78);
+      border: 1px solid #99999b;
+      border-radius: 5px;
+      padding: 5px 9px;
+      font-size: 12px;
+      border-collapse: separate;
+    }
+    .menu-tbl td { padding: 2px 3px; min-width: 0; vertical-align: top; }
+    .menu-tbl td:first-child { text-align: right; color: #333; }
+    .activity-tbl {
+      margin-top: 6px;
+      background-color: rgba(248,250,252,.86);
+      font-size: 10px;
+      max-width: 230px;
+    }
+    .activity-tbl caption {
+      caption-side: top;
+      padding: 1px 0 3px;
+      color: #2f4052;
+      font-weight: 900;
+      text-align: center;
+      font-size: 10px;
+    }
+    .activity-tbl td { padding: 1px 2px; }
+    .bold { font-weight: 800; }
+    .clear { clear: both; }
+    .options-table {
+      width: min(760px, 100%);
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+    .options-table td {
+      padding: 8px 1px;
+      font-size: 12px;
+      vertical-align: top;
+      word-break: break-word;
+    }
+    .question-image {
+      width: auto;
+      height: auto;
+      max-width: min(700px, 100%);
+      max-height: 72vh;
+      object-fit: contain;
+      display: block;
+      margin: 4px 0 12px;
+      border: 0;
+      background: #fff;
+      image-rendering: auto;
+    }
+    .answer-box { display: none; }
+    .answer-cell {
+      border: 1px solid #cbd5df;
+      background: #f8fafc;
+      padding: 9px 10px;
+    }
+    .answer-cell strong { display: block; color: #314255; margin-bottom: 4px; }
+    .marked { color: #0f6b33; font-weight: 900; }
+    .not-marked { color: #9b341e; font-weight: 900; }
+    .options { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .options th, .options td { border: 1px solid #cfd8e3; padding: 8px; vertical-align: top; }
+    .options th { background: #edf3f8; text-align: left; }
+    .options tr.selected { background: #ecf8ed; }
+    .option-image { max-width: min(600px, 100%); max-height: 110px; width: auto; height: auto; vertical-align: middle; object-fit: contain; image-rendering: auto; }
+    .option-line { margin: 2px 0; text-align: left; }
+    .option-line.selected { background: transparent; outline: none; font-weight: 800; }
+    .nat-answer-line {
+      width: min(760px, 100%);
+      margin: 12px 0 0 0;
+      padding: 0 0 8px 2px;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: left;
+    }
+    .first-page-fill {
+      display: none;
+    }
+    .question-page-number {
+      display: none;
+    }
+    .status-line {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      color: #334155;
+      font-weight: 700;
+    }
+    .status-line.ready { display: none; }
+    .error { color: #a51d1d; white-space: pre-wrap; }
+    .print-page-border,
+    .print-page-number,
+    .print-page-watermark {
+      display: none;
+    }
+    .actions {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      padding: 8px clamp(12px, 3vw, 28px);
+      background: #f8fafc;
+      border-bottom: 1px solid #c5d0dc;
+    }
+    button, .button {
+      border: 1px solid #164f7b;
+      background: #1e5b88;
+      color: #fff;
+      padding: 9px 14px;
+      border-radius: 3px;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .button.secondary {
+      background: #fff;
+      color: #1e5b88;
+    }
+    @media print {
+      @page { size: A4 portrait; margin: 8mm; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      html,
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: #fff !important;
+        background-image: none !important;
+      }
+      .topbar,
+      .side,
+      .actions,
+      .candidate-site-shell,
+      .site-header,
+      .candidate-shell-header,
+      .candidate-nav,
+      .candidate-actions,
+      nav,
+      button,
+      .button {
+        display: none !important;
+      }
+      .sheet {
+        position: relative;
+        z-index: 2;
+        overflow: visible !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        border: 0;
+        box-shadow: none;
+        padding: 0;
+        background: #fff !important;
+      }
+      body.candidate-institutional main.sheet {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+      }
+      .print-page-watermark {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        opacity: .16;
+        background-image: var(--response-watermark);
+        background-repeat: repeat;
+        background-size: 260px 170px;
+      }
+      .print-page-border {
+        display: block;
+        position: fixed;
+        inset: 3.5mm 4mm 7mm 3.5mm;
+        z-index: 6;
+        pointer-events: none;
+        border: 2px solid #5f5f5f;
+      }
+      .print-page-number {
+        display: none !important;
+        position: fixed;
+        right: 6mm;
+        bottom: 3.5mm;
+        z-index: 7;
+        padding: 1px 5px;
+        background: rgba(255,255,255,.86);
+        color: #444;
+        border: 1px solid #888;
+        font-size: 9px;
+        font-weight: 700;
+      }
+      .print-page-number::after {
+        content: "Page " counter(page);
+      }
+      .layout { display: block; }
+      .exam-title { padding: 4px 7px; font-size: 10px; }
+      .sheet-head { min-height: 28px; border: 1px solid #4f4f4f; border-bottom: 0; }
+      .sheet-heading { padding: 2px 6px; }
+      .sheet-heading h2 { font-size: 15px; }
+      .sheet-heading p { display: none; }
+      .info-title { padding: 3px 6px; font-size: 10px; border: 1px solid #4f4f4f; border-bottom: 0; break-after: avoid; page-break-after: avoid; }
+      .questions { border: 0; padding: 0; background: #fff !important; overflow: visible !important; }
+      .candidate-strip {
+        border: 1px solid #4f4f4f;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        break-inside: avoid;
+        page-break-inside: avoid;
+        font-size: 9px;
+      }
+      .field {
+        min-height: 7mm;
+        padding: 2.5px 4px;
+        border-right: 1px solid #777;
+        border-bottom: 1px solid #777;
+      }
+      .field:nth-child(3n) { border-right: 0; }
+      .detail-label { margin-right: 2px; }
+      .value {
+        font-size: 9px;
+        line-height: 1.15;
+      }
+      .section-title { margin: 0; padding: 2px 5px; font-size: 9px; border-bottom: 1px solid #777; break-after: avoid; page-break-after: avoid; }
+      .question {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border: 1.5px solid #4f4f4f;
+        margin: 0 4mm;
+        background: #fff !important;
+      }
+      .question-inner {
+        background: #fff !important;
+        flex: 1 1 auto;
+        min-height: inherit;
+        padding: 2mm 1.5mm 7mm;
+      }
+      .question-page-number {
+        display: block !important;
+        position: absolute;
+        align-self: flex-end;
+        right: 3mm;
+        bottom: 2mm;
+        margin-top: 0;
+        z-index: 9;
+        padding: 0;
+        color: #333;
+        background: transparent;
+        border: 0;
+        font-size: 8.5px;
+        font-weight: 800;
+        line-height: 1.3;
+      }
+      .question:first-of-type { min-height: 200mm; margin-top: 0; }
+      .question:first-of-type .question-inner { min-height: 200mm; }
+      .question:first-of-type .first-page-fill {
+        display: none;
+        min-height: 0;
+      }
+      .question:not(:first-of-type) {
+        break-before: page;
+        page-break-before: always;
+        margin-top: 5mm;
+        min-height: 252mm;
+      }
+      .question:not(:first-of-type) .question-inner { min-height: 252mm; }
+      .question { page-break-after: auto; }
+      .menu-tbl { border: 1px solid #99999b; }
+      .q-top-row { grid-template-columns: minmax(0, 1fr) 27%; gap: 5px; }
+      .status-stack { break-inside: avoid; page-break-inside: avoid; }
+      .questionPnlTbl, .rw { height: 100%; }
+      .rw { border-bottom: 0; }
+      .q-index { width: 9%; font-size: 11px; }
+      .questionRowTbl td { font-size: 10.5px; }
+      .options-table { width: 100%; }
+      .question-image { width: auto; height: auto; max-width: 100%; max-height: 142mm; margin-bottom: 7px; }
+      .options-table td { padding: 5px 1px; font-size: 10.5px; }
+      .option-image { width: auto; height: auto; max-width: 100%; max-height: 32mm; }
+      .question-watermark { opacity: .48; }
+      .nat-answer-line { width: 100%; margin-top: 7px; font-size: 10.5px; }
+    }
+    @media (max-width: 960px) {
+      .candidate-strip, .q-meta, .answer-box { grid-template-columns: 1fr 1fr; }
+      .field:nth-child(2n) { border-right: 0; }
+      .layout { grid-template-columns: 1fr; }
+      .q-top-row { grid-template-columns: 1fr; padding-right: 10px; }
+      .menu-tbl { width: min(320px, 100%); margin-left: 10px; }
+      .options-table { width: calc(100% - 20px); margin-left: 10px; }
+      .q-content { max-width: 100%; }
+    }
+    @media (max-width: 620px) {
+      .candidate-strip, .q-meta, .answer-box { grid-template-columns: 1fr; }
+      .field, .q-meta div { border-right: 0; border-bottom: 1px solid var(--line); }
+      .exam-title, .q-head { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 640px) {
+      .sheet {
+        padding: 14px 10px 18px;
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+      .actions .button,
+      .actions button {
+        width: 100%;
+        text-align: center;
+      }
+      .candidate-strip,
+      .layout,
+      .questions {
+        gap: 10px;
+      }
+      .menu-tbl,
+      .activity-tbl {
+        max-width: 100%;
+      }
+      .q-content,
+      .options-table {
+        width: 100%;
+        margin-left: 0;
+      }
+      .sheet-heading h2 {
+        font-size: 20px;
+      }
+    }
+    @media print {
+      .q-top-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 27% !important;
+        align-items: start !important;
+        padding: 0 !important;
+      }
+      .menu-tbl {
+        width: 100% !important;
+        max-width: 188px !important;
+        justify-self: end !important;
+        margin: 3px 0 0 !important;
+        align-self: start !important;
+        break-inside: avoid;
+        font-size: 8.5px !important;
+        padding: 2px 4px !important;
+      }
+      .activity-tbl {
+        max-width: 168px !important;
+        font-size: 7.5px !important;
+        margin-top: 2px !important;
+        padding: 1px 3px !important;
+      }
+      .activity-tbl caption {
+        padding: 0 0 1px !important;
+        font-size: 7.5px !important;
+      }
+      .menu-tbl td {
+        padding: 1px 2px !important;
+      }
+      .questionRowTbl {
+        width: 100% !important;
+        margin: 0 !important;
+      }
+      .question-watermark,
+      .question-inner::before {
+        background-size: 130px 85px !important;
+      }
+    }
+    @media print {
+      @page { size: A4 portrait; margin: 12mm; }
+      html, body { width: auto !important; overflow: visible !important; }
+      .sheet,
+      body.candidate-institutional main.sheet {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 3mm !important;
+        overflow: visible !important;
+      }
+      .print-page-border {
+        display: block !important;
+        inset: .5mm !important;
+        border: 1px solid #555 !important;
+      }
+      .questions { overflow: visible !important; }
+      .question,
+      .question:first-of-type,
+      .question:not(:first-of-type) {
+        display: block !important;
+        min-height: 0 !important;
+        margin: 0 0 4mm !important;
+        border: 1px solid #555 !important;
+        break-before: auto !important;
+        page-break-before: auto !important;
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+      }
+      .question-inner,
+      .question:first-of-type .question-inner,
+      .question:not(:first-of-type) .question-inner {
+        min-height: 0 !important;
+        padding: 3mm !important;
+        overflow: hidden !important;
+      }
+      .q-top-row {
+        grid-template-columns: minmax(0, 1fr) minmax(38mm, 27%) !important;
+        gap: 3mm !important;
+      }
+      .questionRowTbl,
+      .options-table,
+      .menu-tbl,
+      .activity-tbl { table-layout: fixed !important; max-width: 100% !important; }
+      .q-content,
+      .questionRowTbl td,
+      .options-table td,
+      .menu-tbl td,
+      .activity-tbl td,
+      .field,
+      .value {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+        white-space: normal !important;
+      }
+      .question-image,
+      .option-image { max-width: 100% !important; object-fit: contain !important; }
+      .options-table {
+        width: 100% !important;
+        margin: 2mm 0 0 !important;
+      }
+      .options-table td:first-child {
+        width: 16mm !important;
+        min-width: 16mm !important;
+        max-width: 16mm !important;
+        padding-left: 0 !important;
+        padding-right: 2mm !important;
+      }
+      .options-table td:nth-child(2) {
+        width: auto !important;
+        padding-left: 0 !important;
+      }
+      .q-options-label { text-align: left !important; vertical-align: top !important; }
+      .option-line {
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        gap: 2mm !important;
+        width: 100% !important;
+        margin: 0 !important;
+        text-align: left !important;
+      }
+      .option-line > .bold { flex: 0 0 auto; }
+      .option-image { display: block !important; margin: 0 !important; }
+      .question-page-number { position: static !important; text-align: right; margin-top: 2mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="print-page-watermark"></div>
+  <div class="print-page-border"></div>
+  <div class="print-page-number"></div>
+  <header class="topbar">
+    <h1>Candidate Response Sheet</h1>
+  </header>
+  <div class="actions">
+    <a class="button secondary" href="/candidate-entry/details">Back to Dashboard</a>
+    <button type="button" onclick="printResponseSheet()">Print Response Sheet</button>
+  </div>
+
+  <main class="sheet">
+    <section class="sheet-head">
+      <div class="sheet-heading">
+        <h2 id="sheetExamName">Candidate Response Sheet</h2>
+        <p>Candidate Response Sheet</p>
+      </div>
+    </section>
+    <div id="status" class="status-line">Opening response sheet...</div>
+    <h3 class="info-title">Candidate Details</h3>
+    <section id="identity" class="candidate-strip"></section>
+    <div class="exam-title">
+      <span><span id="paperTitle">Response Sheet</span><small id="paperSubTitle">Question paper response view</small></span>
+      <span id="paperCount">0 questions</span>
+    </div>
+    <div class="layout">
+      <section id="questions" class="questions"></section>
+      <aside class="side">
+        <h2>Question Palette</h2>
+        <div class="legend">
+          <div class="legend-row"><span class="badge answered">1</span> Answered</div>
+          <div class="legend-row"><span class="badge not-answered">1</span> Not Answered</div>
+          <div class="legend-row"><span class="badge nat">1</span> NAT Answer</div>
+          <div class="legend-row"><span class="badge blank">1</span> No Saved Mark</div>
+        </div>
+        <div class="palette">
+          <strong>Navigate</strong>
+          <div id="palette" class="palette-grid"></div>
+        </div>
+        <div class="mini-table">
+          <strong>Marked Summary</strong>
+          <table>
+            <thead><tr><th>QID</th><th>Marked</th></tr></thead>
+            <tbody id="summaryRows"><tr><td colspan="2">No response loaded yet.</td></tr></tbody>
+          </table>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="/assets/ui-guard.js"></script>
+  <script src="/assets/candidate-error.js"></script>
+  <script>
+    const candidate = JSON.parse(sessionStorage.getItem('candidateDashboardData') || 'null');
+
+    function esc(value) {
+      return String(value ?? '-')
+        .replaceAll('&', '&amp;')
+        .replaceAll('"', '&quot;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+    }
+
+    function safeFilePart(value) {
+      return String(value || '')
+        .trim()
+        .replace(/[^a-zA-Z0-9_-]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+        .slice(0, 80);
+    }
+
+    function responseSheetPrintTitle(sheet) {
+      const exam = safeFilePart(sheet?.examName || 'Exam');
+      const app = safeFilePart(sheet?.applicationNumber || sheet?.registrationId || 'Candidate');
+      return 'Response_Sheet_' + exam + '_' + app;
+    }
+
+    function printResponseSheet() {
+      if (window.currentResponseSheet) {
+        document.title = responseSheetPrintTitle(window.currentResponseSheet);
+      }
+      window.print();
+    }
+
+    async function candidateSecurityToken() {
+      if (window.__candidateSecurityTokenCache) return window.__candidateSecurityTokenCache;
+      const response = await fetch('/api/public/candidate-security-token', { cache: 'no-store' });
+      const data = await response.json();
+      window.__candidateSecurityTokenCache = data.token || '';
+      return window.__candidateSecurityTokenCache;
+    }
+
+    async function postJson(url, payload) {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Candidate-CSRF': await candidateSecurityToken()
+        },
+        body: JSON.stringify(payload)
+      });
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
+      if (!res.ok) throw new Error(data.detail || data.message || text || res.statusText);
+      return data;
+    }
+
+    function answerType(answer) {
+      return String(answer.type || '').toUpperCase() || 'MCQ';
+    }
+
+    function optionIdMap(answer) {
+      return answer && answer.optionIds && typeof answer.optionIds === 'object' ? answer.optionIds : {};
+    }
+
+    function markedLetters(answer) {
+      const optionIds = optionIdMap(answer);
+      const reverse = new Map(Object.entries(optionIds).map(([letter, id]) => [String(id), String(letter)]));
+      return Array.isArray(answer.markedOptionIds)
+        ? answer.markedOptionIds
+          .map(String)
+          .map((value) => {
+            const clean = String(value || '').trim();
+            return reverse.get(clean) || (/^[A-Z]$/i.test(clean) ? clean.toUpperCase() : '');
+          })
+          .filter(Boolean)
+        : [];
+    }
+
+    function markedAnswer(answer) {
+      if (answerType(answer) === 'NAT') return '-';
+      return markedLetters(answer).join(', ') || '-';
+    }
+
+    function formatDateTime(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function formatDuration(value) {
+      const ms = Number(value || 0);
+      if (!Number.isFinite(ms) || ms <= 0) return '0 min 00 sec';
+      const totalSeconds = Math.max(0, Math.round(ms / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return minutes + ' min ' + String(seconds).padStart(2, '0') + ' sec';
+    }
+
+    function statusClass(answer) {
+      if (answerType(answer) === 'NAT' && answer.natAnswer) return 'nat';
+      if (markedLetters(answer).length) return 'answered';
+      if (String(answer.status || '').toLowerCase().includes('not')) return 'not-answered';
+      return 'blank';
+    }
+
+    function statusText(answer) {
+      if (answerType(answer) === 'NAT' && answer.natAnswer) return 'Answered';
+      if (markedLetters(answer).length) return 'Answered';
+      if (String(answer.status || '').toLowerCase().includes('not')) return 'Not Answered';
+      return 'No saved mark';
+    }
+
+    function renderMedia(value, className) {
+      const text = typeof value === 'object' && value !== null
+        ? (
+          value.viewerImage || value.viewer_image
+          || value.optionViewerImage || value.option_viewer_image
+          || value.displayImage || value.display_image
+          || value.optionDisplayImage || value.option_display_image
+          || value.baseImage || value.base_image
+          || value.optionBaseImage || value.option_base_image
+          || value.image || value.optionImage || value.option_image
+          || value.text || value.label || JSON.stringify(value)
+        )
+        : value;
+      if (typeof text === 'string' && text.startsWith('data:image/')) {
+        return '<img class="' + className + '" alt="Question paper image" src="' + esc(text) + '">';
+      }
+      return '<span>' + esc(text || '-') + '</span>';
+    }
+
+    function optionLines(answer) {
+      const options = answer.options && typeof answer.options === 'object' ? answer.options : {};
+      const optionIds = answer.optionIds && typeof answer.optionIds === 'object' ? answer.optionIds : {};
+      const marked = new Set(markedLetters(answer));
+      const keys = Object.keys(options);
+      if (!keys.length) return '<table class="options-table"><tr><td class="q-options-label">Options</td><td>No option images/text available for this question.</td></tr></table>';
+      const rows = keys.map((key, index) => {
+        const selected = marked.has(key) || marked.has(String(optionIds[key] || ''));
+        const label = index === 0 ? '<td class="q-options-label">Options</td>' : '<td></td>';
+        return '<tr>'
+          + label
+          + '<td><div class="option-line ' + (selected ? 'selected' : '') + '">'
+          + '<span class="bold">' + esc(key) + '.</span> '
+          + renderMedia(options[key], 'option-image')
+          + '</div></td>'
+          + '</tr>';
+      }).join('');
+      return '<table class="options-table" cellpadding="0" cellspacing="0" border="0">' + rows + '</table>';
+    }
+
+    function legacyOptionLines(answer) {
+      const options = answer.options && typeof answer.options === 'object' ? answer.options : {};
+      const optionIds = answer.optionIds && typeof answer.optionIds === 'object' ? answer.optionIds : {};
+      const marked = new Set(markedLetters(answer));
+      const keys = Object.keys(options);
+      if (!keys.length) return '<div class="option-line">No option images/text available for this question.</div>';
+      return keys.map((key, index) => {
+        const selected = marked.has(key) || marked.has(String(optionIds[key] || ''));
+        const label = index === 0 ? '<td class="q-options-label">Options</td>' : '<td></td>';
+        return '<tr>'
+          + label
+          + '<td><div class="option-line ' + (selected ? 'selected' : '') + '">'
+          + '<span class="bold">' + esc(key) + '.</span> '
+          + renderMedia(options[key], 'option-image')
+          + '</div></td>'
+          + '</tr>';
+      }).join('');
+    }
+
+    function renderIdentity(sheet) {
+      const rows = [
+        ['Application Number', sheet.applicationNumber],
+        ['Candidate Name', sheet.candidateName],
+        ['Date of Birth', sheet.dateOfBirth],
+        ['Exam Name', sheet.examName || 'Candidate Examination'],
+        ['Exam Time', formatDateTime(sheet.examStartAt || sheet.submittedAt)],
+        ['Sub Stream', sheet.streamCode || '-']
+      ];
+      document.getElementById('identity').innerHTML = rows.map(([label, value]) =>
+        '<div class="field"><span class="detail-label">' + esc(label) + ':</span><span class="value">' + esc(value) + '</span></div>'
+      ).join('');
+    }
+
+    function responseTable(answer) {
+      return '<table cellspacing="0" cellpadding="0" class="menu-tbl">'
+        + '<tbody>'
+        + '<tr><td>Question Type :</td><td class="bold">' + esc(answerType(answer)) + '</td></tr>'
+        + '<tr><td>Question ID :</td><td class="bold">' + esc(answer.questionId || '-') + '</td></tr>'
+        + '<tr><td>Status :</td><td class="bold">' + esc(statusText(answer)) + '</td></tr>'
+        + '<tr><td>Chosen Option :</td><td class="bold">' + esc(markedAnswer(answer)) + '</td></tr>'
+        + '</tbody>'
+        + '</table>';
+    }
+
+    function activityTable(answer) {
+      const activity = answer.activity && typeof answer.activity === 'object' ? answer.activity : {};
+      const finalStatus = activity.finalStatus || answer.status || statusText(answer);
+      return '<table cellspacing="0" cellpadding="0" class="menu-tbl activity-tbl">'
+        + '<caption>Activity</caption>'
+        + '<tbody>'
+        + '<tr><td>Spent :</td><td class="bold">' + esc(formatDuration(activity.timeSpentMs)) + '</td></tr>'
+        + '<tr><td>Revisit :</td><td class="bold">' + esc(activity.revisitCount ?? 0) + '</td></tr>'
+        + '<tr><td>Answered :</td><td class="bold">' + esc(formatDateTime(activity.lastAnsweredAt || activity.firstAnsweredAt)) + '</td></tr>'
+        + '<tr><td>Ans Time :</td><td class="bold">' + esc(formatDuration(activity.answerTimeMs)) + '</td></tr>'
+        + '<tr><td>Changed :</td><td class="bold">' + esc(activity.answerChangedCount ?? 0) + '</td></tr>'
+        + '<tr><td>Final :</td><td class="bold">' + esc(finalStatusLabel(finalStatus)) + '</td></tr>'
+        + '<tr><td>Review :</td><td class="bold">' + esc(activity.markedForReviewCount ?? 0) + '</td></tr>'
+        + '</tbody>'
+        + '</table>';
+    }
+
+    function finalStatusLabel(value) {
+      const status = String(value || '').toLowerCase();
+      if (status === 'answered') return 'Answered';
+      if (status === 'not_answered') return 'Not Answered';
+      if (status === 'not_visited') return 'Not Visited';
+      if (status === 'review') return 'Marked for Review';
+      if (status === 'review_marked') return 'Answered & Marked for Review';
+      return value || '-';
+    }
+
+    function renderQuestions(answers) {
+      let lastSection = '';
+      const totalPages = Math.max(answers.length, 1);
+      return answers.map((answer, index) => {
+        const section = answer.section || 'Response Section';
+        const sectionBreak = section !== lastSection
+          ? '<h2 class="section-title in-question">' + esc(section) + '</h2>'
+          : '';
+        lastSection = section;
+        const questionLabel = answer.displayQuestionId || ('Question No. ' + (index + 1));
+        const body = answer.questionImage
+          ? renderMedia(answer.questionImage, 'question-image')
+          : '<p>' + esc(answer.body || 'Question text/image is not available in saved paper data.') + '</p>';
+        const options = answerType(answer) === 'NAT'
+          ? '<div class="nat-answer-line">Submitted Numerical Answer : <span class="' + (answer.natAnswer ? 'marked' : 'not-marked') + '">' + esc(answer.natAnswer || 'Not answered') + '</span></div>'
+          : optionLines(answer);
+        return '<article id="q' + (index + 1) + '" class="question">'
+          + sectionBreak
+          + '<div class="question-inner">'
+          + '<div class="question-watermark"></div>'
+          + '<table class="questionPnlTbl" cellpadding="0" cellspacing="0" border="0" width="100%">'
+          + '<tr><td class="rw">'
+          + '<div class="q-top-row">'
+          + '<table class="questionRowTbl" cellpadding="0" cellspacing="0" border="0">'
+          + '<tr>'
+          + '<td class="q-index">' + esc(questionLabel) + '</td>'
+          + '<td class="bold q-content">' + body + '</td>'
+          + '</tr>'
+          + '</table>'
+          + '<div class="status-stack">' + responseTable(answer) + activityTable(answer) + '</div>'
+          + '</div>'
+          + options
+          + (index === 0 ? '<div class="first-page-fill"></div>' : '')
+          + '<div class="clear"></div>'
+          + '</td></tr>'
+          + '</table>'
+          + '</div>'
+          + '<div class="question-page-number">Page ' + (index + 1) + ' of ' + totalPages + '</div>'
+          + '</article>';
+      }).join('');
+    }
+
+    function render(sheet) {
+      window.currentResponseSheet = sheet || {};
+      const answers = Array.isArray(sheet.answers) ? sheet.answers : [];
+      const examName = sheet.examName || 'Candidate Examination';
+      document.title = responseSheetPrintTitle(sheet);
+      window.responseSheetWatermark = String(sheet.applicationNumber || sheet.registrationId || 'RESPONSE SHEET');
+      document.documentElement.style.setProperty('--response-watermark', buildWatermarkImage(window.responseSheetWatermark));
+      document.getElementById('status').textContent = '';
+      document.getElementById('status').classList.add('ready');
+      document.getElementById('sheetExamName').textContent = examName;
+      document.getElementById('paperTitle').textContent = 'Candidate Response Sheet';
+      document.getElementById('paperSubTitle').textContent = '';
+      document.getElementById('paperCount').textContent = '';
+      renderIdentity(sheet);
+      document.getElementById('questions').innerHTML = answers.length
+        ? renderQuestions(answers)
+        : '<p>No saved answers were found in this sheet.</p>';
+      applyQuestionWatermarks();
+      document.getElementById('palette').innerHTML = answers.map((answer, index) =>
+        '<a class="badge ' + statusClass(answer) + '" href="#q' + (index + 1) + '">' + (index + 1) + '</a>'
+      ).join('');
+      document.getElementById('summaryRows').innerHTML = answers.length ? answers.map((answer, index) =>
+        '<tr><td>' + esc(answer.displayQuestionId || ('Q.' + (index + 1))) + '</td><td>' + esc(markedAnswer(answer)) + '</td></tr>'
+      ).join('') : '<tr><td colspan="2">No saved answers.</td></tr>';
+    }
+
+    function watermarkText(text) {
+      const value = String(text || 'RESPONSE SHEET');
+      return Array(24).fill(value).join('     ');
+    }
+
+    function currentWatermark() {
+      return window.responseSheetWatermark || 'RESPONSE SHEET';
+    }
+
+    function applyQuestionWatermarks() {
+      const image = buildWatermarkImage(currentWatermark());
+      document.querySelectorAll('.question-watermark').forEach((element) => {
+        element.style.backgroundImage = image;
+      });
+    }
+
+    function buildWatermarkImage(text) {
+      const safeText = String(text || 'RESPONSE SHEET')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+      const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='130' height='85'>"
+        + "<defs><style>text{font:700 13px Arial,Helvetica,sans-serif;fill:#9a9a9a;}</style></defs>"
+        + "<g transform='rotate(-25 65 42.5)'>"
+        + "<text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'>" + safeText + "</text>"
+        + "</g></svg>";
+      return "url(\"data:image/svg+xml;utf8," + encodeURIComponent(svg) + "\")";
+    }
+
+    async function boot() {
+      if (!candidate || !candidate.registrationId || !candidate.dateOfBirth) {
+        openCandidateError('auth-required');
+        return;
+      }
+      try {
+        const sheet = await postJson('/api/candidate/responses', {
+          registrationId: candidate.registrationId,
+          dateOfBirth: candidate.dateOfBirth
+        });
+        render(sheet);
+      } catch (error) {
+        document.getElementById('status').innerHTML = '<span class="error">Could not open response sheet\n' + esc(error.message) + '</span>';
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "examUrl": "http://localhost:8081/candidate-entry/exam",
+  "allowedOrigin": "http://localhost:8081",
+  "profileDir": "runtime-profile",
+  "clearProfileOnExit": true,
+  "edgePaths": [
+    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe"
+  ]
+}

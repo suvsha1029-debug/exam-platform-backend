@@ -1,0 +1,11 @@
+.portal-faq-entry { margin: 0; padding: 16px 0; border: 0; border-top: 1px solid #cbd2d8; min-width: 0; }
+.portal-faq-entry-head, .portal-faq-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.portal-faq-entry-head { margin-bottom: 10px; }
+.portal-faq-actions { display: flex; gap: 6px; }
+.portal-faq-actions button { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border-radius: 0; }
+.portal-faq-actions button:disabled { opacity: .35; cursor: default; }
+.portal-faq-entry textarea { min-height: 80px; }
+.portal-faq-toolbar { justify-content: flex-start; margin-bottom: 18px; }
+.portal-faq-toolbar button { display: inline-flex; align-items: center; gap: 8px; border-radius: 0; }
+.portal-faq-toolbar span { font-size: 12px; }
+.portal-faq-editor .lucide, .portal-faq-toolbar .lucide { width: 16px; height: 16px; }

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Candidate Portal</title>
+  <link rel="stylesheet" href="/assets/public-portal.css">
+  <script src="/assets/vendor/lucide-0.468.0.min.js" defer></script>
+  <script src="/assets/public-portal.js" defer></script>
+  <script src="/assets/portal-notices.js"></script>
+</head>
+<body class="public-portal">
+  <a class="skip-link" href="#mainContent">Skip to content</a>
+  <div id="pageWatermark" class="page-watermark" aria-hidden="true" hidden></div>
+  <header id="portalHeader">
+    <img id="portalBanner" class="portal-banner" alt="Exam conducting institute" hidden>
+    <div class="portal-heading content-width">
+      <div>
+        <p class="portal-masthead-label">Examinations / Candidate services</p>
+        <h1 id="portalHeaderTitle">Candidate Portal</h1>
+        <p id="portalHeaderSubtitle">Examination services</p>
+      </div>
+      <div id="examSelectorWrap" class="exam-selector" hidden>
+        <label for="examSelector">Examination</label>
+        <select id="examSelector"></select>
+      </div>
+    </div>
+  </header>
+  <nav class="public-portal-tabs" aria-label="Candidate services">
+    <div class="content-width nav-links">
+      <a href="/" aria-current="page" title="Home"><i data-lucide="house" aria-hidden="true"></i><span>Home</span></a>
+      <a href="/candidate-entry/dashboard" title="Candidate Login"><i data-lucide="log-in" aria-hidden="true"></i><span>Login</span></a>
+      <a id="registrationNav" href="/candidate-entry/registration-personal" title="New Registration" hidden><i data-lucide="user-round-plus" aria-hidden="true"></i><span>Register</span></a>
+      <a href="#examWindows" title="Notifications"><i data-lucide="bell" aria-hidden="true"></i><span>Notifications</span></a>
+      <a href="#faqSection" title="Frequently Asked Questions"><i data-lucide="circle-help" aria-hidden="true"></i><span>FAQ</span></a>
+      <a href="#helpSection" title="Help and Contact"><i data-lucide="headset" aria-hidden="true"></i><span>Help</span></a>
+      <a id="publicNoticeTab" href="#" target="_blank" rel="noopener" hidden><i data-lucide="file-text" aria-hidden="true"></i><span id="publicNoticeLabel">Notices</span></a>
+    </div>
+  </nav>
+  <div id="topTicker" class="notification-strip" hidden>
+    <div class="content-width"><i data-lucide="megaphone" aria-hidden="true"></i><span id="tickerText"></span></div>
+  </div>
+  <main id="mainContent" class="content-width">
+    <section class="registration-status" aria-labelledby="mainStatus">
+      <img id="heroWatermark" class="status-watermark" alt="" aria-hidden="true" hidden>
+      <div class="status-copy">
+        <span class="section-label">Candidate Services</span>
+        <h2 id="mainStatus" role="status">Checking registration status...</h2>
+        <p id="mainCopy">Loading examination details.</p>
+      </div>
+      <div class="status-actions">
+        <a id="primaryAction" class="primary-action" href="/candidate-entry/dashboard"><i data-lucide="log-in" aria-hidden="true"></i><span id="primaryActionLabel">Candidate Login</span><i data-lucide="arrow-right" aria-hidden="true"></i></a>
+        <a id="registeredLogin" class="secondary-login" href="/candidate-entry/dashboard" hidden>Already registered? <strong>Login here</strong></a>
+      </div>
+    </section>
+    <section id="examWindows" class="portal-section" aria-labelledby="notificationHeading">
+      <div class="section-heading"><i data-lucide="bell" aria-hidden="true"></i><h2 id="notificationHeading">Notices &amp; announcements</h2></div>
+      <div id="examRows" aria-live="polite"></div>
+    </section>
+    <div class="support-layout">
+      <section id="faqSection" class="portal-section" aria-labelledby="faqHeading">
+        <div class="section-heading"><i data-lucide="circle-help" aria-hidden="true"></i><h2 id="faqHeading">Frequently Asked Questions</h2></div>
+        <div id="faqList"><p class="empty-state">FAQs will be published here.</p></div>
+      </section>
+      <section id="helpSection" class="portal-section" aria-labelledby="helpHeading">
+        <div class="section-heading"><i data-lucide="headset" aria-hidden="true"></i><h2 id="helpHeading">Help &amp; Contact</h2></div>
+        <div id="helpContacts"><p class="empty-state">Contact details will be published here.</p></div>
+      </section>
+    </div>
+  </main>
+  <footer class="portal-footer"><div class="content-width"><span>Candidate Examination Services</span><a href="/candidate-entry/dashboard">Candidate Login <i data-lucide="arrow-up-right" aria-hidden="true"></i></a></div></footer>
+  <script src="/assets/ui-guard.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+# Local runtime, personal records and generated output
+/uploads/
+/data/
+/output/
+/tmp/
+node_modules/
+__pycache__*/
+__pycache__/
+*.pyc
+*.class
+*.log
+*.pid
+*.hprof
+*.db
+*.sqlite*
+*.mv.db
+*.trace.db
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.jks
+**/obj/
+**/bin/
+/desktop/artifacts/
+/desktop/build/
+**/*.WebView2/
+**/User Data/
+secure-client-config.json
+desktop-console-device.json
+/tmp_*
+/_*
+/*.png
+/SchemaProbe.java
+/gate_viewer_check.pyc.*
+/.agents/

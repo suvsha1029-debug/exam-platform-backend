@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Candidate Details</title>
+  <link rel="stylesheet" href="/assets/candidate-details.css">
+  <script src="/assets/portal-notices.js"></script>
+  <script src="/assets/candidate-notices.js"></script>
+  <script src="/assets/candidate-institutional.js" defer></script>
+  <link rel="stylesheet" href="/assets/candidate-challenge.css">
+</head>
+<body class="candidate-details-page">
+  <header class="dashboard-heading">
+    <div class="header-center">
+      <p class="eyebrow" id="dashboardExamName">Candidate Services</p>
+      <h1 id="dashboardCandidateName">Candidate Dashboard</h1>
+    </div>
+    <div class="dashboard-reference"><span>Application record</span><p id="dashboardApplicationNumber"></p></div>
+  </header>
+  <main>
+    <div id="correctionNotice" class="notice">Loading candidate details...</div>
+    <section class="panel">
+      <div id="candidateDashboardContent" class="dashboard-stack" hidden>
+        <dl class="dashboard-summary" aria-label="Application status">
+          <div><dt>Application</dt><dd id="summaryApplication">Submitted</dd></div>
+          <div><dt>Examination response</dt><dd id="summaryResponse">Not submitted</dd></div>
+          <div><dt>Result</dt><dd id="summaryResult">Not published</dd></div>
+        </dl>
+        <section class="action-shell" aria-label="Candidate dashboard actions">
+          <div class="dashboard-section-heading"><h2>Candidate services</h2><span>Application &amp; examination</span></div>
+          <div class="actions">
+            <button type="button" id="printApplication" disabled><i data-lucide="printer"></i>Print / Save Application</button>
+            <button type="button" class="muted" id="viewResponse" hidden disabled><i data-lucide="list-checks"></i>Responses</button>
+            <button type="button" class="muted" id="viewResultCard" hidden disabled><i data-lucide="file-badge"></i>Score Card</button>
+            <button type="button" class="muted" id="downloadScoreCardPdf" hidden disabled><i data-lucide="download"></i>Score Card PDF</button>
+            <button type="button" class="muted" id="downloadOriginalQuestionPaper" hidden disabled><i data-lucide="file-text"></i>Question Paper</button>
+            <button type="button" class="muted" id="downloadOriginalAnswerKey" hidden disabled><i data-lucide="list-check"></i>Answer Key</button>
+            <button type="button" class="muted" id="openAnswerKeyChallenge" hidden disabled>Challenge Answer Key</button>
+            <button type="button" class="muted" id="openCorrection" hidden disabled><i data-lucide="file-pen-line"></i>Correct Application</button>
+          </div>
+        </section>
+        <section id="candidateBulletin" class="candidate-bulletin" hidden aria-labelledby="candidateBulletinTitle"><div class="dashboard-section-heading"><h2 id="candidateBulletinTitle">Examination notices</h2><a href="/#examWindows">All notices</a></div><ul id="candidateNoticeList"></ul></section>
+        <details id="applicationShell" class="application-shell" open>
+          <summary><span>Submitted Application</span><i data-lucide="chevron-down" aria-hidden="true"></i></summary>
+          <div class="document-stage"><div id="printout" class="printout"></div></div>
+        </details>
+      </div>
+      <div id="correctionWorkflow" class="correction-workflow"></div>
+      <div id="challengeWorkflow" class="challenge-workflow"></div>
+      <p id="resultHoldNotice" role="status" hidden>Your result is withheld. Please contact the examination office.</p>
+      <div id="result" class="result"></div>
+    </section>
+  </main>
+  <div id="challengeModal" class="challenge-modal" aria-hidden="true">
+    <div class="challenge-modal-card" role="dialog" aria-modal="true" aria-labelledby="challengeModalTitle">
+      <div class="challenge-modal-head">
+        <div>
+          <h3 id="challengeModalTitle">Answer Key Challenge</h3>
+          <p id="challengeModalMeta"></p>
+        </div>
+        <div class="actions" style="padding:0">
+          <button type="button" class="muted icon-button" id="closeChallengeModal" aria-label="Close challenge" title="Close challenge"><i data-lucide="x" aria-hidden="true"></i></button>
+        </div>
+      </div>
+      <div class="challenge-modal-body">
+        <div class="challenge-toolbar">
+          <div class="search-box">
+            <label for="challengeSearchInput">Search Question</label>
+            <input id="challengeSearchInput" type="text" placeholder="Question number or ID">
+          </div>
+          <div class="search-box" style="flex:0 0 250px">
+            <label>Challenge Window</label>
+            <div id="challengeTimelineWrap" class="timeline-grid"></div>
+          </div>
+        </div>
+        <div class="challenge-modal-grid">
+          <section class="challenge-card">
+            <h4>Question Ledger</h4>
+            <div id="challengeQuestionList" class="challenge-question-list">Loading question ledger...</div>
+          </section>
+          <section class="challenge-card">
+            <h4>Challenge Filing Card</h4>
+            <div id="challengeQuestionPreview">
+              <div class="challenge-question-body">Select a question from the ledger to open the challenge card.</div>
+            </div>
+            <form id="challengeForm" class="challenge-form" style="margin-top:14px">
+              <input id="challengeSelectedQuestionId" name="questionId" type="hidden">
+              <input id="challengeSelectedDisplayQuestionId" name="displayQuestionId" type="hidden">
+              <input id="challengeSelectedQuestionNumber" name="questionNumber" type="hidden">
+              <div class="full">
+                <label>Challenge Type</label>
+                <div class="challenge-claim-grid">
+                  <label class="challenge-claim-card"><input type="radio" name="challengeType" value="ANSWER_KEY" checked><div><strong>Answer Key</strong><span>Correct option / correct answer does not match.</span></div></label>
+                  <label class="challenge-claim-card"><input type="radio" name="challengeType" value="OPTION_MAPPING"><div><strong>Option Mapping</strong><span>Displayed option mapping is incorrect for this question.</span></div></label>
+                  <label class="challenge-claim-card"><input type="radio" name="challengeType" value="NAT_RANGE"><div><strong>NAT Range</strong><span>Numerical key or accepted range needs correction.</span></div></label>
+                  <label class="challenge-claim-card"><input type="radio" name="challengeType" value="OTHER"><div><strong>Other</strong><span>Any other question-level challenge with proof.</span></div></label>
+                </div>
+              </div>
+              <div class="full">
+                <label for="challengeNoteText">Candidate Note</label>
+                <textarea id="challengeNoteText" name="noteText" placeholder="Write the exact correction you expect, the reason, and what your proof shows."></textarea>
+              </div>
+              <div class="challenge-proof-grid full">
+                <div>
+                  <label for="challengeProofPdf">Compulsory PDF Proof (max 10 MB)</label>
+                  <input id="challengeProofPdf" name="proofPdf" type="file" accept="application/pdf" required>
+                </div>
+                <div>
+                  <label for="challengeProofImages">Optional Image Proofs (each max 2 MB)</label>
+                  <input id="challengeProofImages" name="proofImages" type="file" accept="image/png,image/jpeg" multiple>
+                </div>
+              </div>
+              <div class="full">
+                <button type="submit" id="submitChallengeBtn">Submit Challenge</button>
+              </div>
+              <div id="challengeStatus" class="result">No challenge submitted in this session.</div>
+            </form>
+            <div class="challenge-lock-note">Once a challenge is accepted or rejected, it becomes final and cannot be changed again from either side.</div>
+          </section>
+        </div>
+        <section class="challenge-card" style="margin-top:16px">
+          <h4>Submitted Challenges</h4>
+          <div id="challengeHistory" class="challenge-history-list">Loading challenge history...</div>
+        </section>
+      </div>
+    </div>
+  </div>
+  <script src="/assets/ui-guard.js"></script>
+  <script src="/assets/candidate-error.js"></script>
+  <script src="/assets/vendor/lucide-0.468.0.min.js"></script>
+  <script src="/assets/application-document.js"></script>
+  <script>
+    let candidate = JSON.parse(sessionStorage.getItem('candidateDashboardData') || 'null');
+    let applicationReady = Promise.resolve();
+    const challengeTimezones = {
+      IN: { label: 'India', zone: 'Asia/Kolkata' },
+      US: { label: 'US / New York', zone: 'America/New_York' },
+      GB: { label: 'United Kingdom', zone: 'Europe/London' },
+      AE: { label: 'UAE', zone: 'Asia/Dubai' },
+      SG: { label: 'Singapore', zone: 'Asia/Singapore' },
+      AU: { label: 'Australia / Sydney', zone: 'Australia/Sydney' },
+      CA: { label: 'Canada / Toronto', zone: 'America/Toronto' },
+      NP: { label: 'Nepal', zone: 'Asia/Kathmandu' },
+      BD: { label: 'Bangladesh', zone: 'Asia/Dhaka' }
+    };
+    const editableFields = [
+      ['FULL_NAME', 'fullName', 'Full Name', 'input'],
+      ['DATE_OF_BIRTH', 'dateOfBirth', 'Date of Birth', 'date'],
+      ['EMAIL', 'email', 'Email', 'input'],
+      ['ALTERNATE_EMAIL', 'alternateEmail', 'Alternate Email', 'input'],
+      ['PHONE', 'phone', 'Phone', 'input'],
+      ['ADDRESS', 'address', 'Address', 'textarea'],
+      ['STATE', 'state', 'State / Province', 'input'],
+      ['PINCODE', 'pincode', 'Pincode', 'input'],
+      ['NATIONALITY', 'nationality', 'Nationality', 'input'],
+      ['GENDER', 'gender', 'Gender', 'input'],
+      ['PARENT_NAME', 'parentName', 'Parent Name', 'input'],
+      ['PARENT_PHONE', 'parentPhone', 'Parent Phone', 'input'],
+      ['GUARDIAN_NAME', 'guardianName', 'Guardian Name', 'input'],
+      ['GUARDIAN_PHONE', 'guardianPhone', 'Guardian Phone', 'input'],
+      ['GUARDIAN_RELATION', 'guardianRelation', 'Guardian Relation', 'input'],
+      ['UG_DETAILS', 'ugDetails', 'UG Details', 'textarea'],
+      ['PG_DETAILS', 'pgDetails', 'PG Details', 'textarea']
+    ];
+    let challengeSheetCache = null;
+    let challengeQuestionRows = [];
+    let selectedChallengeQuestionId = '';
+    function escapeHtml(value) { return String(value ?? '-').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+    function challengeMediaSource(value) {
+      if (!value) return '';
+      if (typeof value === 'string') return value.startsWith('data:image/') ? value : '';
+      if (typeof value === 'object') {
+        const source = value.viewerImage || value.viewer_image
+          || value.optionViewerImage || value.option_viewer_image
+          || value.displayImage || value.display_image
+          || value.optionDisplayImage || value.option_display_image
+          || value.baseImage || value.base_image
+          || value.optionBaseImage || value.option_base_image
+          || value.image || value.optionImage || value.option_image
+          || '';
+        return typeof source === 'string' && source.startsWith('data:image/') ? source : '';
+      }
+      return '';
+    }
+    function challengeMediaText(value) {
+      if (value == null) return '';
+      if (typeof value === 'string') return value.startsWith('data:image/') ? '' : value;
+      if (typeof value === 'object') {
+        return value.text || value.label || value.value || '';
+      }
+      return String(value);
+    }
+    function renderChallengeMedia(value, imageClass, emptyText) {
+      const image = challengeMediaSource(value);
+      if (image) {
+        return '<img class="' + imageClass + '" alt="Released question view" src="' + escapeHtml(image) + '">';
+      }
+      const text = challengeMediaText(value);
+      return text
+        ? '<span>' + escapeHtml(text) + '</span>'
+        : '<span class="challenge-empty-note">' + escapeHtml(emptyText || 'Released image is not available.') + '</span>';
+    }
+    async function candidateJsonRequest(url, payload) {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Candidate-CSRF': await candidateSecurityToken() },
+        body: JSON.stringify(payload)
+      });
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
+      if (!response.ok) throw new Error(data.detail || data.message || text || response.statusText);
+      return data;
+    }
+    function triggerDataUrlDownload(fileName, dataUrl) {
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = fileName || 'download.pdf';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+    function secureSiblingPage(fileName) {
+      const path = window.location.pathname || '';
+      if (path.endsWith('/candidate-details.html')) {
+        return path.replace(/candidate-details\.html$/, fileName);
+      }
+      return '/candidate-entry/' + fileName.replace('.html', '');
+    }
+    function render() {
+      if (!candidate) { openCandidateError('auth-required'); return; }
+      document.getElementById('candidateDashboardContent').hidden = false;
+      document.getElementById('dashboardCandidateName').textContent = candidate.fullName || 'Candidate Dashboard';
+      document.getElementById('dashboardExamName').textContent = candidate.examName || 'Candidate Services';
+      document.getElementById('dashboardApplicationNumber').textContent = 'Application ' + candidate.registrationId;
+      window.renderCandidateNotices(candidate.examCode);
+      document.getElementById('printApplication').disabled = true;
+      const nextDocument = ApplicationDocument.render(document.getElementById('printout'), candidate, candidateJsonRequest);
+      applicationReady = nextDocument;
+      nextDocument.finally(() => {
+        if (applicationReady === nextDocument) document.getElementById('printApplication').disabled = false;
+      });
+      document.getElementById('correctionNotice').textContent = candidate.correctionsOpen
+        ? 'Correction window is open. You may edit only fields enabled by admin.'
+        : 'Submitted details are locked.';
+      const allowed = allowedCorrectionFields();
+      renderDashboardGates(allowed);
+      renderCorrectionWorkflow(allowed);
+      renderChallengeWorkflow();
+      lucide.createIcons({ attrs: { 'aria-hidden': 'true' } });
+    }
+    function setGateButton(id, enabled) {
+      const button = document.getElementById(id);
+      button.hidden = !enabled;
+      button.disabled = !enabled;
+    }
+    function renderDashboardGates(allowed) {
+      document.getElementById('summaryApplication').textContent = candidate.correctionsOpen ? 'Corrections open' : 'Submitted';
+      document.getElementById('summaryResponse').textContent = candidate.responseSubmitted ? 'Submitted' : 'Not submitted';
+      const resultSummary = document.getElementById('summaryResult');
+      resultSummary.textContent = candidate.resultWithheld ? 'Withheld' : candidate.resultReleased && candidate.responseSubmitted ? 'Published' : 'Not published';
+      resultSummary.classList.toggle('error', Boolean(candidate.resultWithheld));
+      document.getElementById('resultHoldNotice').hidden = !candidate.resultWithheld;
+      setGateButton('viewResponse', candidate.responsesReleased && candidate.responseSubmitted);
+      setGateButton('viewResultCard', candidate.resultReleased && candidate.responseSubmitted);
+      setGateButton('downloadScoreCardPdf', candidate.resultReleased && candidate.scoreCardPdfReleased && candidate.responseSubmitted);
+      setGateButton('downloadOriginalQuestionPaper', candidate.originalQuestionPaperReleased);
+      setGateButton('downloadOriginalAnswerKey', candidate.originalAnswerKeyReleased);
+      setGateButton('openCorrection', candidate.correctionsOpen && (allowed || allowedCorrectionFields()).size);
+      updateChallengeAvailability();
+    }
+    function challengeAvailability(now = Date.now()) {
+      if (!candidate.answerKeyChallengeEnabled) {
+        return { visible: false, open: false, state: 'DISABLED', message: 'Answer-key challenges are not enabled for this exam.' };
+      }
+      const opensAt = candidate.answerKeyChallengeOpensAt ? new Date(candidate.answerKeyChallengeOpensAt).getTime() : null;
+      const closesAt = candidate.answerKeyChallengeClosesAt ? new Date(candidate.answerKeyChallengeClosesAt).getTime() : null;
+      if (!candidate.responseSubmitted) {
+        return { visible: true, open: false, state: 'WAITING', message: 'Challenge filing becomes available after your exam response is submitted.' };
+      }
+      if (!candidate.originalAnswerKeyReleased) {
+        return { visible: true, open: false, state: 'WAITING', message: 'Challenge window is scheduled, but the answer key has not been released by the administrator yet.' };
+      }
+      if (Number.isFinite(opensAt) && now < opensAt) {
+        return { visible: true, open: false, state: 'SCHEDULED', message: 'Challenge filing opens ' + formatChallengeInstant(opensAt) + '.', remainingMs: opensAt - now };
+      }
+      if (Number.isFinite(closesAt) && now >= closesAt) {
+        return { visible: true, open: false, state: 'CLOSED', message: 'Challenge filing closed ' + formatChallengeInstant(closesAt) + '.' };
+      }
+      return { visible: true, open: true, state: 'OPEN', message: Number.isFinite(closesAt) ? 'Challenge filing is open until ' + formatChallengeInstant(closesAt) + '.' : 'Challenge filing is open.' };
+    }
+    function formatChallengeInstant(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return 'at the configured time';
+      return new Intl.DateTimeFormat('en-IN', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: 'Asia/Kolkata'
+      }).format(date) + ' IST';
+    }
+    function challengeCountdown(milliseconds) {
+      const total = Math.max(0, Math.floor(Number(milliseconds || 0) / 1000));
+      const days = Math.floor(total / 86400);
+      const hours = Math.floor((total % 86400) / 3600);
+      const minutes = Math.floor((total % 3600) / 60);
+      const seconds = total % 60;
+      return (days ? days + 'd ' : '') + [hours, minutes, seconds].map((value) => String(value).padStart(2, '0')).join(':');
+    }
+    function updateChallengeAvailability() {
+      const button = document.getElementById('openAnswerKeyChallenge');
+      const availability = challengeAvailability();
+      button.hidden = !availability.visible;
+      button.disabled = !availability.open;
+      button.textContent = availability.open
+        ? 'Challenge Answer Key - Open'
+        : availability.state === 'SCHEDULED'
+          ? 'Challenge Opens In ' + challengeCountdown(availability.remainingMs)
+          : availability.state === 'CLOSED'
+            ? 'Challenge Window Closed'
+            : 'Challenge Answer Key - Waiting';
+      renderChallengeWorkflow(availability);
+    }
+    function allowedCorrectionFields() {
+      const configured = candidate.candidateCorrectionFields || {};
+      return new Set(Object.entries(configured).filter((entry) => entry[1] === 'true' || entry[1] === true).map((entry) => entry[0]));
+    }
+    function renderCorrectionWorkflow(allowed) {
+      const panel = document.getElementById('correctionWorkflow');
+      panel.classList.toggle('visible', candidate.correctionsOpen);
+      if (!candidate.correctionsOpen) {
+        panel.innerHTML = '';
+        return;
+      }
+      if (!allowed.size) {
+        panel.innerHTML = '<strong>Correction workflow</strong><p style="margin:8px 0 0;color:#607089;">Admin opened correction window, but no fields are enabled for candidate editing yet.</p>';
+        return;
+      }
+      const chips = editableFields
+        .filter(([field]) => allowed.has(field))
+        .map(([field, key, label]) => '<div class="correction-chip">' + escapeHtml(label) + '<small>Admin enabled this field for correction.</small></div>')
+        .join('');
+      panel.innerHTML = '<strong>Correction workflow</strong><p style="margin:8px 0 0;color:#607089;">Only the fields below can be changed. Review carefully, save once, then print the updated copy.</p><div class="correction-grid">' + chips + '</div>';
+    }
+    function challengeTimeCell(zone, instantText) {
+      if (!instantText) return '<td class="schedule-unset">Not published</td>';
+      const date = new Date(instantText);
+      if (Number.isNaN(date.getTime())) return '<td class="schedule-unset">Not published</td>';
+      const day = new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeZone: zone }).format(date);
+      const clock = new Intl.DateTimeFormat('en-IN', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: zone }).format(date);
+      return '<td><time datetime="' + escapeHtml(date.toISOString()) + '"><span>' + escapeHtml(day) + '</span><small>' + escapeHtml(clock) + '</small></time></td>';
+    }
+    function renderChallengeWorkflow(state) {
+      const panel = document.getElementById('challengeWorkflow');
+      const availability = state || challengeAvailability();
+      panel.classList.toggle('visible', availability.visible);
+      if (!availability.visible) {
+        panel.innerHTML = '';
+        delete panel.dataset.scheduleSignature;
+        return;
+      }
+      const signature = JSON.stringify([availability.state, availability.message, candidate.answerKeyChallengeOpensAt, candidate.answerKeyChallengeClosesAt,
+        candidate.allowedCountryIso2s, candidate.responseSubmitted, candidate.originalAnswerKeyReleased]);
+      if (panel.dataset.scheduleSignature === signature) return;
+      panel.dataset.scheduleSignature = signature;
+      panel.innerHTML = '<strong>Answer-Key Challenge: ' + escapeHtml(availability.state) + '</strong>'
+        + '<p style="margin:8px 0;color:#607089">' + escapeHtml(availability.message) + '</p>'
+        + '<div class="timeline-grid">' + challengeTimelineHtml() + '</div>'
+        + '<div class="challenge-readiness">'
+        + '<span>Response submitted: <strong>' + (candidate.responseSubmitted ? 'Ready' : 'Pending') + '</strong></span>'
+        + '<span>Answer key: <strong>' + (candidate.originalAnswerKeyReleased ? 'Released' : 'Pending') + '</strong></span>'
+        + '</div>';
+    }
+    function challengeTimelineHtml() {
+      const countries = Array.isArray(candidate.allowedCountryIso2s) ? candidate.allowedCountryIso2s : [];
+      const timezones = new Map([['Asia/Kolkata', challengeTimezones.IN]]);
+      countries.forEach(code => {
+        const item = challengeTimezones[String(code || '').toUpperCase()];
+        if (item) timezones.set(item.zone, item);
+      });
+      return '<table class="challenge-schedule"><caption>Answer-key challenge schedule</caption>'
+        + '<thead><tr><th scope="col">Time Zone</th><th scope="col">Opens</th><th scope="col">Closes</th></tr></thead><tbody>'
+        + [...timezones.values()].map(item => '<tr data-timezone="' + escapeHtml(item.zone) + '"><th scope="row" title="' + escapeHtml(item.zone) + '">'
+          + escapeHtml(item.label) + '</th>' + challengeTimeCell(item.zone, candidate.answerKeyChallengeOpensAt)
+          + challengeTimeCell(item.zone, candidate.answerKeyChallengeClosesAt) + '</tr>').join('')
+        + '</tbody></table>';
+    }
+    async function ensureChallengeSheet() {
+      if (challengeSheetCache) return challengeSheetCache;
+      challengeSheetCache = await candidateJsonRequest('/api/candidate/responses', {
+        registrationId: candidate.registrationId,
+        dateOfBirth: candidate.dateOfBirth
+      });
+      challengeQuestionRows = Array.isArray(challengeSheetCache.answers) ? challengeSheetCache.answers : [];
+      return challengeSheetCache;
+    }
+    function challengeQuestionLabel(row, index) {
+      return row.displayQuestionId || row.questionId || ('Q.' + (index + 1));
+    }
+    function challengeSearchBlob(row) {
+      const optionText = Object.values(row.options || {}).map((value) => challengeMediaText(value)).join(' ');
+      return [
+        row.displayQuestionId,
+        row.questionId,
+        row.section,
+        row.body,
+        row.questionText,
+        row.question_text,
+        optionText
+      ].join(' ').toLowerCase();
+    }
+    function challengeQuestionMatches(row, needle, index) {
+      const text = challengeSearchBlob(row);
+      return text.includes(needle) || challengeQuestionLabel(row, index).toLowerCase().includes(needle);
+    }
+    function renderChallengeQuestionList() {
+      const wrap = document.getElementById('challengeQuestionList');
+      const query = String(document.getElementById('challengeSearchInput').value || '').trim().toLowerCase();
+      const rows = challengeQuestionRows.filter((row, index) => !query || challengeQuestionMatches(row, query, index));
+      if (!rows.length) {
+        wrap.innerHTML = '<div class="challenge-history-card">No question matched this search.</div>';
+        renderChallengePreview(null);
+        return;
+      }
+      if (!selectedChallengeQuestionId || !rows.some((row) => String(row.questionId || '') === selectedChallengeQuestionId)) {
+        selectedChallengeQuestionId = String(rows[0].questionId || '');
+      }
+      wrap.innerHTML = rows.map((row, index) =>
+        '<button type="button" class="challenge-question-pill' + (String(row.questionId || '') === selectedChallengeQuestionId ? ' active' : '') + '" data-challenge-qid="' + escapeHtml(row.questionId || '') + '">'
+        + '<strong>' + escapeHtml(challengeQuestionLabel(row, index)) + '</strong>'
+        + '<small>' + escapeHtml(row.questionId || '-') + '</small>'
+        + '<small>' + escapeHtml(row.section || 'Section') + ' | ' + escapeHtml(row.type || '-') + '</small>'
+        + '</button>'
+      ).join('');
+      wrap.querySelectorAll('[data-challenge-qid]').forEach((button) => {
+        button.addEventListener('click', () => {
+          selectedChallengeQuestionId = button.dataset.challengeQid || '';
+          renderChallengeQuestionList();
+        });
+      });
+      const selected = rows.find((row) => String(row.questionId || '') === selectedChallengeQuestionId) || rows[0];
+      renderChallengePreview(selected);
+    }
+    function renderChallengePreview(row) {
+      const wrap = document.getElementById('challengeQuestionPreview');
+      if (!row) {
+        document.getElementById('challengeSelectedQuestionId').value = '';
+        document.getElementById('challengeSelectedDisplayQuestionId').value = '';
+        document.getElementById('challengeSelectedQuestionNumber').value = '';
+        wrap.innerHTML = '<div class="challenge-question-body">Select a question from the ledger to open the challenge card.</div>';
+        return;
+      }
+      document.getElementById('challengeSelectedQuestionId').value = row.questionId || '';
+      document.getElementById('challengeSelectedDisplayQuestionId').value = row.displayQuestionId || '';
+      document.getElementById('challengeSelectedQuestionNumber').value = row.displayQuestionId || row.questionId || '';
+      const meta = '<div class="challenge-preview-meta">'
+        + '<div><strong>Displayed Q</strong>' + escapeHtml(row.displayQuestionId || '-') + '</div>'
+        + '<div><strong>Global Question ID</strong>' + escapeHtml(row.questionId || '-') + '</div>'
+        + '<div><strong>Type / Section</strong>' + escapeHtml((row.type || '-') + ' / ' + (row.section || '-')) + '</div>'
+        + '</div>';
+      const questionImage = challengeMediaSource(row.questionImage || row.question_image || row.image);
+      const body = questionImage
+        ? '<div class="challenge-question-body has-image">' + renderChallengeMedia(questionImage, 'challenge-question-image', 'Question image is not available in this released view.') + '</div>'
+        : '<div class="challenge-question-body">' + renderChallengeMedia(row.body || row.questionText || row.question_text || '', 'challenge-question-image', 'Question image/text is not available in the released response view.') + '</div>';
+      const options = String(row.type || '').toUpperCase() === 'NAT'
+        ? '<div class="challenge-nat-box">NAT response view. File your challenge for key/range correction using the proof bundle below.</div>'
+        : '<div class="challenge-option-list">' + Object.entries(row.options || {}).map(([letter, value]) =>
+            '<div class="challenge-option-line"><b>' + escapeHtml(letter) + '.</b><div class="challenge-option-media">' + renderChallengeMedia(value, 'challenge-option-image', 'Released option image is not available.') + '</div></div>'
+          ).join('') + '</div>';
+      wrap.innerHTML = meta + body + options;
+    }
+    function renderChallengeHistory(rows) {
+      const wrap = document.getElementById('challengeHistory');
+      wrap.innerHTML = (Array.isArray(rows) && rows.length)
+        ? rows.map((row) => '<div class="challenge-history-card"><strong>' + escapeHtml(row.displayQuestionId || row.questionId || '-') + '</strong><div>Question ID: ' + escapeHtml(row.questionId || '-') + '</div><div>Status: ' + escapeHtml(row.status || '-') + '</div><div>Resolution: ' + escapeHtml(candidateChallengeResolution(row.resolution)) + '</div><div>PDF: ' + escapeHtml(row.proofPdfName || '-') + '</div><div>Images: ' + escapeHtml(row.proofImageCount || 0) + '</div><div>Created: ' + escapeHtml(row.createdAt || '-') + '</div><div>Note: ' + escapeHtml(row.noteText || '-') + '</div><div>Review: ' + escapeHtml(row.reviewNote || row.reviewedBy || '-') + '</div></div>').join('')
+        : '<div class="challenge-history-card">No challenge has been filed yet.</div>';
+    }
+    function candidateChallengeResolution(value) {
+      return ({
+        KEEP_CURRENT_KEY: 'Current answer key retained',
+        MARK_TO_ALL: 'Full marks awarded to all candidates',
+        DROP_QUESTION: 'Question revoked from evaluation'
+      })[String(value || '')] || 'Pending admin decision';
+    }
+    async function openChallengeModal() {
+      const modal = document.getElementById('challengeModal');
+      document.getElementById('challengeModalMeta').textContent = candidate.registrationId + ' | ' + (candidate.examName || '');
+      document.getElementById('challengeTimelineWrap').innerHTML = challengeTimelineHtml() || '<div class="timeline-card"><strong>Window</strong><div>Admin has not published the challenge timeline yet.</div></div>';
+      document.getElementById('challengeStatus').textContent = 'Loading challenge card...';
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      try {
+        await ensureChallengeSheet();
+        renderChallengeQuestionList();
+        await loadChallengeHistory();
+        document.getElementById('challengeStatus').innerHTML = '<span class="ok">Challenge card ready</span>\nPick one question, attach proof, and submit once.';
+      } catch (error) {
+        document.getElementById('challengeQuestionList').innerHTML = '<div class="challenge-history-card">Question ledger could not be opened for this challenge window.</div>';
+        renderChallengePreview(null);
+        document.getElementById('challengeStatus').innerHTML = '<span class="error">Challenge window could not be opened</span>\n' + escapeHtml(error.message);
+      }
+    }
+    function closeChallengeModal() {
+      const modal = document.getElementById('challengeModal');
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+    async function submitChallengeForm(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const status = document.getElementById('challengeStatus');
+      const selectedQuestionId = String(form.questionId.value || '').trim();
+      if (!selectedQuestionId) {
+        status.innerHTML = '<span class="error">Question selection required</span>\nPick one question from the challenge ledger first.';
+        return;
+      }
+      status.textContent = 'Submitting challenge with proof bundle...';
+      try {
+        const formData = new FormData();
+        formData.append('registrationId', candidate.registrationId);
+        formData.append('questionId', selectedQuestionId);
+        formData.append('displayQuestionId', form.displayQuestionId.value.trim());
+        formData.append('questionNumber', form.questionNumber.value.trim());
+        const claimType = (form.querySelector('input[name="challengeType"]:checked') || {}).value || 'ANSWER_KEY';
+        formData.append('noteText', '[' + claimType + '] ' + form.noteText.value.trim());
+        if (!form.proofPdf.files[0]) throw new Error('PDF proof is compulsory.');
+        formData.append('proofPdf', form.proofPdf.files[0]);
+        [...form.proofImages.files].forEach((file) => formData.append('proofImages', file));
+        const response = await fetch('/api/candidate/answer-key-challenges', {
+          method: 'POST',
+          headers: { 'X-Candidate-CSRF': await candidateSecurityToken() },
+          body: formData
+        });
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
+        if (!response.ok) throw new Error(data.detail || data.message || text || response.statusText);
+        status.innerHTML = '<span class="ok">Challenge submitted</span>\\nQuestion: ' + escapeHtml(data.questionId || '-') + ' | Status: ' + escapeHtml(data.status || 'PENDING');
+        form.reset();
+        document.getElementById('challengeSearchInput').value = '';
+        selectedChallengeQuestionId = '';
+        renderChallengeQuestionList();
+        await loadChallengeHistory();
+      } catch (error) {
+        status.innerHTML = '<span class="error">Challenge submission failed</span>\\n' + escapeHtml(error.message);
+      }
+    }
+    async function loadChallengeHistory() {
+      const wrap = document.getElementById('challengeHistory');
+      if (!wrap) return;
+      wrap.textContent = 'Loading challenge history...';
+      try {
+        const formData = new URLSearchParams();
+        formData.set('registrationId', candidate.registrationId);
+        const response = await fetch('/api/candidate/answer-key-challenges/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8', 'X-Candidate-CSRF': await candidateSecurityToken() },
+          body: formData.toString()
+        });
+        const text = await response.text();
+        const rows = text ? JSON.parse(text) : [];
+        if (!response.ok) throw new Error((rows && rows.detail) || text || response.statusText);
+        renderChallengeHistory(rows);
+      } catch (error) {
+        wrap.innerHTML = '<span class="error">Could not load challenge history</span>\\n' + escapeHtml(error.message);
+      }
+    }
+    async function refreshCandidateDashboardState() {
+      if (!candidate || !candidate.registrationId) return;
+      try {
+        const fresh = await candidateJsonRequest('/api/candidate/dashboard', { registrationId: candidate.registrationId });
+        const previousRecord = ApplicationDocument.signature(candidate);
+        candidate = { ...candidate, ...fresh };
+        sessionStorage.setItem('candidateDashboardData', JSON.stringify(candidate));
+        if (ApplicationDocument.signature(candidate) !== previousRecord) render();
+        else renderDashboardGates(allowedCorrectionFields());
+      } catch (error) {
+        if (String(error.message || '').toLowerCase().includes('session')) {
+          document.getElementById('result').innerHTML = '<span class="error">Dashboard session expired</span>\nLog in again to receive live exam updates.';
+        }
+      }
+    }
+    document.getElementById('openCorrection').addEventListener('click', () => { window.location.href = '/candidate-entry/correction'; });
+    document.getElementById('viewResponse').addEventListener('click', () => { window.location.href = '/candidate-entry/responses'; });
+    document.getElementById('viewResultCard').addEventListener('click', () => { window.location.href = secureSiblingPage('candidate-result.html'); });
+    document.getElementById('openAnswerKeyChallenge').addEventListener('click', openChallengeModal);
+    document.getElementById('closeChallengeModal').addEventListener('click', closeChallengeModal);
+    document.getElementById('challengeModal').addEventListener('click', (event) => {
+      if (event.target.id === 'challengeModal') closeChallengeModal();
+    });
+    document.getElementById('challengeSearchInput').addEventListener('input', renderChallengeQuestionList);
+    document.getElementById('challengeForm').addEventListener('submit', submitChallengeForm);
+    document.getElementById('downloadScoreCardPdf').addEventListener('click', async () => {
+      const result = document.getElementById('result');
+      result.textContent = 'Preparing released score card PDF...';
+      try {
+        const data = await candidateJsonRequest('/api/candidate/score-card-pdf', { registrationId: candidate.registrationId });
+        triggerDataUrlDownload(data.fileName || 'score-card.pdf', data.dataUrl);
+        result.innerHTML = '<span class="ok">Score card PDF ready</span>';
+      } catch (error) {
+        result.innerHTML = '<span class="error">Could not prepare score card PDF</span>\\n' + error.message;
+      }
+    });
+    document.getElementById('downloadOriginalQuestionPaper').addEventListener('click', async () => {
+      const result = document.getElementById('result');
+      result.textContent = 'Opening original question paper PDF...';
+      try {
+        const data = await candidateJsonRequest('/api/candidate/original-question-paper', { registrationId: candidate.registrationId });
+        triggerDataUrlDownload(data.fileName || 'question-paper.pdf', data.dataUrl);
+        result.innerHTML = '<span class="ok">Original question paper ready</span>';
+      } catch (error) {
+        result.innerHTML = '<span class="error">Could not open original question paper</span>\\n' + error.message;
+      }
+    });
+    document.getElementById('downloadOriginalAnswerKey').addEventListener('click', async () => {
+      const result = document.getElementById('result');
+      result.textContent = 'Opening original answer key PDF...';
+      try {
+        const data = await candidateJsonRequest('/api/candidate/original-answer-key', { registrationId: candidate.registrationId });
+        triggerDataUrlDownload(data.fileName || 'answer-key.pdf', data.dataUrl);
+        result.innerHTML = '<span class="ok">Original answer key ready</span>';
+      } catch (error) {
+        result.innerHTML = '<span class="error">Could not open original answer key</span>\\n' + error.message;
+      }
+    });
+    let applicationWasOpen = true;
+    document.getElementById('printApplication').addEventListener('click', async () => {
+      await applicationReady;
+      await document.fonts.ready;
+      window.print();
+    });
+    window.addEventListener('beforeprint', () => {
+      const application = document.getElementById('applicationShell');
+      applicationWasOpen = application.open;
+      application.open = true;
+    });
+    window.addEventListener('afterprint', () => {
+      document.getElementById('applicationShell').open = applicationWasOpen;
+    });
+    async function candidateSecurityToken() {
+      if (window.__candidateSecurityTokenCache) return window.__candidateSecurityTokenCache;
+      const response = await fetch('/api/public/candidate-security-token', { cache: 'no-store' });
+      const data = await response.json();
+      window.__candidateSecurityTokenCache = data.token || '';
+      return window.__candidateSecurityTokenCache;
+    }
+    render();
+    refreshCandidateDashboardState();
+    window.setInterval(updateChallengeAvailability, 1000);
+    window.setInterval(refreshCandidateDashboardState, 30000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) refreshCandidateDashboardState();
+    });
+  </script>
+</body>
+</html>

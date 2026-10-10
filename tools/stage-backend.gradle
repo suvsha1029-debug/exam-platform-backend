@@ -1,0 +1,7 @@
+allprojects {
+    afterEvaluate {
+        tasks.named('bootJar') {
+            destinationDirectory = layout.buildDirectory.dir('staged')
+        }
+    }
+}

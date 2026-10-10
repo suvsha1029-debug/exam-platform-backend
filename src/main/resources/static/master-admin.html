@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Master Admin Console</title>
+  <style>
+    :root {
+      --navy:#082e5b; --blue:#0d5ca6; --sky:#dcecff; --line:#9ebce1;
+      --ink:#10243f; --muted:#607089; --paper:#fff; --good:#126c39; --danger:#a92d42;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--ink); background:#d8e5f2; font-family:Tahoma,Verdana,Arial,sans-serif; }
+    header { display:flex; justify-content:space-between; gap:16px; align-items:center; padding:14px 18px; color:#fff; background:#0b4f91; border-bottom:3px solid #062f5b; }
+    h1,h2,h3,p { margin-top:0; }
+    header h1 { margin-bottom:5px; font-size:25px; }
+    header p { margin-bottom:0; color:#d9ebff; }
+    main { width:min(1240px,calc(100% - 28px)); margin:24px auto 54px; }
+    .grid { display:grid; gap:18px; grid-template-columns:minmax(0,1fr) minmax(0,1.35fr); }
+    .card { padding:16px; border:1px solid #7295bd; background:#f7fbff; }
+    .wide { grid-column:1/-1; }
+    .fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    label { display:block; margin-bottom:5px; color:#173e70; font-size:13px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+    input,textarea { width:100%; border:1px solid #6e8fb5; padding:8px 9px; color:var(--ink); background:#fff; font:14px Tahoma,Verdana,Arial,sans-serif; }
+    textarea { min-height:84px; resize:vertical; }
+    button,.button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:34px; border:1px solid #063b72; padding:7px 12px; color:#fff; background:#0d5ca6; font:700 13px Tahoma,Verdana,Arial,sans-serif; cursor:pointer; text-decoration:none; }
+    button.danger { border-color:#8d2032; background:#a92d42; }
+    button.restore { border-color:#126c39; background:#18783f; }
+    .actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+    .note { color:var(--muted); line-height:1.45; }
+    .status { min-height:22px; margin-top:12px; font-weight:700; }
+    .status.ok { color:var(--good); } .status.bad { color:var(--danger); }
+    .registry { overflow:auto; }
+    table { width:100%; min-width:920px; border-collapse:collapse; font-size:14px; }
+    th,td { border-bottom:1px solid #c8d9ed; padding:10px 8px; text-align:left; vertical-align:top; }
+    th { color:#123c6c; background:#edf5ff; }
+    .pill { display:inline-block; padding:4px 8px; border:1px solid #9ebce1; background:#e2efff; color:#0b4d91; font-size:12px; font-weight:700; }
+    *,*::before,*::after { border-radius:0!important; box-shadow:none!important; text-shadow:none!important; }
+    .pill.off { background:#fde4e8; color:#98273a; }
+    .pill.master { background:#fff0bf; color:#765100; }
+    .hidden { display:none!important; }
+    @media (max-width:900px){ .grid,.fields { grid-template-columns:1fr; } }
+  </style>
+  <link rel="stylesheet" href="/assets/admin/operations-workspace.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Master Admin Console</h1>
+    </div>
+    <div class="actions">
+      <a class="button" href="/logout">Sign Out</a>
+      <a class="button" href="/console/8f3a91d6c42e7b5a0d19/admin">Exam Admin</a>
+    </div>
+  </header>
+  <main>
+    <nav class="operations-nav" aria-label="Master administration">
+      <button type="button" data-master-view="accounts"><i data-lucide="users"></i>Admin access</button>
+      <button type="button" data-master-view="approvals"><i data-lucide="shield-check"></i>Approvals</button>
+      <button type="button" data-master-view="results"><i data-lucide="file-lock-2"></i>Result controls</button>
+      <a href="/console/8f3a91d6c42e7b5a0d19/admin#post-exam"><i data-lucide="clipboard-check"></i>Post-exam workspace</a>
+    </nav>
+    <section id="masterResultControls" class="master-result-controls" hidden>
+      <div class="operations-heading"><div><p class="operations-eyebrow">MASTER ADMINISTRATION</p><h2>Candidate result controls</h2></div><span class="operations-tag">Restricted access</span></div>
+      <form id="resultControlSearch" class="operations-filters">
+        <div><label for="holdSearch">Candidate</label><input id="holdSearch" type="search" placeholder="Application number or name" maxlength="100"></div>
+        <div><label for="holdExam">Exam code</label><input id="holdExam" maxlength="32" placeholder="All exams"></div>
+        <label class="operations-check"><input id="holdOnly" type="checkbox">Withheld only</label>
+        <button type="submit"><i data-lucide="search"></i>Search</button>
+      </form>
+      <p id="holdStatus" role="status" aria-live="polite"></p>
+      <div class="registry"><table><thead><tr><th>Application</th><th>Candidate</th><th>Exam</th><th>Result status</th><th>Actions</th></tr></thead><tbody id="holdRows"></tbody></table></div>
+      <div class="operations-pagination"><button id="holdPrevious" type="button" aria-label="Previous page" title="Previous page"><i data-lucide="chevron-left"></i></button><span id="holdPage"></span><button id="holdNext" type="button" aria-label="Next page" title="Next page"><i data-lucide="chevron-right"></i></button></div>
+    </section>
+    <dialog id="holdDialog" aria-labelledby="holdDialogTitle">
+      <form id="holdDecisionForm">
+        <div class="operations-heading"><h2 id="holdDialogTitle">Result decision</h2><button id="holdDialogClose" type="button" aria-label="Close" title="Close"><i data-lucide="x"></i></button></div>
+        <p id="holdCandidate"></p><p id="holdImpact" class="note"></p>
+        <label for="holdReason">Decision reason</label><textarea id="holdReason" required minlength="5" maxlength="1000" rows="3"></textarea>
+        <p id="holdDecisionStatus" role="status"></p>
+        <div class="actions"><button id="holdConfirm" type="submit">Confirm decision</button><button id="holdCancel" type="button" class="secondary">Cancel</button></div>
+      </form>
+    </dialog>
+    <dialog id="holdHistoryDialog" aria-labelledby="holdHistoryTitle">
+      <div class="operations-heading"><h2 id="holdHistoryTitle">Decision history</h2><button id="holdHistoryClose" type="button" aria-label="Close" title="Close"><i data-lucide="x"></i></button></div>
+      <div id="holdHistoryBody"></div>
+      <div class="operations-pagination"><button id="holdHistoryPrevious" type="button" aria-label="Previous history page"><i data-lucide="chevron-left"></i></button><span id="holdHistoryPage"></span><button id="holdHistoryNext" type="button" aria-label="Next history page"><i data-lucide="chevron-right"></i></button></div>
+    </dialog>
+    <div class="grid">
+      <section class="card">
+        <h2>Add Or Update Admin</h2>
+        <form id="inviteForm">
+          <div class="fields">
+            <div><label for="adminEmail">Admin Email</label><input id="adminEmail" type="email" required></div>
+            <div><label for="adminName">Admin Name</label><input id="adminName" required></div>
+            <div><label for="adminPhone">Phone Number</label><input id="adminPhone" inputmode="tel" required></div>
+            <div><label for="adminDob">Date Of Birth</label><input id="adminDob" type="date" required></div>
+            <div><label for="examName">Exam Name</label><input id="examName"></div>
+            <div><label for="services">Service Availed</label><input id="services" placeholder="Assessment hosting, evaluation, PDF publication"></div>
+          </div>
+          <div class="actions"><button type="submit">Save Admin Access</button></div>
+          <div id="inviteStatus" class="status"></div>
+        </form>
+      </section>
+      <section class="card wide">
+        <div class="actions" style="justify-content:space-between;margin-top:0">
+          <div><h2 style="margin-bottom:4px">Admin Registry</h2></div>
+          <button id="refreshButton" type="button">Refresh Registry</button>
+        </div>
+        <div id="registryStatus" class="status"></div>
+        <div class="registry">
+          <table>
+            <thead><tr><th>Administrator</th><th>Exam</th><th>Service Availed</th><th>Role</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="registryBody"><tr><td colspan="6">Sign in as master admin to load the registry.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card wide">
+        <div class="actions" style="justify-content:space-between;margin-top:0">
+          <div><h2 style="margin-bottom:4px">Exam Rejoin And Re-exam Approvals</h2></div>
+          <button id="refreshExamAccessButton" type="button">Refresh Requests</button>
+        </div>
+        <div id="examAccessStatus" class="status"></div>
+        <div class="registry">
+          <table>
+            <thead><tr><th>Candidate</th><th>Exam</th><th>Request</th><th>Remaining</th><th>Requested By</th><th>Status</th><th>Decision</th></tr></thead>
+            <tbody id="examAccessBody"><tr><td colspan="7">Sign in as master admin to load exam-access requests.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card wide">
+        <div class="actions" style="justify-content:space-between;margin-top:0">
+          <div><h2 style="margin-bottom:4px">Manual Evaluation Approvals</h2></div>
+          <button id="refreshManualEvaluationButton" type="button">Refresh Requests</button>
+        </div>
+        <p class="note">Approval permits one time-limited key upload and bypasses licence lineage only. Strict question, option, type, NAT, and paper-coverage validation remains enforced.</p>
+        <div id="manualEvaluationStatus" class="status"></div>
+        <div class="registry">
+          <table>
+            <thead><tr><th>Exam</th><th>Reason</th><th>Requested By</th><th>Status</th><th>Audit</th><th>Decision</th></tr></thead>
+            <tbody id="manualEvaluationBody"><tr><td colspan="6">Sign in as master admin to load manual-evaluation requests.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script src="/assets/admin/admin-security.js"></script>
+  <script>
+    const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    const status = (id, message, good = false) => {
+      const el = document.getElementById(id);
+      el.className = 'status ' + (good ? 'ok' : 'bad');
+      el.textContent = message || '';
+    };
+    async function request(url, options = {}) {
+      const response = await fetch(url, {headers:{'Content-Type':'application/json', ...(options.headers || {})}, ...options});
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.detail || body.message || (response.status === 401 ? 'Sign in as master admin first.' : 'Request failed.'));
+      return body;
+    }
+    async function loadRegistry() {
+      try {
+        const rows = await request('/api/master-admin/accounts');
+        document.getElementById('registryBody').innerHTML = rows.map((row) => `
+          <tr>
+            <td><strong>${esc(row.adminName)}</strong><br>${esc(row.email)}<br>${esc(row.phoneNumber || '-')} | ${esc(row.dateOfBirth || '-')}</td>
+            <td>${esc(row.examName || '-')}</td>
+            <td>${esc(row.serviceAvailed || '-')}</td>
+            <td><span class="pill ${row.role === 'MASTER_ADMIN' ? 'master' : ''}">${esc(row.role)}</span></td>
+            <td><span class="pill ${row.active ? '' : 'off'}">${row.active ? (row.passwordSetupRequired ? 'PASSWORD SETUP PENDING' : 'ACTIVE') : 'REVOKED'}</span></td>
+            <td><div class="actions" style="margin-top:0">${row.role === 'MASTER_ADMIN' ? '' : `<button class="${row.active ? 'danger' : 'restore'}" onclick="setAccess(${Number(row.id)}, '${row.active ? 'revoke' : 'restore'}')">${row.active ? 'Revoke' : 'Restore'}</button>`}<button onclick="requirePasswordReset(${Number(row.id)})">Reset Password</button></div></td>
+          </tr>`).join('') || '<tr><td colspan="6">No admin accounts found.</td></tr>';
+        status('registryStatus', 'Registry loaded.', true);
+      } catch (error) {
+        status('registryStatus', error.message);
+      }
+    }
+    async function setAccess(id, action) {
+      try {
+        await request('/api/master-admin/accounts/' + id + '/' + action, {method:'PATCH'});
+        await loadRegistry();
+      } catch (error) {
+        status('registryStatus', error.message);
+      }
+    }
+    async function requirePasswordReset(id) {
+      try {
+        await request('/api/master-admin/accounts/' + id + '/require-password-reset', {method:'PATCH'});
+        status('registryStatus', 'Password reset window opened. The administrator must verify email, phone, and DOB before saving a new password.', true);
+        await loadRegistry();
+      } catch (error) {
+        status('registryStatus', error.message);
+      }
+    }
+    function remaining(seconds) {
+      if (seconds === null || seconds === undefined) return '-';
+      const safe = Math.max(0, Number(seconds) || 0);
+      return [Math.floor(safe / 3600), Math.floor((safe % 3600) / 60), Math.floor(safe % 60)]
+        .map((value) => String(value).padStart(2, '0')).join(':');
+    }
+    async function loadExamAccessRequests() {
+      try {
+        const rows = await request('/api/master-admin/exam-access-requests');
+        document.getElementById('examAccessBody').innerHTML = rows.map((row) => `
+          <tr>
+            <td><strong>${esc(row.candidateName)}</strong><br>${esc(row.registrationId)}</td>
+            <td>${esc(row.examCode)}</td>
+            <td><span class="pill">${esc(row.type)}</span><br>${esc(row.reason || '-')}</td>
+            <td>${esc(remaining(row.remainingSeconds))}</td>
+            <td>${esc(row.requestedBy || '-')}<br>${esc(row.requestedAt || '-')}</td>
+            <td><span class="pill ${row.status === 'REJECTED' ? 'off' : ''}">${esc(row.status)}</span></td>
+            <td>${row.status === 'PENDING_MASTER_APPROVAL' ? `<div class="actions" style="margin-top:0"><button class="restore" onclick="reviewExamAccess(${Number(row.id)}, 'approve')">Approve</button><button class="danger" onclick="reviewExamAccess(${Number(row.id)}, 'reject')">Reject</button></div>` : esc(row.reviewNote || '-')}</td>
+          </tr>`).join('') || '<tr><td colspan="7">No exam-access requests found.</td></tr>';
+        status('examAccessStatus', rows.length + ' exam-access request(s) loaded.', true);
+      } catch (error) {
+        status('examAccessStatus', error.message);
+      }
+    }
+    async function reviewExamAccess(id, action) {
+      const note = prompt((action === 'approve' ? 'Approval' : 'Rejection') + ' note:', action === 'approve' ? 'Reviewed and approved by master admin.' : 'Rejected after master-admin review.');
+      if (note === null) return;
+      try {
+        await request('/api/master-admin/exam-access-requests/' + id + '/' + action, {method:'PATCH', body:JSON.stringify({note})});
+        await loadExamAccessRequests();
+      } catch (error) {
+        status('examAccessStatus', error.message);
+      }
+    }
+    async function loadManualEvaluationRequests() {
+      try {
+        const rows = await request('/api/master-admin/manual-evaluation-requests');
+        document.getElementById('manualEvaluationBody').innerHTML = rows.map((row) => {
+          const decision = row.status === 'PENDING_MASTER_APPROVAL'
+            ? `<div class="fields"><div><label for="manualMinutes-${Number(row.id)}">Valid Minutes</label><input id="manualMinutes-${Number(row.id)}" type="number" min="5" max="120" value="30"></div><div><label for="manualNote-${Number(row.id)}">Review Note</label><input id="manualNote-${Number(row.id)}" maxlength="1000" value="Strict identity validation remains required."></div></div><div class="actions"><button class="restore" onclick="reviewManualEvaluation(${Number(row.id)}, 'approve')">Approve Once</button><button class="danger" onclick="reviewManualEvaluation(${Number(row.id)}, 'reject')">Reject</button></div>`
+            : esc(row.reviewNote || '-');
+          const audit = row.keySha256
+            ? `Consumed by ${esc(row.consumedBy || '-')}<br>${esc(row.consumedAt || '-')}<br>SHA-256: <code>${esc(row.keySha256)}</code><br>Responses: ${esc(row.evaluatedResponseCount ?? 0)}`
+            : `Reviewed by ${esc(row.reviewedBy || '-')}<br>${esc(row.reviewedAt || '-')}`;
+          return `<tr>
+            <td><strong>${esc(row.examCode)}</strong><br>Request #${Number(row.id)}</td>
+            <td>${esc(row.reason || '-')}</td>
+            <td>${esc(row.requestedBy || '-')}<br>${esc(row.requestedAt || '-')}</td>
+            <td><span class="pill ${row.status === 'REJECTED' ? 'off' : ''}">${esc(row.status)}</span><br>Expires: ${esc(row.expiresAt || '-')}</td>
+            <td>${audit}</td>
+            <td>${decision}</td>
+          </tr>`;
+        }).join('') || '<tr><td colspan="6">No manual-evaluation requests found.</td></tr>';
+        status('manualEvaluationStatus', rows.length + ' manual-evaluation request(s) loaded.', true);
+      } catch (error) {
+        status('manualEvaluationStatus', error.message);
+      }
+    }
+    async function reviewManualEvaluation(id, action) {
+      const note = String(document.getElementById('manualNote-' + id)?.value || '').trim();
+      const validMinutes = Math.max(5, Math.min(120, Number(document.getElementById('manualMinutes-' + id)?.value || 30)));
+      if (note.length < 5) {
+        status('manualEvaluationStatus', 'Enter a meaningful master-admin review note.');
+        return;
+      }
+      try {
+        await request('/api/master-admin/manual-evaluation-requests/' + id + '/' + action, {
+          method:'PATCH',
+          body:JSON.stringify({note, validMinutes})
+        });
+        await loadManualEvaluationRequests();
+      } catch (error) {
+        status('manualEvaluationStatus', error.message);
+      }
+    }
+    document.getElementById('inviteForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      try {
+        await request('/api/master-admin/accounts', {method:'POST', body:JSON.stringify({
+          email:adminEmail.value, adminName:adminName.value, phoneNumber:adminPhone.value, dateOfBirth:adminDob.value, examName:examName.value, serviceAvailed:services.value
+        })});
+        status('inviteStatus', 'Admin access saved.', true);
+        event.target.reset();
+        await loadRegistry();
+      } catch (error) { status('inviteStatus', error.message); }
+    });
+    document.getElementById('refreshButton').addEventListener('click', loadRegistry);
+    document.getElementById('refreshExamAccessButton').addEventListener('click', loadExamAccessRequests);
+    document.getElementById('refreshManualEvaluationButton').addEventListener('click', loadManualEvaluationRequests);
+    loadRegistry();
+    loadExamAccessRequests();
+    loadManualEvaluationRequests();
+  </script>
+  <script src="/assets/vendor/lucide-0.468.0.min.js"></script>
+  <script src="/assets/admin/master-result-controls.js"></script>
+</body>
+</html>

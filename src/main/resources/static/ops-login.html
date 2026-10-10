@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operations Sign In</title>
+  <style>
+    * { box-sizing:border-box; border-radius:0!important; box-shadow:none!important; text-shadow:none!important; }
+    body { margin:0; min-height:100vh; color:#10243f; background:#d8e5f2; font-family:Tahoma,Verdana,Arial,sans-serif; }
+    header { padding:13px 18px; color:#fff; background:#0b4f91; border-bottom:3px solid #062f5b; }
+    h1 { margin:0; font-size:23px; }
+    main { width:min(470px,calc(100% - 28px)); margin:62px auto; border:1px solid #7295bd; background:#f7fbff; padding:18px; }
+    h2 { margin:0 0 18px; font-size:20px; }
+    label { display:block; margin:12px 0 5px; color:#173e70; font-size:13px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+    input { width:100%; border:1px solid #6e8fb5; padding:9px; background:#fff; color:#10243f; font:14px Tahoma,Verdana,Arial,sans-serif; }
+    button { margin-top:16px; min-height:35px; border:1px solid #063b72; padding:7px 16px; color:#fff; background:#0d5ca6; font:700 13px Tahoma,Verdana,Arial,sans-serif; cursor:pointer; }
+    .error { margin-top:14px; border:1px solid #b13b4e; padding:8px; color:#8d2032; background:#fff0f2; font-size:13px; }
+  </style>
+</head>
+<body>
+  <header><h1>Operations Access</h1></header>
+  <main>
+    <h2>Sign In</h2>
+    <form method="post" action="/login">
+      <label for="username">Email</label>
+      <input id="username" name="username" type="email" autocomplete="username" required>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button type="submit">Sign In</button>
+    </form>
+    <div id="loginError" class="error" hidden>Invalid credentials.</div>
+  </main>
+  <script>
+    if (new URLSearchParams(location.search).has('error')) {
+      document.getElementById('loginError').hidden = false;
+    }
+  </script>
+</body>
+</html>
